@@ -1,4 +1,5 @@
 ﻿using Licenta.Models.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Licenta.Models.Core
 {
@@ -9,6 +10,7 @@ namespace Licenta.Models.Core
         public string RoleId { get; set; }
 
         public Staff Staff { get; set; }
-        public ApplicationRole Role { get; set; }
+
+        public IdentityRole Role { get; set; }
     }
 }

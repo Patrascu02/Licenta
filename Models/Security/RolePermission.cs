@@ -1,5 +1,6 @@
 ﻿using Licenta.Models.Security;
 using Licenta.Models.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Licenta.Models.Security
 {
@@ -9,7 +10,7 @@ namespace Licenta.Models.Security
         public string RoleId { get; set; }
         public int PermissionId { get; set; }
 
-        public AspNetRoles Role { get; set; }
+        public IdentityRole Role { get; set; }
         public Permission Permission { get; set; }
     }
 }

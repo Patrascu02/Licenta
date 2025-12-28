@@ -1,6 +1,6 @@
 ﻿using Licenta.Models.Roles;
 
-namespace Licenta.Models.Core
+namespace Licenta.Models.Contracts
 {
     public class Contract
     {

@@ -1,5 +1,7 @@
 ﻿using Licenta.Models.Core;
 using Licenta.Models.Sports;
+using Licenta.Models.Medical;
+using Licenta.Models.Contracts;
 
 namespace Licenta.Models.Roles
 {
