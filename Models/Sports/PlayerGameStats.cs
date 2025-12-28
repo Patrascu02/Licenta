@@ -14,7 +14,7 @@ namespace Licenta.Models.Sports
         public int MinutesPlayed { get; set; }
         public float Efficiency { get; set; }
 
-        public Game Game { get; set; }
-        public Player Player { get; set; }
+        public Game? Game { get; set; }
+        public Player? Player { get; set; }
     }
 }

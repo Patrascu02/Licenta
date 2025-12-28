@@ -6,8 +6,8 @@ namespace Licenta.Models.Roles
     {
         public int CoachId { get; set; }
         public int StaffId { get; set; }
-        public string LicenseNumber { get; set; }
+        public string? LicenseNumber { get; set; }
 
-        public Staff Staff { get; set; }
+        public Staff? Staff { get; set; }
     }
 }

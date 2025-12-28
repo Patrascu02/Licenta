@@ -7,12 +7,12 @@ namespace Licenta.Models.Contracts
         public int ContractId { get; set; }
         public int PlayerId { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public decimal Salary { get; set; }
         public int Version { get; set; }
         public bool IsActive { get; set; }
-        public string SignedFilePath { get; set; }
+        public string? SignedFilePath { get; set; }
 
-        public Player Player { get; set; }
+        public Player? Player { get; set; }
     }
 }

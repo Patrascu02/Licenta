@@ -7,10 +7,10 @@ namespace Licenta.Models.Core
     {
         public int StaffRoleId { get; set; }
         public int StaffId { get; set; }
-        public string RoleId { get; set; }
+        public string? RoleId { get; set; }
 
-        public Staff Staff { get; set; }
+        public Staff? Staff { get; set; }
 
-        public IdentityRole Role { get; set; }
+        public IdentityRole? Role { get; set; }
     }
 }

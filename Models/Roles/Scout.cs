@@ -7,9 +7,9 @@ namespace Licenta.Models.Roles
     {
         public int ScoutId { get; set; }
         public int StaffId { get; set; }
-        public string Region { get; set; }
+        public string? Region { get; set; }
 
-        public Staff Staff { get; set; }
-        public ICollection<ScoutPlayer> ScoutPlayers { get; set; }
+        public Staff? Staff { get; set; }
+        public ICollection<ScoutPlayer>? ScoutPlayers { get; set; }
     }
 }

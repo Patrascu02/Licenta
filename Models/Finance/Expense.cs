@@ -6,11 +6,11 @@ namespace Licenta.Models.Finance
     {
         public int ExpenseId { get; set; }
         public int SeasonId { get; set; }
-        public string Type { get; set; }
+        public string? Type { get; set; }
         public decimal Amount { get; set; }
         public DateTime ExpenseDate { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public Season Season { get; set; }
+        public Season? Season { get; set; }
     }
 }

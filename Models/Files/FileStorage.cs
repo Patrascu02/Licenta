@@ -6,11 +6,11 @@ namespace Licenta.Models.Files
     {
         public int FileId { get; set; }
         public int StaffId { get; set; }
-        public string FilePath { get; set; }
-        public string FileType { get; set; }
-        public string RelatedEntity { get; set; }
+        public string? FilePath { get; set; }
+        public string? FileType { get; set; }
+        public string? RelatedEntity { get; set; }
         public DateTime UploadedAt { get; set; }
 
-        public Staff Staff { get; set; }
+        public Staff? Staff { get; set; }
     }
 }

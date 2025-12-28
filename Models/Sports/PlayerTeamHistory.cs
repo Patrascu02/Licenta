@@ -10,7 +10,7 @@ namespace Licenta.Models.Sports
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public Player Player { get; set; }
-        public Team Team { get; set; }
+        public Player? Player { get; set; }
+        public Team? Team { get; set; }
     }
 }
