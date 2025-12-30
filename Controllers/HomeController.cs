@@ -15,6 +15,11 @@ namespace Licenta.Controllers
 
         public IActionResult Index()
         {
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction("AdminDashboard", "Admin");
+            }
+            
             return View();
         }
 

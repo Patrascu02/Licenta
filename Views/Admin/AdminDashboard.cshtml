@@ -1,0 +1,132 @@
+﻿@model IEnumerable<Licenta.Models.Security.AuditLog>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i>Panou Control Administrator</h2>
+        <a asp-action="CreateUser" class="btn btn-primary">
+            <i class="fas fa-user-plus me-1"></i> Creeaza Utilizator Nou
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Conturi</h6>
+                            <h2 class="mb-0">@ViewBag.TotalUsers</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Jucători</h6>
+                            <h2 class="mb-0">@ViewBag.TotalPlayers</h2>
+                        </div>
+                        <i class="fas fa-running fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Antrenori</h6>
+                            <h2 class="mb-0">@ViewBag.TotalCoaches</h2>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-dark shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Personal Staff</h6>
+                            <h2 class="mb-0">@ViewBag.TotalStaff</h2>
+                        </div>
+                        <i class="fas fa-user-tie fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Activitate Recentă Sistem</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Utilizator</th>
+                                <th>Acțiune</th>
+                                <th>Data/Ora</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var log in Model)
+                                {
+                                    <tr>
+                                        <td>@log.StaffId</td> @* Poți face join ulterior pentru nume *@
+                                        <td>@log.Action</td>
+                                        <td>@log.Timestamp.ToString("g")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">Nu există activitate înregistrată.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow text-center">
+                <div class="card-body">
+                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D6EFD&color=fff&size=128" class="rounded-circle mb-3" alt="Admin Avatar">
+                    <h4>@User.Identity.Name</h4>
+                    <p class="text-muted">Administrator Sistem</p>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="/Identity/Account/Manage" class="btn btn-outline-primary">
+                            <i class="fas fa-user-edit me-1"></i> Editează datele mele
+                        </a>
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="fas fa-sign-out-alt me-1"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
