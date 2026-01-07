@@ -1,4 +1,5 @@
 ﻿using Licenta.Data;
+using Licenta.Models.Core; // Adăugat pentru a accesa clasa Staff
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +7,6 @@ namespace Licenta
 {
     public class Program
     {
-        // Modificăm semnătura metodei pentru a permite operații asincrone (await)
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +17,6 @@ namespace Licenta
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            // Adaugam .AddRoles<IdentityRole>() pentru a putea gestiona rolurile in baza de date
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -25,7 +24,7 @@ namespace Licenta
 
             var app = builder.Build();
 
-            // --- LOGICA PENTRU ADMIN PREDEFINIT ---
+            // --- LOGICA PENTRU SEEDING (Admin și Roluri) ---
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -33,15 +32,19 @@ namespace Licenta
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                 var context = services.GetRequiredService<ApplicationDbContext>();
 
-                
                 await context.Database.MigrateAsync();
 
-                
-                if (!await roleManager.RoleExistsAsync("Admin"))
+                // 1. Creare Roluri
+                string[] roleNames = { "Admin", "Manager", "Coach", "Player", "Medic", "Scout" };
+                foreach (var roleName in roleNames)
                 {
-                    await roleManager.CreateAsync(new IdentityRole("Admin"));
+                    if (!await roleManager.RoleExistsAsync(roleName))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(roleName));
+                    }
                 }
 
+                // 2. Creare Admin Predefinit
                 string adminEmail = "admin@clubbaschet.ro";
                 string adminPassword = "Password123!";
 
@@ -60,17 +63,20 @@ namespace Licenta
                     if (createPowerUser.Succeeded)
                     {
                         await userManager.AddToRoleAsync(user, "Admin");
-                    }
-                }
 
-
-                string[] roleNames = { "Admin", "Manager", "Coach", "Player", "Medic", "Scout" };
-
-                foreach (var roleName in roleNames)
-                {
-                    if (!await roleManager.RoleExistsAsync(roleName))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(roleName));
+                        // --- CREARE PROFIL STAFF PENTRU ADMIN ---
+                        var adminStaff = new Staff
+                        {
+                            UserId = user.Id,
+                            FirstName = "Admin",
+                            LastName = "Sistem",
+                            HireDate = DateTime.Now,
+                            DateOfBirth = new DateTime(1990, 1, 1),
+                            ExperienceYears = 5
+                        };
+                        context.Staff.Add(adminStaff);
+                        await context.SaveChangesAsync();
+                        // ----------------------------------------
                     }
                 }
             }
@@ -91,6 +97,7 @@ namespace Licenta
 
             app.UseRouting();
 
+            app.UseAuthentication(); // Asigură-te că UseAuthentication este înaintea UseAuthorization
             app.UseAuthorization();
 
             app.MapControllerRoute(
@@ -98,7 +105,6 @@ namespace Licenta
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
 
-            
             await app.RunAsync();
         }
     }

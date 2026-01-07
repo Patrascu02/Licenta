@@ -1,22 +1,173 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+﻿:root {
+    --primary-color: #0d47a1; /* Albastru regal */
+    --primary-dark: #1a237e; /* Navy pentru gradient */
+    --secondary-color: #ff8f00; /* Portocaliu baschet pentru accente */
+    --bg-light: #f4f7f6;
+    --card-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    --border-radius: 12px;
+    /* Nuanțe monocromatice pentru cardurile de dashboard */
+    --blue-grade-1: linear-gradient(45deg, #0d47a1, #1976d2);
+    --blue-grade-2: linear-gradient(45deg, #1565c0, #1e88e5);
+    --blue-grade-3: linear-gradient(45deg, #1a237e, #283593);
+    --blue-grade-4: linear-gradient(45deg, #0277bd, #0288d1);
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+}
+
+/* NAVBAR MODERNA */
+.navbar {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%) !important;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    color: white !important;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: rgba(255,255,255,0.85) !important;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem !important;
+}
+
+    .nav-link:hover {
+        color: var(--secondary-color) !important;
+        transform: translateY(-2px);
+    }
+
+/* CARDURI PREMIUM */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background-color: #fff;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+    }
+
+/* DASHBOARD STAT CARDS (Nuante de albastru) */
+.stat-card {
+    position: relative;
+    z-index: 1;
+    color: white !important;
+    border: none;
+}
+
+.bg-admin-primary {
+    background: var(--blue-grade-1) !important;
+}
+
+.bg-admin-light {
+    background: var(--blue-grade-2) !important;
+}
+
+.bg-admin-dark {
+    background: var(--blue-grade-3) !important;
+}
+
+.bg-admin-accent {
+    background: var(--blue-grade-4) !important;
+}
+
+.stat-card i {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    font-size: 3rem;
+    opacity: 0.2;
+    z-index: -1;
+    color: white;
+}
+
+/* BUTOANE */
+.btn {
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+}
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
+        transform: scale(1.02);
+    }
+
+/* TABELE */
+.table {
+    border-radius: var(--border-radius);
+}
+
+    .table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: #666;
+    }
+
+/* BADGES / STATUS */
+.badge.rounded-pill {
+    padding: 0.5em 1.2em;
+    font-weight: 600;
+}
+
+.bg-soft-success {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+    color: #198754 !important;
+}
+
+/* FOOTER */
+footer {
+    background: white;
+    padding: 1.5rem 0;
+    margin-top: auto; /* Impinge footerul jos */
+    border-top: 1px solid #eee;
+}
+
+/* UTILS */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.mt-n5 {
+    margin-top: -3rem !important;
+}
+
+/* Dropdown User (Salut!) */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-light);
+    color: var(--primary-color);
 }
