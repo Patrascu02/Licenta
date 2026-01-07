@@ -152,7 +152,7 @@ namespace Licenta.Controllers
         }
 
 
-        // --- GESTIUNE UTILIZATORI (Excluzând Admin) ---
+        // --- GESTIUNE UTILIZATORI (Filtrare Admin) ---
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ManageUsers()
         {
@@ -173,7 +173,7 @@ namespace Licenta.Controllers
                 var roles = await _userManager.GetRolesAsync(identityUser);
                 var roleName = roles.FirstOrDefault() ?? "Nespecificat";
 
-                // REZOLVARE CERINȚA 2: Dacă este Admin, nu îl afișăm în listă
+                // Admin-ul nu apare în listă
                 if (roleName == "Admin") continue;
 
                 viewModel.Add(new UserManagementViewModel
@@ -187,7 +187,8 @@ namespace Licenta.Controllers
             return View(viewModel);
         }
 
-        // GET: Admin/EditUser/5
+        // --- GET: EDIT USER ---
+        [HttpGet]
         public async Task<IActionResult> EditUser(int id)
         {
             var staff = await _context.Staff
@@ -195,13 +196,14 @@ namespace Licenta.Controllers
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
                 .Include(s => s.Scout)
-                .FirstOrDefaultAsync(m => m.StaffId == id);
+                .FirstOrDefaultAsync(s => s.StaffId == id);
 
             if (staff == null) return NotFound();
 
             var identityUser = await _userManager.FindByIdAsync(staff.UserId);
+            var roles = await _userManager.GetRolesAsync(identityUser);
+            var roleName = roles.FirstOrDefault() ?? "Nespecificat";
 
-            // Mapăm datele către un ViewModel de Editare (trebuie creat sau folosit cel de Create adaptat)
             var model = new EditUserViewModel
             {
                 StaffId = staff.StaffId,
@@ -209,80 +211,106 @@ namespace Licenta.Controllers
                 LastName = staff.LastName,
                 Email = identityUser?.Email,
                 DateOfBirth = staff.DateOfBirth,
-                HireDate = staff.HireDate
-                // Adaugă aici câmpuri specifice dacă vrei să editezi și poziția/numărul (Player)
+                HireDate = staff.HireDate,
+                RoleName = roleName,
+
+                // Mapare condiționată
+                Position = staff.Player?.Position,
+                JerseyNumber = staff.Player?.JerseyNumber,
+                Height = staff.Player?.Height,
+                LicenseNumber = staff.Coach?.LicenseNumber,
+                Specialization = staff.Medic?.Specialty
             };
 
             return View(model);
         }
 
+        // --- POST: EDIT USER ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(EditUserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var staff = await _context.Staff
+                .Include(s => s.Player)
+                .Include(s => s.Coach)
+                .Include(s => s.Medic)
+                .FirstOrDefaultAsync(s => s.StaffId == model.StaffId);
+
+            if (staff == null) return NotFound();
+
+            // 1. Actualizare date generale
+            staff.FirstName = model.FirstName;
+            staff.LastName = model.LastName;
+            staff.DateOfBirth = model.DateOfBirth;
+            staff.HireDate = model.HireDate;
+
+            // 2. Actualizare date specifice în funcție de rol
+            if (model.RoleName == "Player" && staff.Player != null)
             {
-                var staff = await _context.Staff.FindAsync(model.StaffId);
-                if (staff == null) return NotFound();
-
-                staff.FirstName = model.FirstName;
-                staff.LastName = model.LastName;
-                staff.DateOfBirth = model.DateOfBirth;
-                staff.HireDate = model.HireDate;
-
-                _context.Update(staff);
-
-                // Logare Audit pentru Editare
-                await LogAuditAction($"Editat utilizator: {staff.FirstName} {staff.LastName}");
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(ManageUsers));
+                staff.Player.Position = model.Position;
+                staff.Player.JerseyNumber = model.JerseyNumber ?? 0;
+                staff.Player.Height = model.Height ?? 0;
+                _context.Update(staff.Player);
             }
-            return View(model);
+            else if (model.RoleName == "Coach" && staff.Coach != null)
+            {
+                staff.Coach.LicenseNumber = model.LicenseNumber;
+                _context.Update(staff.Coach);
+            }
+            else if (model.RoleName == "Medic" && staff.Medic != null)
+            {
+                staff.Medic.Specialty = model.Specialization;
+                _context.Update(staff.Medic);
+            }
+
+            _context.Update(staff);
+            await LogAuditAction($"Editat profil complet: {staff.FirstName} {staff.LastName} ({model.RoleName})");
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ManageUsers));
         }
 
+        // --- ȘTERGERE (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var staffMember = await _context.Staff
-                .Include(s => s.User)
-                .FirstOrDefaultAsync(s => s.StaffId == id);
-
+            var staffMember = await _context.Staff.FindAsync(id);
             if (staffMember == null) return NotFound();
 
             // 1. Logăm acțiunea ÎNAINTE de ștergere
-            await LogAuditAction($"ȘTERS utilizator: {staffMember.FirstName} {staffMember.LastName} (ID: {id})");
+            await LogAuditAction($"ȘTERS UTILIZATOR: {staffMember.FirstName} {staffMember.LastName} (StaffId: {id})");
 
-            // 2. Ștergem datele din Identity (Contul de login)
+            // 2. Găsim user-ul de login
             var user = await _userManager.FindByIdAsync(staffMember.UserId);
 
-            // 3. Ștergem Staff (va șterge și Player/Coach prin Cascade Delete în DB)
+            // 3. Ștergem Staff ( Cascade Delete va șterge Player/Coach dacă e setat în DB)
             _context.Staff.Remove(staffMember);
-            await _context.SaveChangesAsync();
 
             if (user != null)
             {
                 await _userManager.DeleteAsync(user);
             }
 
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(ManageUsers));
         }
 
-        // METODĂ HELPER pentru Audit (pentru a nu repeta codul)
-        private async Task LogAuditAction(string actionDescription)
+        // --- HELPER AUDIT ---
+        private async Task LogAuditAction(string message)
         {
             var currentUserId = _userManager.GetUserId(User);
-            var currentAdmin = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == currentUserId);
+            var adminStaff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == currentUserId);
 
-            if (currentAdmin != null)
+            if (adminStaff != null)
             {
                 _context.AuditLogs.Add(new AuditLog
                 {
-                    Action = actionDescription,
+                    Action = message,
                     Timestamp = DateTime.Now,
-                    StaffId = currentAdmin.StaffId,
-                    EntityName = "Staff"
+                    StaffId = adminStaff.StaffId
                 });
             }
         }

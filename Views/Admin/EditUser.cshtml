@@ -1,0 +1,103 @@
+﻿@model Licenta.Models.ViewModels.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Editare Profil";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Editare: @Model.LastName @Model.FirstName</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="EditUser" method="post">
+                        <input type="hidden" asp-for="StaffId" />
+                        <input type="hidden" asp-for="RoleName" />
+
+                        <h6 class="text-muted border-bottom pb-2 mb-3">Informații Generale</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label fw-bold small">Prenume</label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label fw-bold small">Nume</label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="DateOfBirth" class="form-label fw-bold small">Data Nașterii</label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="HireDate" class="form-label fw-bold small">Data Angajării</label>
+                                <input asp-for="HireDate" type="date" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small">Email (Doar vizualizare)</label>
+                            <input asp-for="Email" class="form-control bg-light" readonly />
+                        </div>
+
+                        @if (Model.RoleName == "Player")
+                        {
+                            <div class="alert alert-info border-0 shadow-sm">
+                                <h6 class="alert-heading fw-bold mb-3"><i class="fas fa-basketball-ball me-2"></i>Date Sportive</h6>
+                                <div class="row">
+                                    <div class="col-md-4 mb-2">
+                                        <label asp-for="Position" class="form-label small">Poziție</label>
+                                        <select asp-for="Position" class="form-select">
+                                            <option value="Point Guard">Point Guard</option>
+                                            <option value="Shooting Guard">Shooting Guard</option>
+                                            <option value="Small Forward">Small Forward</option>
+                                            <option value="Power Forward">Power Forward</option>
+                                            <option value="Center">Center</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <label asp-for="JerseyNumber" class="form-label small">Nr. Tricou</label>
+                                        <input asp-for="JerseyNumber" class="form-control" />
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <label asp-for="Height" class="form-label small">Înălțime (cm)</label>
+                                        <input asp-for="Height" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.RoleName == "Coach")
+                        {
+                            <div class="alert alert-warning border-0 shadow-sm text-dark">
+                                <h6 class="alert-heading fw-bold mb-3"><i class="fas fa-clipboard-list me-2"></i>Date Tehnice</h6>
+                                <label asp-for="LicenseNumber" class="form-label small">Număr Licență</label>
+                                <input asp-for="LicenseNumber" class="form-control" />
+                            </div>
+                        }
+
+                        @if (Model.RoleName == "Medic")
+                        {
+                            <div class="alert alert-success border-0 shadow-sm">
+                                <h6 class="alert-heading fw-bold mb-3"><i class="fas fa-user-md me-2"></i>Date Medicale</h6>
+                                <label asp-for="Specialization" class="form-label small">Specializare</label>
+                                <input asp-for="Specialization" class="form-control" />
+                            </div>
+                        }
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="ManageUsers" class="btn btn-outline-secondary px-4">Anulează</a>
+                            <button type="submit" class="btn btn-success px-5 shadow"><i class="fas fa-save me-2"></i>Salvează</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
