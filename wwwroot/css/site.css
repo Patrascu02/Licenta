@@ -171,3 +171,23 @@ footer {
     background-color: var(--bg-light);
     color: var(--primary-color);
 }
+
+
+/* Asigurăm că pagina ocupă tot ecranul */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    /* Adăugăm un spațiu jos egal cu înălțimea footer-ului pentru a nu suprapune elementele */
+    margin-bottom: 70px;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px; /* Înălțime fixă pentru footer */
+    line-height: 60px; /* Centrează textul vertical */
+}
