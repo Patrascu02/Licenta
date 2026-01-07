@@ -1,0 +1,85 @@
+﻿@using Licenta.Models.ViewModels
+@model IEnumerable<UserManagementViewModel>
+
+@{
+    ViewData["Title"] = "Gestiune Conturi";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-users-cog me-2 text-primary"></i>Gestiune Utilizatori</h2>
+        <a asp-action="CreateUser" class="btn btn-primary shadow-sm">
+            <i class="fas fa-user-plus me-1"></i> Adaugă Utilizator
+        </a>
+    </div>
+
+    <ul class="nav nav-pills mb-3 shadow-sm p-2 bg-white rounded border" id="pills-tab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="tab-all" data-bs-toggle="pill" data-bs-target="#all" type="button">Toți (Fără Admin)</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-players" data-bs-toggle="pill" data-bs-target="#players" type="button">Jucători</button>
+        </li>
+    </ul>
+
+    <div class="tab-content bg-white p-3 border rounded shadow-sm" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="all">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Nume Complet</th>
+                        <th>Rol</th>
+                        <th>Email</th>
+                        <th class="text-end">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong></td>
+                            <td><span class="badge bg-secondary">@item.RoleName</span></td>
+                            <td>@item.Email</td>
+                            <td class="text-end">
+                                <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" class="d-inline" onsubmit="return confirm('Sigur vrei să ștergi acest utilizator?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="players">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Nume</th>
+                        <th>Poziție</th>
+                        <th>Înălțime</th>
+                        <th class="text-end">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Where(u => u.RoleName == "Player" && u.StaffMember.Player != null))
+                    {
+                        <tr>
+                            <td>@item.StaffMember.LastName @item.StaffMember.FirstName</td>
+                            <td><span class="badge bg-info text-dark">@item.StaffMember.Player.Position</span></td>
+                            <td>@item.StaffMember.Player.Height cm</td>
+                            <td class="text-end">
+                                <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
