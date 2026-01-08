@@ -6,9 +6,9 @@
 }
 
 <style>
-    /* REPARARE VIZIBILITATE SCRIS TAB-URI */
+    /* Stilurile tale existente */
     .nav-pills .nav-link {
-        color: #333 !important; /* Scris închis la culoare pentru tab-uri inactive */
+        color: #333 !important;
         background-color: #f1f1f1;
         margin-right: 8px;
         border: 1px solid #ccc;
@@ -22,8 +22,8 @@
         }
 
         .nav-pills .nav-link.active {
-            background-color: #0d6efd !important; /* Albastru doar pentru cel activ */
-            color: #ffffff !important; /* Scris alb doar pentru cel activ */
+            background-color: #0d6efd !important;
+            color: #ffffff !important;
             border-color: #0d6efd;
         }
 
@@ -46,19 +46,13 @@
 
     <ul class="nav nav-pills mb-3 p-2 bg-white rounded border shadow-sm" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-all" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab">
-                <i class="fas fa-list me-1"></i> Toți (Fără Admin)
-            </button>
+            <button class="nav-link active" id="tab-all" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab"><i class="fas fa-list me-1"></i> Toți</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-players" data-bs-toggle="pill" data-bs-target="#players" type="button" role="tab">
-                <i class="fas fa-basketball-ball me-1"></i> Jucători
-            </button>
+            <button class="nav-link" id="tab-players" data-bs-toggle="pill" data-bs-target="#players" type="button" role="tab"><i class="fas fa-basketball-ball me-1"></i> Jucători</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-staff" data-bs-toggle="pill" data-bs-target="#staff" type="button" role="tab">
-                <i class="fas fa-user-tie me-1"></i> Staff Tehnic
-            </button>
+            <button class="nav-link" id="tab-staff" data-bs-toggle="pill" data-bs-target="#staff" type="button" role="tab"><i class="fas fa-user-tie me-1"></i> Staff</button>
         </li>
     </ul>
 
@@ -67,14 +61,7 @@
         <div class="tab-pane fade show active" id="all" role="tabpanel">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nume Complet</th>
-                            <th>Rol</th>
-                            <th>Email</th>
-                            <th class="text-end">Acțiuni</th>
-                        </tr>
-                    </thead>
+                    <thead class="table-light"><tr><th>Nume</th><th>Rol</th><th>Email</th><th class="text-end">Acțiuni</th></tr></thead>
                     <tbody>
                         @foreach (var item in Model)
                         {
@@ -84,14 +71,14 @@
                                 <td>@item.Email</td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary" title="Editează">
-                                            <i class="fas fa-edit"></i>
+                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+
+                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-warning text-dark" title="Permisiuni Speciale">
+                                            <i class="fas fa-key"></i>
                                         </a>
-                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post"
-                                              onsubmit="return confirm('Sigur vrei să ștergi acest utilizator?');" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Șterge">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+
+                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Sigur?');" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>
@@ -105,15 +92,7 @@
         <div class="tab-pane fade" id="players" role="tabpanel">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nume</th>
-                            <th>Poziție</th>
-                            <th>Nr. Tricou</th>
-                            <th>Înălțime</th>
-                            <th class="text-end">Acțiuni</th>
-                        </tr>
-                    </thead>
+                    <thead class="table-light"><tr><th>Nume</th><th>Poziție</th><th>Nr.</th><th>Înălțime</th><th class="text-end">Acțiuni</th></tr></thead>
                     <tbody>
                         @foreach (var item in Model.Where(u => u.RoleName == "Player"))
                         {
@@ -124,14 +103,14 @@
                                 <td>@(item.StaffMember.Player?.Height ?? 0) cm</td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-edit"></i>
+                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+
+                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-warning text-dark" title="Permisiuni Speciale">
+                                            <i class="fas fa-key"></i>
                                         </a>
-                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post"
-                                              onsubmit="return confirm('Ștergi jucătorul?');" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+
+                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi jucătorul?');" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>
@@ -145,14 +124,7 @@
         <div class="tab-pane fade" id="staff" role="tabpanel">
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nume</th>
-                            <th>Rol</th>
-                            <th>Email</th>
-                            <th class="text-end">Acțiuni</th>
-                        </tr>
-                    </thead>
+                    <thead class="table-light"><tr><th>Nume</th><th>Rol</th><th>Email</th><th class="text-end">Acțiuni</th></tr></thead>
                     <tbody>
                         @foreach (var item in Model.Where(u => u.RoleName != "Player"))
                         {
@@ -162,14 +134,14 @@
                                 <td>@item.Email</td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-edit"></i>
+                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+
+                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-warning text-dark" title="Permisiuni Speciale">
+                                            <i class="fas fa-key"></i>
                                         </a>
-                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post"
-                                              onsubmit="return confirm('Ștergi membrul staff?');" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+
+                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi membrul staff?');" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>

@@ -1,0 +1,75 @@
+﻿@model Licenta.Models.ViewModels.ManageUserPermissionsViewModel
+
+@{
+    ViewData["Title"] = "Permisiuni Individuale";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-user-lock me-2"></i>Permisiuni Speciale: <strong>@Model.UserName</strong></h4>
+        </div>
+        <div class="card-body bg-light">
+            <div class="alert alert-warning border-0 shadow-sm mb-4">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Atenție!</strong> Permisiunile bifate aici sunt <strong>excepții</strong> acordate direct acestui utilizator.
+                Ele se adaugă peste permisiunile rolului său de bază. Folosește asta pentru cazuri speciale (ex: Antrenor Principal, Căpitan).
+            </div>
+
+            <form asp-action="UpdateUserPermissions" method="post">
+                <input type="hidden" asp-for="StaffId" />
+                <input type="hidden" asp-for="UserId" />
+
+                <div class="bg-white p-3 rounded shadow-sm border">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 30%;">Cod Permisiune</th>
+                                    <th style="width: 55%;">Descriere</th>
+                                    <th style="width: 15%;" class="text-center">Activează</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.PermissionList.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="hidden" asp-for="PermissionList[i].PermissionId" />
+                                            <input type="hidden" asp-for="PermissionList[i].Name" />
+                                            <input type="hidden" asp-for="PermissionList[i].Description" />
+
+                                            @{
+                                                var badgeClass = "bg-secondary";
+                                                if (Model.PermissionList[i].Name.StartsWith("Players")) badgeClass = "bg-primary";
+                                                else if (Model.PermissionList[i].Name.StartsWith("Medical")) badgeClass = "bg-success";
+                                                else if (Model.PermissionList[i].Name.StartsWith("Contracts")) badgeClass = "bg-warning text-dark";
+                                                else if (Model.PermissionList[i].Name.StartsWith("Training")) badgeClass = "bg-info text-dark";
+                                            }
+                                            <span class="badge @badgeClass">@Model.PermissionList[i].Name</span>
+                                        </td>
+                                        <td class="text-muted">
+                                            @Model.PermissionList[i].Description
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                <input asp-for="PermissionList[i].IsSelected" class="form-check-input" type="checkbox" style="width: 3em; height: 1.5em; cursor: pointer;">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="ManageUsers" class="btn btn-outline-secondary px-4"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
+                    <button type="submit" class="btn btn-success px-5 fw-bold shadow">
+                        <i class="fas fa-save me-2"></i>Salvează Permisiunile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
