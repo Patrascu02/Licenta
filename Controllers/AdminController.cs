@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Licenta.Controllers
 {
@@ -14,12 +18,19 @@ namespace Licenta.Controllers
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        // Folosim IdentityUser sau ApplicationUser în funcție de configurarea din Program.cs. 
+        // Dacă primești eroare la rulare, schimbă IdentityUser cu ApplicationUser.
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager; // <--- AICI ERA LIPSA
 
-        public AdminController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        public AdminController(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager) // <--- INJECTARE AICI
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager; // <--- INIȚIALIZARE AICI
         }
 
         // --- DASHBOARD ---
@@ -31,6 +42,7 @@ namespace Licenta.Controllers
             ViewBag.TotalStaff = await _context.Staff.CountAsync();
 
             var recentLogs = await _context.AuditLogs
+                .Include(a => a.Staff) // Includem numele celui care a făcut acțiunea
                 .OrderByDescending(l => l.Timestamp)
                 .Take(5)
                 .ToListAsync();
@@ -60,7 +72,7 @@ namespace Licenta.Controllers
                     return View(model);
                 }
 
-                // 2. Creare IdentityUser (Securitate)
+                // 2. Creare IdentityUser (Login)
                 var user = new IdentityUser { UserName = model.Email, Email = model.Email, EmailConfirmed = true };
                 var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -68,7 +80,7 @@ namespace Licenta.Controllers
                 {
                     await _userManager.AddToRoleAsync(user, model.Role);
 
-                    // 3. Creare Staff (Părinte)
+                    // 3. Creare Staff (Profil Bază)
                     var staff = new Staff
                     {
                         UserId = user.Id,
@@ -79,9 +91,7 @@ namespace Licenta.Controllers
                         ExperienceYears = 0
                     };
                     _context.Staff.Add(staff);
-
-                    // Salvăm Staff-ul pentru a genera StaffId
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); // Salvăm pentru a genera StaffId
 
                     // 4. Creare Entitate Specifică (Child)
                     if (model.Role == "Player")
@@ -107,32 +117,18 @@ namespace Licenta.Controllers
                         _context.Medics.Add(new Medic
                         {
                             StaffId = staff.StaffId,
-                            Specialty = model.Specialization, // Mapare: View(Specialization) -> DB(Specialty)
+                            Specialty = model.Specialization,
                             MedicalLicense = "În așteptare"
                         });
                     }
                     else if (model.Role == "Scout")
                     {
-                        _context.Scouts.Add(new Scout
-                        {
-                            StaffId = staff.StaffId
-                        });
+                        _context.Scouts.Add(new Scout { StaffId = staff.StaffId });
                     }
 
-                    // 5. Audit Log (Cine a creat pe cine)
-                    var currentUserId = _userManager.GetUserId(User);
-                    var currentAdmin = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == currentUserId);
-                    if (currentAdmin != null)
-                    {
-                        _context.AuditLogs.Add(new AuditLog
-                        {
-                            Action = $"Creat {model.Role}: {model.FirstName} {model.LastName} ({model.Email})",
-                            Timestamp = DateTime.Now,
-                            StaffId = currentAdmin.StaffId
-                        });
-                    }
+                    // 5. Audit Log
+                    await LogAuditAction($"Creat utilizator nou: {model.Role} - {model.FirstName} {model.LastName}");
 
-                    // Salvare finală pentru entitatea de rol și log
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(AdminDashboard));
                 }
@@ -143,7 +139,7 @@ namespace Licenta.Controllers
             return View(model);
         }
 
-        // --- VERIFICARE EMAIL LIVE (AJAX) ---
+        // --- VERIFICARE EMAIL (AJAX) ---
         [HttpGet]
         public async Task<JsonResult> CheckEmailExists(string email)
         {
@@ -151,9 +147,7 @@ namespace Licenta.Controllers
             return Json(new { exists = (user != null) });
         }
 
-
-        // --- GESTIUNE UTILIZATORI (Filtrare Admin) ---
-        [Authorize(Roles = "Admin")]
+        // --- GESTIUNE UTILIZATORI (LISTĂ) ---
         public async Task<IActionResult> ManageUsers()
         {
             var staffList = await _context.Staff
@@ -173,7 +167,7 @@ namespace Licenta.Controllers
                 var roles = await _userManager.GetRolesAsync(identityUser);
                 var roleName = roles.FirstOrDefault() ?? "Nespecificat";
 
-                // Admin-ul nu apare în listă
+                // EXCLUDEM ADMINUL din listă pentru siguranță
                 if (roleName == "Admin") continue;
 
                 viewModel.Add(new UserManagementViewModel
@@ -187,7 +181,7 @@ namespace Licenta.Controllers
             return View(viewModel);
         }
 
-        // --- GET: EDIT USER ---
+        // --- EDITARE UTILIZATOR (GET) ---
         [HttpGet]
         public async Task<IActionResult> EditUser(int id)
         {
@@ -195,7 +189,6 @@ namespace Licenta.Controllers
                 .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
-                .Include(s => s.Scout)
                 .FirstOrDefaultAsync(s => s.StaffId == id);
 
             if (staff == null) return NotFound();
@@ -214,7 +207,7 @@ namespace Licenta.Controllers
                 HireDate = staff.HireDate,
                 RoleName = roleName,
 
-                // Mapare condiționată
+                // Mapare dinamică
                 Position = staff.Player?.Position,
                 JerseyNumber = staff.Player?.JerseyNumber,
                 Height = staff.Player?.Height,
@@ -225,7 +218,7 @@ namespace Licenta.Controllers
             return View(model);
         }
 
-        // --- POST: EDIT USER ---
+        // --- EDITARE UTILIZATOR (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(EditUserViewModel model)
@@ -240,13 +233,13 @@ namespace Licenta.Controllers
 
             if (staff == null) return NotFound();
 
-            // 1. Actualizare date generale
+            // Actualizare date generale
             staff.FirstName = model.FirstName;
             staff.LastName = model.LastName;
             staff.DateOfBirth = model.DateOfBirth;
             staff.HireDate = model.HireDate;
 
-            // 2. Actualizare date specifice în funcție de rol
+            // Actualizare date specifice
             if (model.RoleName == "Player" && staff.Player != null)
             {
                 staff.Player.Position = model.Position;
@@ -266,13 +259,13 @@ namespace Licenta.Controllers
             }
 
             _context.Update(staff);
-            await LogAuditAction($"Editat profil complet: {staff.FirstName} {staff.LastName} ({model.RoleName})");
-
+            await LogAuditAction($"Editat utilizator: {staff.FirstName} {staff.LastName}");
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(ManageUsers));
         }
 
-        // --- ȘTERGERE (POST) ---
+        // --- ȘTERGERE UTILIZATOR (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
@@ -280,13 +273,13 @@ namespace Licenta.Controllers
             var staffMember = await _context.Staff.FindAsync(id);
             if (staffMember == null) return NotFound();
 
-            // 1. Logăm acțiunea ÎNAINTE de ștergere
-            await LogAuditAction($"ȘTERS UTILIZATOR: {staffMember.FirstName} {staffMember.LastName} (StaffId: {id})");
+            // 1. Audit înainte de ștergere
+            await LogAuditAction($"ȘTERS utilizator: {staffMember.FirstName} {staffMember.LastName} (ID: {id})");
 
-            // 2. Găsim user-ul de login
+            // 2. Ștergere cont Identity
             var user = await _userManager.FindByIdAsync(staffMember.UserId);
 
-            // 3. Ștergem Staff ( Cascade Delete va șterge Player/Coach dacă e setat în DB)
+            // 3. Ștergere Staff (Cascade Delete în DB se ocupă de restul)
             _context.Staff.Remove(staffMember);
 
             if (user != null)
@@ -298,10 +291,11 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageUsers));
         }
 
-        // --- HELPER AUDIT ---
+        // --- HELPER: LOG AUDIT ---
         private async Task LogAuditAction(string message)
         {
             var currentUserId = _userManager.GetUserId(User);
+            // Găsim adminul curent
             var adminStaff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == currentUserId);
 
             if (adminStaff != null)
@@ -310,9 +304,100 @@ namespace Licenta.Controllers
                 {
                     Action = message,
                     Timestamp = DateTime.Now,
-                    StaffId = adminStaff.StaffId
+                    StaffId = adminStaff.StaffId,
+                    EntityName = "UserManagement"
                 });
+                // Notă: Nu dăm SaveChanges aici dacă metoda este apelată dintr-o altă tranzacție (ex: CreateUser),
+                // dar e safe dacă e apelată independent sau dacă EF Core gestionează tranzacția.
+                // Pentru DeleteUser, trebuie să fim atenți, așa că e mai bine să salvăm în metoda părinte
+                // sau să folosim un context separat, dar pentru simplitate lăsăm SaveChanges-ul în metodele principale.
             }
+        }
+
+        // ==========================================
+        //         MODUL PERMISIUNI (ACL)
+        // ==========================================
+
+        // --- LISTA ROLURILOR (Exclus Admin) ---
+        [HttpGet]
+        public async Task<IActionResult> ManageRoles()
+        {
+            // Aducem toate rolurile, dar filtrăm Admin-ul
+            var roles = await _roleManager.Roles
+                .Where(r => r.Name != "Admin") // <--- Această linie face excluderea
+                .ToListAsync();
+
+            return View(roles);
+        }
+
+        // 2. CONFIGURARE PERMISIUNI (GET)
+        [HttpGet]
+        public async Task<IActionResult> ManagePermissions(string roleId)
+        {
+            var role = await _roleManager.FindByIdAsync(roleId);
+            if (role == null) return NotFound();
+
+            // Luăm catalogul de permisiuni
+            var allPermissions = await _context.Permissions.ToListAsync();
+
+            // Luăm ce are deja rolul (din tabela de legătură)
+            var existingLinkIds = await _context.RolePermissions
+                                          .Where(rp => rp.RoleId == roleId)
+                                          .Select(rp => rp.PermissionId)
+                                          .ToListAsync();
+
+            var model = new ManageRolePermissionsViewModel
+            {
+                RoleId = roleId,
+                RoleName = role.Name,
+                PermissionList = allPermissions.Select(p => new PermissionCheckbox
+                {
+                    PermissionId = p.PermissionId,
+                    Name = p.Name,
+                    Description = p.Description,
+                    IsSelected = existingLinkIds.Contains(p.PermissionId)
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        // 3. SALVARE PERMISIUNI (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePermissions(ManageRolePermissionsViewModel model)
+        {
+            var role = await _roleManager.FindByIdAsync(model.RoleId);
+            if (role == null) return NotFound();
+
+            // A. Curățăm permisiunile vechi (DB Custom)
+            var oldLinks = await _context.RolePermissions.Where(rp => rp.RoleId == model.RoleId).ToListAsync();
+            _context.RolePermissions.RemoveRange(oldLinks);
+
+            // B. Curățăm Claims vechi (Identity)
+            var oldClaims = await _roleManager.GetClaimsAsync(role);
+            foreach (var claim in oldClaims.Where(c => c.Type == "Permission"))
+            {
+                await _roleManager.RemoveClaimAsync(role, claim);
+            }
+
+            // C. Adăugăm permisiunile noi
+            var selectedPermissions = model.PermissionList.Where(p => p.IsSelected).ToList();
+            foreach (var item in selectedPermissions)
+            {
+                // DB Custom
+                _context.RolePermissions.Add(new RolePermission
+                {
+                    RoleId = model.RoleId,
+                    PermissionId = item.PermissionId
+                });
+
+                // Identity Claims (pentru [Authorize])
+                await _roleManager.AddClaimAsync(role, new System.Security.Claims.Claim("Permission", item.Name));
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ManageRoles));
         }
     }
 }

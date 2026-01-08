@@ -1,0 +1,59 @@
+﻿@model Licenta.Models.ViewModels.ManageRolePermissionsViewModel
+
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0"><i class="fas fa-key me-2"></i>Configurare Permisiuni: @Model.RoleName</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="UpdatePermissions" method="post">
+                <input type="hidden" asp-for="RoleId" />
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Selectează ce acțiuni poate efectua un utilizator cu rolul de <strong>@Model.RoleName</strong>.
+                </div>
+
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover align-middle border">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Permisiune (Cod)</th>
+                                <th>Descriere</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.PermissionList.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="hidden" asp-for="PermissionList[i].PermissionId" />
+                                        <input type="hidden" asp-for="PermissionList[i].Name" />
+                                        <input type="hidden" asp-for="PermissionList[i].Description" />
+
+                                        <code class="text-primary fw-bold">@Model.PermissionList[i].Name</code>
+                                    </td>
+                                    <td>
+                                        @Model.PermissionList[i].Description
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            <input asp-for="PermissionList[i].IsSelected" class="form-check-input" type="checkbox" style="cursor: pointer; width: 3rem; height: 1.5rem;" />
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="ManageRoles" class="btn btn-secondary px-4">Înapoi</a>
+                    <button type="submit" class="btn btn-success px-5 fw-bold shadow">
+                        <i class="fas fa-save me-2"></i>Salvează Modificările
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
