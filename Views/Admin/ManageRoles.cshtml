@@ -1,0 +1,63 @@
+﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityRole>
+
+@{
+    ViewData["Title"] = "Roluri și Permisiuni";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-user-shield me-2 text-primary"></i>Configurare Permisiuni (ACL)</h2>
+        <a asp-action="AdminDashboard" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Înapoi la Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Nume Rol</th>
+                        <th>ID Rol</th>
+                        <th class="text-end pe-4">Acțiuni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var role in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">
+                                @if (role.Name == "Coach")
+                                {
+                                    <i class="fas fa-clipboard-list text-warning me-2"></i>
+                                }
+                                else if (role.Name == "Medic")
+                                {
+
+                                    <i class="fas fa-user-md text-success me-2"></i>
+                                }
+                                else if (role.Name == "Scout")
+                                {
+
+                                    <i class="fas fa-binoculars text-info me-2"></i>
+                                }
+                                else
+                                {
+
+                                    <i class="fas fa-user text-secondary me-2"></i>
+                                }
+                                @role.Name
+                            </td>
+                            <td class="text-muted small">@role.Id</td>
+                            <td class="text-end pe-4">
+                                <a asp-action="ManagePermissions" asp-route-roleId="@role.Id" class="btn btn-primary btn-sm shadow-sm">
+                                    <i class="fas fa-key me-1"></i> Configurează
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

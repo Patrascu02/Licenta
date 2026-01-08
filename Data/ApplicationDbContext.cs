@@ -47,6 +47,9 @@ namespace Licenta.Data
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
 
+        // --- AICI ESTE TABELA NOUĂ ---
+        public DbSet<UserPermission> UserPermissions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -57,6 +60,8 @@ namespace Licenta.Data
             builder.Entity<Staff>().HasKey(s => s.StaffId);
             builder.Entity<Player>().HasKey(p => p.PlayerId);
             builder.Entity<Injury>().HasKey(i => i.InjuryId);
+            // Cheia primară pentru UserPermission e definită prin atributul [Key] în model, dar o poți pune și aici explicit:
+            builder.Entity<UserPermission>().HasKey(up => up.UserPermissionId);
 
             // --- REZOLVARE WARNINGS PENTRU DECIMAL ---
             builder.Entity<Contract>()
@@ -156,10 +161,18 @@ namespace Licenta.Data
                 .HasForeignKey(f => f.StaffId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // 6. Permisiuni Roluri
             builder.Entity<RolePermission>()
                 .HasOne(rp => rp.Permission)
                 .WithMany()
                 .HasForeignKey(rp => rp.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 7. Permisiuni Individuale (UserPermission) - CONFIGURARE NOUĂ
+            builder.Entity<UserPermission>()
+                .HasOne(up => up.Permission)
+                .WithMany()
+                .HasForeignKey(up => up.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
