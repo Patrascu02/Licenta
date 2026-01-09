@@ -38,6 +38,7 @@
                                             <input type="hidden" asp-for="PermissionList[i].PermissionId" />
                                             <input type="hidden" asp-for="PermissionList[i].Name" />
                                             <input type="hidden" asp-for="PermissionList[i].Description" />
+                                            <input type="hidden" asp-for="PermissionList[i].IsInherited" />
 
                                             @{
                                                 var badgeClass = "bg-secondary";
@@ -50,10 +51,29 @@
                                         </td>
                                         <td class="text-muted">
                                             @Model.PermissionList[i].Description
+
+                                            @if (Model.PermissionList[i].IsInherited)
+                                            {
+                                                <span class="badge bg-light text-dark border ms-2">
+                                                    <i class="fas fa-users me-1"></i> Inclus în Rol
+                                                </span>
+                                            }
                                         </td>
                                         <td class="text-center">
                                             <div class="form-check form-switch d-flex justify-content-center">
-                                                <input asp-for="PermissionList[i].IsSelected" class="form-check-input" type="checkbox" style="width: 3em; height: 1.5em; cursor: pointer;">
+                                                @if (Model.PermissionList[i].IsInherited)
+                                                {
+                                                    @* CAZ 1: Permisiune din ROL -> Afișăm Bifat dar Dezactivat (Read-Only) *@
+                                                    <input class="form-check-input" type="checkbox" checked disabled
+                                                           style="width: 3em; height: 1.5em; opacity: 0.6; cursor: not-allowed;"
+                                                           title="Această permisiune este deja activă prin rolul utilizatorului">
+                                                }
+                                                else
+                                                {
+                                                    @* CAZ 2: Permisiune EXTRA -> Checkbox Editabil legat de model *@
+                                                    <input asp-for="PermissionList[i].IsSelected" class="form-check-input" type="checkbox"
+                                                           style="width: 3em; height: 1.5em; cursor: pointer;">
+                                                }
                                             </div>
                                         </td>
                                     </tr>

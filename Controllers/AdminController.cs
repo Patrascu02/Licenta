@@ -360,6 +360,9 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageRoles));
         }
 
+
+
+
         // --- 2. GESTIUNE PERMISIUNI INDIVIDUALE (USER) ---
         [HttpGet]
         public async Task<IActionResult> ManageUserPermissions(int staffId)
@@ -368,10 +371,27 @@ namespace Licenta.Controllers
             if (staff == null) return NotFound();
 
             var userId = staff.UserId;
+            var user = await _userManager.FindByIdAsync(userId); // Găsim user-ul Identity
+
+            // 1. Toate permisiunile posibile
             var allPermissions = await _context.Permissions.ToListAsync();
+
+            // 2. Permisiuni EXPLICITE (UserPermission - Extra)
             var userDirectPermissions = await _context.UserPermissions
                 .Where(up => up.UserId == userId)
                 .Select(up => up.PermissionId)
+                .ToListAsync();
+
+            // 3. Permisiuni MOȘTENITE (RolePermission - Standard) - LOGICA NOUĂ
+            var userRoles = await _userManager.GetRolesAsync(user); // Numele rolurilor (ex: "Coach")
+            var roleIds = await _roleManager.Roles
+                .Where(r => userRoles.Contains(r.Name))
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            var inheritedPermissions = await _context.RolePermissions
+                .Where(rp => roleIds.Contains(rp.RoleId))
+                .Select(rp => rp.PermissionId)
                 .ToListAsync();
 
             var model = new ManageUserPermissionsViewModel
@@ -384,7 +404,12 @@ namespace Licenta.Controllers
                     PermissionId = p.PermissionId,
                     Name = p.Name,
                     Description = p.Description,
-                    IsSelected = userDirectPermissions.Contains(p.PermissionId)
+
+                    // Este bifat manual DOAR dacă e în UserPermissions
+                    IsSelected = userDirectPermissions.Contains(p.PermissionId),
+
+                    // Este moștenit dacă e în RolePermissions
+                    IsInherited = inheritedPermissions.Contains(p.PermissionId)
                 }).ToList()
             };
 

@@ -13,5 +13,7 @@
         public string Name { get; set; }       // Ex: "Contracts.Edit"
         public string Description { get; set; } // Ex: "Poate modifica contracte"
         public bool IsSelected { get; set; }
+
+        public bool IsInherited { get; set; } // Vine automat din Rol (RolePermission)
     }
 }
