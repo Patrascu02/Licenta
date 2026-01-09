@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Licenta.Models.Security.AuditLog>
+
+@{
+    ViewData["Title"] = "Istoric Complet Activitate";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-history text-primary me-2"></i>Jurnal de Audit</h2>
+        <a asp-action="AdminDashboard" class="btn btn-outline-secondary shadow-sm">
+            <i class="fas fa-arrow-left me-1"></i> Înapoi la Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4" style="width: 20%">Data și Ora</th>
+                            <th style="width: 25%">Utilizator (Staff)</th>
+                            <th style="width: 55%">Acțiune</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 text-muted">
+                                    <i class="far fa-clock me-1"></i> @log.Timestamp.ToString("dd MMM yyyy, HH:mm")
+                                </td>
+                                <td>
+                                    @if (log.Staff != null)
+                                    {
+                                        <span class="fw-bold text-dark">@log.Staff.FirstName @log.Staff.LastName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Sistem / Șters</span>
+                                    }
+                                </td>
+                                <td>
+                                    @log.Action
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

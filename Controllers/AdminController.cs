@@ -448,5 +448,19 @@ namespace Licenta.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("ManageUsers");
         }
+
+
+        // --- AUDIT LOGS (ISTORIC COMPLET) ---
+        [HttpGet]
+        public async Task<IActionResult> AuditLogs()
+        {
+            var logs = await _context.AuditLogs
+                .Include(a => a.Staff) // Încărcăm datele despre cine a făcut acțiunea
+                .OrderByDescending(l => l.Timestamp) // Cele mai recente primele
+                .ToListAsync();
+
+            return View(logs);
+        }
     }
+
 }
