@@ -9,6 +9,8 @@ namespace Licenta.Models.Sports
         public string? City { get; set; }
         public string? Category { get; set; }
 
+        public int MaxAge { get; set; }
+
         public ICollection<PlayerTeamHistory>? PlayerHistories { get; set; }
     }
 }

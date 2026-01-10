@@ -1,20 +1,27 @@
 ﻿using Licenta.Models.Roles;
 using Licenta.Models.Sports;
 
-namespace Licenta.Models.Sports
+public class PlayerGameStats
 {
-    public class PlayerGameStats
-    {
-        public int PlayerGameStatsId { get; set; }
-        public int GameId { get; set; }
-        public int PlayerId { get; set; }
-        public int Points { get; set; }
-        public int Assists { get; set; }
-        public int Rebounds { get; set; }
-        public int MinutesPlayed { get; set; }
-        public float Efficiency { get; set; }
+    public int PlayerGameStatsId { get; set; }
+    public int PlayerId { get; set; }
+    public Player Player { get; set; }
 
-        public Game? Game { get; set; }
-        public Player? Player { get; set; }
-    }
+    // Facem GameId nullable pentru că un raport de scouting lunar 
+    // reprezintă media mai multor meciuri, nu a unuia singur
+    public int? GameId { get; set; }
+    public Game? Game { get; set; }
+
+    // ADAUGĂ ACESTE CÂMPURI PENTRU SCOUTING LUNAR:
+    public int Month { get; set; } // 1-12
+    public int Year { get; set; }
+    public bool IsScoutingReport { get; set; } // Diferențiem un meci real de o notă de scouting
+
+    
+    public double Points { get; set; }
+    public double Rebounds { get; set; }
+    public double Assists { get; set; }
+    public double Blocks { get; set; }
+    public double Steals { get; set; }
+    public double MinutesPlayed { get; set; }
 }

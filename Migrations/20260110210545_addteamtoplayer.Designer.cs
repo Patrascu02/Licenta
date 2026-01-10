@@ -4,6 +4,7 @@ using Licenta.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Licenta.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260110210545_addteamtoplayer")]
+    partial class addteamtoplayer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -632,6 +635,44 @@ namespace Licenta.Migrations
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("Licenta.Models.Sports.PlayerGameStats", b =>
+                {
+                    b.Property<int>("PlayerGameStatsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlayerGameStatsId"));
+
+                    b.Property<int>("Assists")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Efficiency")
+                        .HasColumnType("real");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinutesPlayed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rebounds")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlayerGameStatsId");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("PlayerGameStats");
+                });
+
             modelBuilder.Entity("Licenta.Models.Sports.PlayerTeamHistory", b =>
                 {
                     b.Property<int>("PlayerTeamHistoryId")
@@ -922,56 +963,6 @@ namespace Licenta.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PlayerGameStats", b =>
-                {
-                    b.Property<int>("PlayerGameStatsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlayerGameStatsId"));
-
-                    b.Property<double>("Assists")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Blocks")
-                        .HasColumnType("float");
-
-                    b.Property<int?>("GameId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsScoutingReport")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("MinutesPlayed")
-                        .HasColumnType("float");
-
-                    b.Property<int>("Month")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Points")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Rebounds")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Steals")
-                        .HasColumnType("float");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("PlayerGameStatsId");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("PlayerId");
-
-                    b.ToTable("PlayerGameStats");
-                });
-
             modelBuilder.Entity("Licenta.Models.Identity.ApplicationUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -1241,6 +1232,25 @@ namespace Licenta.Migrations
                     b.Navigation("Season");
                 });
 
+            modelBuilder.Entity("Licenta.Models.Sports.PlayerGameStats", b =>
+                {
+                    b.HasOne("Licenta.Models.Sports.Game", "Game")
+                        .WithMany("PlayerStats")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Licenta.Models.Roles.Player", "Player")
+                        .WithMany("GameStats")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("Licenta.Models.Sports.PlayerTeamHistory", b =>
                 {
                     b.HasOne("Licenta.Models.Roles.Player", "Player")
@@ -1309,24 +1319,6 @@ namespace Licenta.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("PlayerGameStats", b =>
-                {
-                    b.HasOne("Licenta.Models.Sports.Game", "Game")
-                        .WithMany("PlayerStats")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Licenta.Models.Roles.Player", "Player")
-                        .WithMany("GameStats")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("Licenta.Models.Core.Staff", b =>

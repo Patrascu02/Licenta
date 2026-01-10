@@ -2,6 +2,7 @@
 using Licenta.Models.Core;
 using Licenta.Models.Roles;
 using Licenta.Models.Security;
+using Licenta.Models.Sports;
 using Licenta.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -91,13 +92,39 @@ namespace Licenta.Controllers
 
                     if (model.Role == "Player")
                     {
-                        _context.Players.Add(new Player
+                        // 1. Găsim echipa unică a clubului (presupunem că e prima sau singura din tabelă)
+                        var mainTeam = await _context.Teams.FirstOrDefaultAsync();
+
+                        // Siguranță: Dacă nu există nicio echipă, o creăm pe loc
+                        if (mainTeam == null)
+                        {
+                            mainTeam = new Team { Name = "Echipa Seniori", City = "Club", Category = "Seniori", MaxAge = 99 };
+                            _context.Teams.Add(mainTeam);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        // 2. Creăm jucătorul și îl legăm direct de această echipă
+                        var player = new Player
                         {
                             StaffId = staff.StaffId,
                             Position = model.Position ?? "Nespecificat",
                             JerseyNumber = model.JerseyNumber ?? 0,
-                            Height = model.Height ?? 0
-                        });
+                            Height = model.Height ?? 0,
+
+                            // AICI SE FACE ASOCIEREA:
+                            CurrentTeamId = mainTeam.TeamId
+                        };
+                        _context.Players.Add(player);
+                        await _context.SaveChangesAsync(); // Salvăm pentru a genera PlayerId
+
+                        // 3. (Opțional dar recomandat) Adăugăm intrarea în istoricul echipei
+                        var history = new PlayerTeamHistory
+                        {
+                            PlayerId = player.PlayerId,
+                            TeamId = mainTeam.TeamId,
+                            StartDate = DateTime.Now
+                        };
+                        _context.PlayerTeamHistories.Add(history);
                     }
                     else if (model.Role == "Coach")
                     {
