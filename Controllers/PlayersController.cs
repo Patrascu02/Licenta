@@ -42,14 +42,18 @@ namespace Licenta.Controllers
         }
 
         // --- 2. DETALII JUCĂTOR (READ) ---
-        [HttpGet]
+        // În PlayersController.cs
         public async Task<IActionResult> Details(int id)
         {
-            if (!User.HasClaim("Permission", "Players.View")) return Forbid();
+            // Permitem accesul dacă are ORI Players.View ORI Scouting.Manage
+            if (!User.HasClaim(c => c.Type == "Permission" && (c.Value == "Players.View" || c.Value == "Scouting.Manage")))
+            {
+                return Forbid();
+            }
 
             var player = await _context.Players
                 .Include(p => p.Staff)
-                .Include(p => p.Contracts) // Putem include și contractele dacă are drepturi (vezi view)
+                .Include(p => p.GameStats) // Numele corect din modelul tău este GameStats
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
 
             if (player == null) return NotFound();
