@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Licenta.Models.Roles.Player>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nume</th>
+            <th>Poziție</th>
+            <th>Număr</th>
+            <th>Acțiuni</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.Staff.FirstName @item.Staff.LastName
+                </td>
+                <td>
+                    @item.Position
+                </td>
+                <td>
+                    #@item.JerseyNumber
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.PlayerId" class="btn btn-info btn-sm">Detalii</a>
+
+                    @if (User.HasClaim("Permission", "Players.Edit"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.PlayerId" class="btn btn-warning btn-sm">Editează</a>
+                    }
+
+                    @if (User.HasClaim("Permission", "Players.Delete"))
+                    {
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
