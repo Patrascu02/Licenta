@@ -62,6 +62,10 @@ namespace Licenta.Models.ViewModels
         [Range(150, 250, ErrorMessage = "Înălțimea trebuie să fie între 150 și 250 cm.")]
         public int? Height { get; set; } // Schimbat din double? în int?
 
+        [Display(Name = "Greutate (kg)")]
+        [Range(50, 160, ErrorMessage = "Greutatea trebuie să fie între 50 și 160 kg.")]
+        public int? Weight { get; set; }
+
 
         // --- DATE SPECIFICE ANTRENOR ---
         [Display(Name = "Număr Licență")]

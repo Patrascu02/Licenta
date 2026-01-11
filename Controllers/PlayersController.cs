@@ -45,19 +45,32 @@ namespace Licenta.Controllers
         // În PlayersController.cs
         public async Task<IActionResult> Details(int id)
         {
-            // Permitem accesul dacă are ORI Players.View ORI Scouting.Manage
-            if (!User.HasClaim(c => c.Type == "Permission" && (c.Value == "Players.View" || c.Value == "Scouting.Manage")))
-            {
-                return Forbid();
-            }
-
+            // 1. Găsim jucătorul cerut
             var player = await _context.Players
-                .Include(p => p.Staff)        // Date personale (Nume, Prenume)
-                .Include(p => p.CurrentTeam)  // Echipa curentă (ca să nu mai apară "Fără echipă")
-                .Include(p => p.GameStats)    // Statisticile (pentru tabelul de Scouting)
+                .Include(p => p.Staff)
+                .Include(p => p.CurrentTeam)
+                .Include(p => p.GameStats)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
 
             if (player == null) return NotFound();
+
+            // 2. VERIFICARE PERMISIUNI (Actualizată)
+            // Acces permis dacă:
+            // a) Ești Admin/Antrenor (Players.View)
+            // b) Ești Scouter (Scouting.Manage)
+            // c) Ești chiar jucătorul respectiv (Self-Service)
+
+            var currentUserId = _userManager.GetUserId(User);
+            var isOwnProfile = (player.Staff.UserId == currentUserId);
+            // Notă: Asigură-te că Staff are UserId populat corect
+
+            bool hasAdminRights = User.HasClaim(c => c.Type == "Permission" &&
+                                  (c.Value == "Players.View" || c.Value == "Scouting.Manage"));
+
+            if (!hasAdminRights && !isOwnProfile)
+            {
+                return Forbid(); // Nu ai voie să vezi profilul altui coleg
+            }
 
             return View(player);
         }
@@ -112,9 +125,7 @@ namespace Licenta.Controllers
             return View(player);
         }
 
-        // --- 5. ȘTERGERE JUCĂTOR (DELETE) ---
-        // Notă: De obicei ștergerea se face din AdminController pentru că implică și User/Staff,
-        // dar dacă vrei să permiți ștergerea doar a profilului de jucător:
+       
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -134,7 +145,7 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // --- HELPERE ---
+     
         private bool PlayerExists(int id)
         {
             return _context.Players.Any(e => e.PlayerId == id);
@@ -155,8 +166,31 @@ namespace Licenta.Controllers
                     EntityName = entityName,
                     EntityId = entityId
                 });
-                // Nu dăm SaveChanges aici, se dă în metoda principală
             }
+        }
+
+
+        // --- 6. PROFILUL MEU (Pentru Jucătorii Logați) ---
+        [HttpGet]
+        public async Task<IActionResult> MyProfile()
+        {
+            // 1. Aflăm ID-ul userului conectat
+            var userId = _userManager.GetUserId(User);
+
+            // 2. Căutăm în tabela Staff -> apoi legătura cu Player
+            var staffMember = await _context.Staff
+                .Include(s => s.Player) // Încărcăm și datele de jucător
+                .FirstOrDefaultAsync(s => s.UserId == userId);
+
+            if (staffMember == null || staffMember.Player == null)
+            {
+                // Dacă userul e logat dar nu e legat de un jucător (ex: e doar Admin)
+                return RedirectToAction("Index", "Home");
+            }
+
+            // 3. Redirecționăm către metoda Details folosind ID-ul corect
+            // Astfel refolosim pagina Details.cshtml pe care ai reparat-o deja
+            return RedirectToAction("Details", new { id = staffMember.Player.PlayerId });
         }
     }
 }

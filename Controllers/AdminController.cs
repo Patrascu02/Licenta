@@ -103,6 +103,7 @@ namespace Licenta.Controllers
                             Position = model.Position,
                             JerseyNumber = model.JerseyNumber ?? 0,
                             Height = model.Height ?? 0,
+                            Weight = model.Weight ?? 0,
                             // 2. ASIGNARE AUTOMATĂ: Dacă avem o echipă, o legăm de jucător
                             CurrentTeamId = mainTeam?.TeamId
                         };
@@ -217,9 +218,14 @@ namespace Licenta.Controllers
                 DateOfBirth = staff.DateOfBirth,
                 HireDate = staff.HireDate,
                 RoleName = roleName,
+
+                // Jucător
                 Position = staff.Player?.Position,
                 JerseyNumber = staff.Player?.JerseyNumber,
                 Height = staff.Player?.Height,
+                Weight = staff.Player?.Weight, // <--- ADAUGĂ ASTA
+
+                // Restul
                 LicenseNumber = staff.Coach?.LicenseNumber,
                 Specialization = staff.Medic?.Specialty
             };
@@ -235,25 +241,29 @@ namespace Licenta.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var staff = await _context.Staff
-                .Include(s => s.Player)
+                .Include(s => s.Player) // Asigură-te că Player e inclus
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
                 .FirstOrDefaultAsync(s => s.StaffId == model.StaffId);
 
             if (staff == null) return NotFound();
 
+            // Actualizare date generale
             staff.FirstName = model.FirstName;
             staff.LastName = model.LastName;
             staff.DateOfBirth = model.DateOfBirth;
             staff.HireDate = model.HireDate;
 
+            // Actualizare date specifice Jucător
             if (model.RoleName == "Player" && staff.Player != null)
             {
                 staff.Player.Position = model.Position;
                 staff.Player.JerseyNumber = model.JerseyNumber ?? 0;
                 staff.Player.Height = model.Height ?? 0;
+                staff.Player.Weight = model.Weight ?? 0; // <--- ADAUGĂ ASTA PENTRU SALVARE
                 _context.Update(staff.Player);
             }
+            // ... restul logicii pentru Coach și Medic rămâne la fel ...
             else if (model.RoleName == "Coach" && staff.Coach != null)
             {
                 staff.Coach.LicenseNumber = model.LicenseNumber;

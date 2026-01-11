@@ -6,7 +6,7 @@ namespace Licenta.Models.ViewModels
     public class EditUserViewModel
     {
         public int StaffId { get; set; }
-        public string RoleName { get; set; } // Avem nevoie de asta pentru a ști ce câmpuri afișăm
+        public string RoleName { get; set; }
 
         [Required(ErrorMessage = "Prenumele este obligatoriu")]
         [Display(Name = "Prenume")]
@@ -17,7 +17,7 @@ namespace Licenta.Models.ViewModels
         public string LastName { get; set; }
 
         [Display(Name = "Email")]
-        public string Email { get; set; } // Read-only de obicei
+        public string Email { get; set; }
 
         [DataType(DataType.Date)]
         [Display(Name = "Data Nașterii")]
@@ -36,6 +36,11 @@ namespace Licenta.Models.ViewModels
 
         [Display(Name = "Înălțime (cm)")]
         public int? Height { get; set; }
+
+        
+        [Display(Name = "Greutate (kg)")]
+        public int? Weight { get; set; }
+        // -------------------
 
         // --- Date Specifice Antrenor ---
         [Display(Name = "Licență")]

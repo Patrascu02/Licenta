@@ -19,7 +19,12 @@ namespace Licenta.Controllers
             {
                 return RedirectToAction("AdminDashboard", "Admin");
             }
-            
+
+            if (User.IsInRole("Player"))
+            {
+                return RedirectToAction("MyProfile", "Players");
+            }
+
             return View();
         }
 

@@ -98,7 +98,7 @@
                             <div id="playerFields" class="role-fields mb-4" style="display:none;">
                                 <h6 class="text-info fw-bold mb-3 border-bottom pb-2"><i class="fas fa-basketball-ball me-2"></i>Detalii Jucător</h6>
                                 <div class="row p-3 bg-light rounded shadow-sm border">
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label small fw-bold text-muted">POZIȚIE</label>
                                         <select asp-for="Position" class="form-select border-2">
                                             <option value="Point Guard">Point Guard (1)</option>
@@ -108,13 +108,17 @@
                                             <option value="Center">Center (5)</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label small fw-bold text-muted">NR. TRICOU</label>
                                         <input asp-for="JerseyNumber" type="number" class="form-control border-2" />
                                     </div>
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label small fw-bold text-muted">ÎNĂLȚIME (cm)</label>
                                         <input asp-for="Height" type="number" class="form-control border-2" />
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label small fw-bold text-muted">GREUTATE (kg)</label>
+                                        <input asp-for="Weight" type="number" class="form-control border-2" />
                                     </div>
                                 </div>
                             </div>
