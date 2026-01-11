@@ -52,8 +52,9 @@ namespace Licenta.Controllers
             }
 
             var player = await _context.Players
-                .Include(p => p.Staff)
-                .Include(p => p.GameStats) // Numele corect din modelul tău este GameStats
+                .Include(p => p.Staff)        // Date personale (Nume, Prenume)
+                .Include(p => p.CurrentTeam)  // Echipa curentă (ca să nu mai apară "Fără echipă")
+                .Include(p => p.GameStats)    // Statisticile (pentru tabelul de Scouting)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
 
             if (player == null) return NotFound();

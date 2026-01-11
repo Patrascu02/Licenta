@@ -1,10 +1,13 @@
 ﻿using Licenta.Models.Roles;
 using Licenta.Models.Sports;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 public class PlayerGameStats
 {
     public int PlayerGameStatsId { get; set; }
     public int PlayerId { get; set; }
+
+    [ValidateNever]//valideaza id ul dar nu te uita la tot obiectul player
     public Player Player { get; set; }
 
     // Facem GameId nullable pentru că un raport de scouting lunar 

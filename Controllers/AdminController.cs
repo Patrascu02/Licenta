@@ -95,24 +95,16 @@ namespace Licenta.Controllers
                         // 1. Găsim echipa unică a clubului (presupunem că e prima sau singura din tabelă)
                         var mainTeam = await _context.Teams.FirstOrDefaultAsync();
 
-                        // Siguranță: Dacă nu există nicio echipă, o creăm pe loc
-                        if (mainTeam == null)
-                        {
-                            mainTeam = new Team { Name = "Echipa Seniori", City = "Club", Category = "Seniori", MaxAge = 99 };
-                            _context.Teams.Add(mainTeam);
-                            await _context.SaveChangesAsync();
-                        }
 
                         // 2. Creăm jucătorul și îl legăm direct de această echipă
                         var player = new Player
                         {
                             StaffId = staff.StaffId,
-                            Position = model.Position ?? "Nespecificat",
+                            Position = model.Position,
                             JerseyNumber = model.JerseyNumber ?? 0,
                             Height = model.Height ?? 0,
-
-                            // AICI SE FACE ASOCIEREA:
-                            CurrentTeamId = mainTeam.TeamId
+                            // 2. ASIGNARE AUTOMATĂ: Dacă avem o echipă, o legăm de jucător
+                            CurrentTeamId = mainTeam?.TeamId
                         };
                         _context.Players.Add(player);
                         await _context.SaveChangesAsync(); // Salvăm pentru a genera PlayerId
