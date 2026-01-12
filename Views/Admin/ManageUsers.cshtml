@@ -31,7 +31,7 @@
     }
 
     .badge-role {
-        min-width: 100px; /* Lățime fixă pentru aliniere frumoasă */
+        min-width: 100px;
         font-weight: 500;
         padding: 8px;
     }
@@ -103,9 +103,12 @@
                                             <i class="fas fa-key"></i>
                                         </a>
 
-                                        <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Adaugă Contract">
-                                            <i class="fas fa-file-invoice-dollar"></i>
-                                        </a>
+                                        @if (User.IsInRole("GeneralManager"))
+                                        {
+                                            <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Adaugă Contract">
+                                                <i class="fas fa-file-invoice-dollar"></i>
+                                            </a>
+                                        }
 
                                         <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Sigur dorești să ștergi acest utilizator?');" class="d-inline">
                                             <button type="submit" class="btn btn-outline-danger" title="Șterge"><i class="fas fa-trash"></i></button>
@@ -135,9 +138,12 @@
                                     <div class="btn-group btn-group-sm">
                                         <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
 
-                                        <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
-                                            <i class="fas fa-file-invoice-dollar"></i>
-                                        </a>
+                                        @if (User.IsInRole("GeneralManager"))
+                                        {
+                                            <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
+                                                <i class="fas fa-file-invoice-dollar"></i>
+                                            </a>
+                                        }
 
                                         <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi jucătorul?');" class="d-inline">
                                             <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
@@ -187,9 +193,12 @@
                                     <div class="btn-group btn-group-sm">
                                         <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
 
-                                        <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
-                                            <i class="fas fa-file-invoice-dollar"></i>
-                                        </a>
+                                        @if (User.IsInRole("GeneralManager"))
+                                        {
+                                            <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
+                                                <i class="fas fa-file-invoice-dollar"></i>
+                                            </a>
+                                        }
 
                                         <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi membrul staff?');" class="d-inline">
                                             <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
