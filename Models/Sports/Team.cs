@@ -11,6 +11,8 @@ namespace Licenta.Models.Sports
 
         public int MaxAge { get; set; }
 
+        public decimal BudgetLimit { get; set; } = 1000000;
+
         public ICollection<PlayerTeamHistory>? PlayerHistories { get; set; }
     }
 }

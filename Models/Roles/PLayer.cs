@@ -24,7 +24,7 @@ namespace Licenta.Models.Roles
         public Team CurrentTeam { get; set; }
         public ICollection<PlayerTeamHistory>? TeamHistories { get; set; }
         public ICollection<PlayerGameStats>? GameStats { get; set; }
-        public ICollection<Contract>? Contracts { get; set; }
+       // public ICollection<Contract>? Contracts { get; set; }
         public ICollection<Injury>? Injuries { get; set; }
     }
 }

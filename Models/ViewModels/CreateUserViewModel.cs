@@ -75,5 +75,11 @@ namespace Licenta.Models.ViewModels
         // --- DATE SPECIFICE MEDIC ---
         [Display(Name = "Specializare Medicală")]
         public string? Specialization { get; set; }
+
+        //--- gm ---
+
+        [Display(Name = "Birou / Departament")]
+        public string? Office { get; set; }
+
     }
 }

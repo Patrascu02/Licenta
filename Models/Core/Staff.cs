@@ -32,5 +32,6 @@ namespace Licenta.Models.Core
         public ICollection<FileStorage>? Files { get; set; }
         public ICollection<TerminationNotice>? NoticesIssued { get; set; }
         public ICollection<TerminationNotice>? NoticesReceived { get; set; }
+        public ICollection<Licenta.Models.Contracts.Contract>? Contracts { get; set; }
     }
 }

@@ -48,6 +48,7 @@ namespace Licenta.Controllers
             // 1. Găsim jucătorul cerut
             var player = await _context.Players
                 .Include(p => p.Staff)
+                    .ThenInclude(s => s.Contracts) 
                 .Include(p => p.CurrentTeam)
                 .Include(p => p.GameStats)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);

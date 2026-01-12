@@ -29,6 +29,7 @@ namespace Licenta.Data
         public DbSet<Coach> Coaches { get; set; }
         public DbSet<Medic> Medics { get; set; }
         public DbSet<Scout> Scouts { get; set; }
+        public DbSet<GeneralManager> GeneralManagers { get; set; }
         public DbSet<ScoutPlayer> ScoutPlayers { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<PlayerTeamHistory> PlayerTeamHistories { get; set; }
@@ -46,8 +47,6 @@ namespace Licenta.Data
         public DbSet<FileStorage> FileStorages { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
-
-        // --- AICI ESTE TABELA NOUĂ ---
         public DbSet<UserPermission> UserPermissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -60,10 +59,9 @@ namespace Licenta.Data
             builder.Entity<Staff>().HasKey(s => s.StaffId);
             builder.Entity<Player>().HasKey(p => p.PlayerId);
             builder.Entity<Injury>().HasKey(i => i.InjuryId);
-            // Cheia primară pentru UserPermission e definită prin atributul [Key] în model, dar o poți pune și aici explicit:
             builder.Entity<UserPermission>().HasKey(up => up.UserPermissionId);
 
-            // --- REZOLVARE WARNINGS PENTRU DECIMAL ---
+            // --- REZOLVARE WARNINGS PENTRU DECIMAL (AICI AM ADĂUGAT TEAM) ---
             builder.Entity<Contract>()
                 .Property(c => c.Salary)
                 .HasColumnType("decimal(18,2)");
@@ -76,13 +74,18 @@ namespace Licenta.Data
                 .Property(s => s.Budget)
                 .HasColumnType("decimal(18,2)");
 
+            // NOU: Configurare pentru bugetul echipei
+            builder.Entity<Team>()
+                .Property(t => t.BudgetLimit)
+                .HasColumnType("decimal(18,2)");
+
             // --- CONFIGURĂRI CASCADE DELETE ---
 
-            // 1. Relații Jucător
+            // 1. Relații Jucător & Contracte
             builder.Entity<Contract>()
-                .HasOne(c => c.Player)
-                .WithMany(p => p.Contracts)
-                .HasForeignKey(c => c.PlayerId)
+                .HasOne(c => c.Staff)
+                .WithMany(s => s.Contracts)
+                .HasForeignKey(c => c.StaffId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Injury>()
@@ -122,7 +125,7 @@ namespace Licenta.Data
                 .HasForeignKey(pgs => pgs.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 3. Comunicare și Mesaje (NoAction pentru a evita multiple cascade paths)
+            // 3. Comunicare și Mesaje
             builder.Entity<Message>()
                 .HasOne(m => m.FromStaff)
                 .WithMany(s => s.MessagesSent)
@@ -161,14 +164,13 @@ namespace Licenta.Data
                 .HasForeignKey(f => f.StaffId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 6. Permisiuni Roluri
+            // 6. Permisiuni
             builder.Entity<RolePermission>()
                 .HasOne(rp => rp.Permission)
                 .WithMany()
                 .HasForeignKey(rp => rp.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 7. Permisiuni Individuale (UserPermission) - CONFIGURARE NOUĂ
             builder.Entity<UserPermission>()
                 .HasOne(up => up.Permission)
                 .WithMany()

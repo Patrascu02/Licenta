@@ -6,7 +6,6 @@
 }
 
 <style>
-    /* Stilurile tale existente */
     .nav-pills .nav-link {
         color: #333 !important;
         background-color: #f1f1f1;
@@ -32,7 +31,9 @@
     }
 
     .badge-role {
-        min-width: 80px;
+        min-width: 100px; /* Lățime fixă pentru aliniere frumoasă */
+        font-weight: 500;
+        padding: 8px;
     }
 </style>
 
@@ -67,18 +68,47 @@
                         {
                             <tr>
                                 <td><strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong></td>
-                                <td><span class="badge bg-secondary badge-role">@item.RoleName</span></td>
+                                <td>
+                                    @if (item.RoleName == "GeneralManager")
+                                    {
+                                        <span class="badge bg-dark badge-role">General Manager</span>
+                                    }
+                                    else if (item.RoleName == "Coach")
+                                    {
+                                        <span class="badge bg-warning text-dark badge-role">Antrenor</span>
+                                    }
+                                    else if (item.RoleName == "Player")
+                                    {
+                                        <span class="badge bg-primary badge-role">Jucător</span>
+                                    }
+                                    else if (item.RoleName == "Medic")
+                                    {
+                                        <span class="badge bg-danger badge-role">Medic</span>
+                                    }
+                                    else if (item.RoleName == "Scout")
+                                    {
+                                        <span class="badge bg-info text-dark badge-role">Scouter</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary badge-role">@item.RoleName</span>
+                                    }
+                                </td>
                                 <td>@item.Email</td>
                                 <td class="text-end">
-                                    <div class="btn-group">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary" title="Editează"><i class="fas fa-edit"></i></a>
 
-                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-warning text-dark" title="Permisiuni Speciale">
+                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-info text-dark" title="Permisiuni Speciale">
                                             <i class="fas fa-key"></i>
                                         </a>
 
-                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Sigur?');" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Adaugă Contract">
+                                            <i class="fas fa-file-invoice-dollar"></i>
+                                        </a>
+
+                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Sigur dorești să ștergi acest utilizator?');" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger" title="Șterge"><i class="fas fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>
@@ -102,15 +132,15 @@
                                 <td>#@(item.StaffMember.Player?.JerseyNumber ?? 0)</td>
                                 <td>@(item.StaffMember.Player?.Height ?? 0) cm</td>
                                 <td class="text-end">
-                                    <div class="btn-group">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
 
-                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-warning text-dark" title="Permisiuni Speciale">
-                                            <i class="fas fa-key"></i>
+                                        <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
+                                            <i class="fas fa-file-invoice-dollar"></i>
                                         </a>
 
                                         <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi jucătorul?');" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                            <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>
@@ -130,18 +160,39 @@
                         {
                             <tr>
                                 <td><strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong></td>
-                                <td><span class="badge bg-warning text-dark badge-role">@item.RoleName</span></td>
+                                <td>
+                                    @if (item.RoleName == "GeneralManager")
+                                    {
+                                        <span class="badge bg-dark badge-role">General Manager</span>
+                                    }
+                                    else if (item.RoleName == "Coach")
+                                    {
+                                        <span class="badge bg-warning text-dark badge-role">Antrenor</span>
+                                    }
+                                    else if (item.RoleName == "Medic")
+                                    {
+                                        <span class="badge bg-danger badge-role">Medic</span>
+                                    }
+                                    else if (item.RoleName == "Scout")
+                                    {
+                                        <span class="badge bg-info text-dark badge-role">Scouter</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary badge-role">@item.RoleName</span>
+                                    }
+                                </td>
                                 <td>@item.Email</td>
                                 <td class="text-end">
-                                    <div class="btn-group">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
 
-                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-sm btn-outline-warning text-dark" title="Permisiuni Speciale">
-                                            <i class="fas fa-key"></i>
+                                        <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
+                                            <i class="fas fa-file-invoice-dollar"></i>
                                         </a>
 
                                         <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi membrul staff?');" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                            <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>

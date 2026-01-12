@@ -35,7 +35,7 @@ namespace Licenta
                 await context.Database.MigrateAsync();
 
                 // 1. Creare Roluri
-                string[] roleNames = { "Admin", "Manager", "Coach", "Player", "Medic", "Scout" };
+                string[] roleNames = { "Admin", "GeneralManager", "Coach", "Player", "Medic", "Scout" };
                 foreach (var roleName in roleNames)
                 {
                     if (!await roleManager.RoleExistsAsync(roleName))

@@ -1,0 +1,140 @@
+﻿@model Licenta.Models.ViewModels.BudgetDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Financiar GM";
+    // Calculăm culoarea alertei: Roșu dacă e depășit, Galben dacă mai e < 10%, Verde altfel
+    var alertClass = Model.RemainingBudget < 0 ? "alert-danger" : (Model.RemainingBudget < Model.BudgetLimit * 0.1m ? "alert-warning" : "alert-success");
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-pie text-success"></i> Management Buget & Cheltuieli</h2>
+
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-secondary fs-6">Anul Fiscal: @DateTime.Now.Year</span>
+
+            <button type="button" class="btn btn-outline-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#editBudgetModal">
+                <i class="fas fa-edit me-1"></i> Modifică Limita Buget
+            </button>
+        </div>
+    </div>
+
+    <div class="alert @alertClass shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="alert-heading fw-bold">Stare Buget: @(Model.RemainingBudget < 0 ? "DEPĂȘIT!" : "În grafic")</h4>
+                <p class="mb-0">
+                    Cheltuit: <strong>@Model.TotalSpent.ToString("C0")</strong> /
+                    Limită: <strong>@Model.BudgetLimit.ToString("C0")</strong>
+                </p>
+            </div>
+            <div class="text-end">
+                <h2 class="fw-bold">@Model.RemainingBudget.ToString("C0")</h2>
+                <small>Rămas</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress mb-5" style="height: 30px;">
+        <div class="progress-bar @(Model.SpendingPercentage > 100 ? "bg-danger" : "bg-success")"
+             role="progressbar"
+             style="width: @Math.Min(Model.SpendingPercentage, 100)%;">
+            @Model.SpendingPercentage.ToString("F1")% Cheltuit
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Repartizare Salarii</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-running me-2 text-muted"></i>Jucători</span>
+                            <span class="fw-bold">@Model.PlayerSalaries.ToString("C0")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-tie me-2 text-muted"></i>Antrenori</span>
+                            <span class="fw-bold">@Model.CoachSalaries.ToString("C0")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-md me-2 text-muted"></i>Staff Medical</span>
+                            <span class="fw-bold">@Model.MedicSalaries.ToString("C0")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-binoculars me-2 text-muted"></i>Scouting</span>
+                            <span class="fw-bold">@Model.ScoutSalaries.ToString("C0")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-light fw-bold">
+                            TOTAL SALARII
+                            <span>@((Model.PlayerSalaries + Model.CoachSalaries + Model.MedicSalaries + Model.ScoutSalaries).ToString("C0"))</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Cheltuieli Operaționale</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.OperationalExpenses.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var expense in Model.OperationalExpenses)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@expense.Key</span>
+                                    <span class="fw-bold">@expense.Value.ToString("C0")</span>
+                                </li>
+                            }
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-light fw-bold">
+                                TOTAL OPERAȚIONAL
+                                <span>@Model.OperationalExpenses.Values.Sum().ToString("C0")</span>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">Nu există cheltuieli înregistrate în acest an.</p>
+                    }
+
+                    <div class="mt-3 text-center">
+                        <button class="btn btn-outline-dark btn-sm">
+                            <i class="fas fa-plus me-1"></i> Înregistrează Cheltuială Nouă
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editBudgetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-coins text-warning me-2"></i>Actualizare Buget Sezon</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="UpdateBudget" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="newLimit" class="form-label fw-bold">Noua Limită de Buget (€)</label>
+                        <input type="number" name="newLimit" class="form-control form-control-lg"
+                               value="@Convert.ToInt32(Model.BudgetLimit)" min="0" required />
+                        <div class="form-text">Introduceți suma totală aprobată de conducere pentru acest sezon.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                    <button type="submit" class="btn btn-primary">Salvează Modificarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

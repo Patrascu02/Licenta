@@ -140,6 +140,14 @@ namespace Licenta.Controllers
                     {
                         _context.Scouts.Add(new Scout { StaffId = staff.StaffId });
                     }
+                    else if (model.Role == "GeneralManager")
+                    {
+                        _context.GeneralManagers.Add(new GeneralManager
+                        {
+                            StaffId = staff.StaffId,
+                            Office = model.Office ?? "Administrație"
+                        });
+                    }
 
                     await LogAuditAction($"Creat utilizator nou: {model.Role} - {model.FirstName} {model.LastName}");
                     await _context.SaveChangesAsync();
@@ -168,6 +176,7 @@ namespace Licenta.Controllers
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
                 .Include(s => s.Scout)
+                .Include(s => s.GeneralManager)
                 .ToListAsync();
 
             var viewModel = new List<UserManagementViewModel>();
