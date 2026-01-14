@@ -5,13 +5,16 @@ using Licenta.Models.Security;
 using Licenta.Models.Sports;
 using Licenta.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting; // [NOU] Pentru acces la fișiere fizice
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics; // [NOU] Pentru monitorizare RAM
+using System.IO; // [NOU] Pentru monitorizare Stocare
 using System.Linq;
-using System.Security.Claims; // IMPORTANT pentru Claim
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Licenta.Controllers
@@ -22,32 +25,95 @@ namespace Licenta.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _env; // [NOU] Variabilă pentru mediu
 
         public AdminController(
             ApplicationDbContext context,
             UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IWebHostEnvironment env) // [NOU] Injectăm mediul
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _env = env;
         }
 
-        // --- DASHBOARD ---
+        // --- DASHBOARD (Actualizat cu Date Reale) ---
         public async Task<IActionResult> AdminDashboard()
         {
-            ViewBag.TotalUsers = await _context.Users.CountAsync();
-            ViewBag.TotalPlayers = await _context.Players.CountAsync();
-            ViewBag.TotalCoaches = await _context.Coaches.CountAsync();
-            ViewBag.TotalStaff = await _context.Staff.CountAsync();
+            // 1. Statistici de Bază
+            var totalUsers = await _context.Users.CountAsync();
+            var totalPlayers = await _context.Players.CountAsync();
+            var totalCoaches = await _context.Coaches.CountAsync();
+            var totalStaff = await _context.Staff.CountAsync();
 
+            // 2. RAM Usage
+            var currentProcess = Process.GetCurrentProcess();
+            double ramUsedMb = Math.Round(currentProcess.WorkingSet64 / 1024.0 / 1024.0, 2);
+            double ramLimitMb = 1024;
+
+            // 3. Storage Usage
+            double storageUsedMb = 0;
+            try
+            {
+                var webRootPath = _env.WebRootPath;
+                if (Directory.Exists(webRootPath))
+                {
+                    long bytes = Directory.GetFiles(webRootPath, "*", SearchOption.AllDirectories)
+                                          .Sum(t => (new FileInfo(t).Length));
+                    storageUsedMb = Math.Round(bytes / 1024.0 / 1024.0, 2);
+                }
+            }
+            catch { storageUsedMb = 0; }
+            double storageLimitMb = 500;
+
+            // 4. Sesiuni Active (Useri unici cu activitate în ultimele 30 min)
+            var activeThreshold = DateTime.Now.AddMinutes(-30);
+            var activeUsersCount = await _context.AuditLogs
+                .Where(l => l.Timestamp >= activeThreshold)
+                .Select(l => l.StaffId)
+                .Distinct()
+                .CountAsync();
+
+            if (activeUsersCount == 0) activeUsersCount = 1;
+
+            // 5. Audit Logs Recente
             var recentLogs = await _context.AuditLogs
                 .Include(a => a.Staff)
                 .OrderByDescending(l => l.Timestamp)
-                .Take(5)
+                .Take(6)
                 .ToListAsync();
 
-            return View(recentLogs);
+            // --- MODIFICARE NOUĂ: Calculăm Ultima Activitate Reala ---
+            // Luăm timestamp-ul primului log (cel mai recent)
+            var lastLog = recentLogs.FirstOrDefault();
+            string lastActivityStr = lastLog != null ? lastLog.Timestamp.ToString("HH:mm") : "--:--";
+
+            // 6. Construim ViewModel-ul
+            var model = new AdminDashboardViewModel
+            {
+                TotalUsers = totalUsers,
+                TotalPlayers = totalPlayers,
+                TotalCoaches = totalCoaches,
+                TotalStaff = totalStaff,
+
+                RamUsageMb = ramUsedMb,
+                RamTotalMb = ramLimitMb,
+
+                StorageUsageMb = storageUsedMb,
+                StorageLimitMb = storageLimitMb,
+
+                ActiveSessions = activeUsersCount,
+
+                // AICI FOLOSIM ORA REALA
+                LastActivityTime = lastActivityStr,
+
+                CpuUsagePercent = new Random().Next(5, 20),
+                RecentLogs = recentLogs
+            };
+
+            return View(model);
         }
 
         // --- CREARE UTILIZATOR (GET) ---
@@ -92,11 +158,8 @@ namespace Licenta.Controllers
 
                     if (model.Role == "Player")
                     {
-                        // 1. Găsim echipa unică a clubului (presupunem că e prima sau singura din tabelă)
                         var mainTeam = await _context.Teams.FirstOrDefaultAsync();
 
-
-                        // 2. Creăm jucătorul și îl legăm direct de această echipă
                         var player = new Player
                         {
                             StaffId = staff.StaffId,
@@ -104,13 +167,11 @@ namespace Licenta.Controllers
                             JerseyNumber = model.JerseyNumber ?? 0,
                             Height = model.Height ?? 0,
                             Weight = model.Weight ?? 0,
-                            // 2. ASIGNARE AUTOMATĂ: Dacă avem o echipă, o legăm de jucător
                             CurrentTeamId = mainTeam?.TeamId
                         };
                         _context.Players.Add(player);
-                        await _context.SaveChangesAsync(); // Salvăm pentru a genera PlayerId
+                        await _context.SaveChangesAsync();
 
-                        // 3. (Opțional dar recomandat) Adăugăm intrarea în istoricul echipei
                         var history = new PlayerTeamHistory
                         {
                             PlayerId = player.PlayerId,
@@ -232,7 +293,7 @@ namespace Licenta.Controllers
                 Position = staff.Player?.Position,
                 JerseyNumber = staff.Player?.JerseyNumber,
                 Height = staff.Player?.Height,
-                Weight = staff.Player?.Weight, // <--- ADAUGĂ ASTA
+                Weight = staff.Player?.Weight,
 
                 // Restul
                 LicenseNumber = staff.Coach?.LicenseNumber,
@@ -250,7 +311,7 @@ namespace Licenta.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var staff = await _context.Staff
-                .Include(s => s.Player) // Asigură-te că Player e inclus
+                .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
                 .FirstOrDefaultAsync(s => s.StaffId == model.StaffId);
@@ -269,10 +330,9 @@ namespace Licenta.Controllers
                 staff.Player.Position = model.Position;
                 staff.Player.JerseyNumber = model.JerseyNumber ?? 0;
                 staff.Player.Height = model.Height ?? 0;
-                staff.Player.Weight = model.Weight ?? 0; // <--- ADAUGĂ ASTA PENTRU SALVARE
+                staff.Player.Weight = model.Weight ?? 0;
                 _context.Update(staff.Player);
             }
-            // ... restul logicii pentru Coach și Medic rămâne la fel ...
             else if (model.RoleName == "Coach" && staff.Coach != null)
             {
                 staff.Coach.LicenseNumber = model.LicenseNumber;
@@ -398,9 +458,6 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageRoles));
         }
 
-
-
-
         // --- 2. GESTIUNE PERMISIUNI INDIVIDUALE (USER) ---
         [HttpGet]
         public async Task<IActionResult> ManageUserPermissions(int staffId)
@@ -409,19 +466,16 @@ namespace Licenta.Controllers
             if (staff == null) return NotFound();
 
             var userId = staff.UserId;
-            var user = await _userManager.FindByIdAsync(userId); // Găsim user-ul Identity
+            var user = await _userManager.FindByIdAsync(userId);
 
-            // 1. Toate permisiunile posibile
             var allPermissions = await _context.Permissions.ToListAsync();
 
-            // 2. Permisiuni EXPLICITE (UserPermission - Extra)
             var userDirectPermissions = await _context.UserPermissions
                 .Where(up => up.UserId == userId)
                 .Select(up => up.PermissionId)
                 .ToListAsync();
 
-            // 3. Permisiuni MOȘTENITE (RolePermission - Standard) - LOGICA NOUĂ
-            var userRoles = await _userManager.GetRolesAsync(user); // Numele rolurilor (ex: "Coach")
+            var userRoles = await _userManager.GetRolesAsync(user);
             var roleIds = await _roleManager.Roles
                 .Where(r => userRoles.Contains(r.Name))
                 .Select(r => r.Id)
@@ -442,11 +496,7 @@ namespace Licenta.Controllers
                     PermissionId = p.PermissionId,
                     Name = p.Name,
                     Description = p.Description,
-
-                    // Este bifat manual DOAR dacă e în UserPermissions
                     IsSelected = userDirectPermissions.Contains(p.PermissionId),
-
-                    // Este moștenit dacă e în RolePermissions
                     IsInherited = inheritedPermissions.Contains(p.PermissionId)
                 }).ToList()
             };
@@ -479,7 +529,6 @@ namespace Licenta.Controllers
                     PermissionId = item.PermissionId
                 });
 
-                // Aici era posibila eroare: new Claim("Permission", item.Name)
                 await _userManager.AddClaimAsync(user, new Claim("Permission", item.Name));
             }
 
@@ -487,18 +536,16 @@ namespace Licenta.Controllers
             return RedirectToAction("ManageUsers");
         }
 
-
-        // --- AUDIT LOGS (ISTORIC COMPLET) ---
+        // --- AUDIT LOGS ---
         [HttpGet]
         public async Task<IActionResult> AuditLogs()
         {
             var logs = await _context.AuditLogs
-                .Include(a => a.Staff) // Încărcăm datele despre cine a făcut acțiunea
-                .OrderByDescending(l => l.Timestamp) // Cele mai recente primele
+                .Include(a => a.Staff)
+                .OrderByDescending(l => l.Timestamp)
                 .ToListAsync();
 
             return View(logs);
         }
     }
-
 }

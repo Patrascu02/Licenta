@@ -1,193 +1,248 @@
 ﻿:root {
-    --primary-color: #0d47a1; /* Albastru regal */
-    --primary-dark: #1a237e; /* Navy pentru gradient */
-    --secondary-color: #ff8f00; /* Portocaliu baschet pentru accente */
-    --bg-light: #f4f7f6;
-    --card-shadow: 0 10px 20px rgba(0,0,0,0.08);
-    --border-radius: 12px;
-    /* Nuanțe monocromatice pentru cardurile de dashboard */
-    --blue-grade-1: linear-gradient(45deg, #0d47a1, #1976d2);
-    --blue-grade-2: linear-gradient(45deg, #1565c0, #1e88e5);
-    --blue-grade-3: linear-gradient(45deg, #1a237e, #283593);
-    --blue-grade-4: linear-gradient(45deg, #0277bd, #0288d1);
+    /* Culori de bază */
+    --primary-color: #2563eb;
+    --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --secondary-color: #f59e0b;
+    --bg-body: #edf2f9;
+    /* Variabile pentru efectul GLASS (Sticlă) */
+    --glass-bg: rgba(255, 255, 255, 0.85); /* Puțin mai opac pentru contrast cu fundalul animat */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    --glass-blur: blur(12px);
+    /* Efecte 3D */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-3d: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1);
+    --shadow-hover: 0 20px 40px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.1);
 }
 
+/* === FUNDAL ANIMAT (Aurora Effect) === */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg-light);
-    color: #333;
+    /* Gradient dinamic care se mișcă lent */
+    background: linear-gradient(-45deg, #e0e7ff, #c7d2fe, #bae6fd, #f0f9ff);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: #334155;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-h1, h2, h3, h4, h5, h6, .navbar-brand {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
-/* NAVBAR MODERNA */
+/* === NAVBAR 3D GLASS === */
 .navbar {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%) !important;
+    background: rgba(13, 71, 161, 0.85) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 1rem 2rem;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    color: white !important;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    font-size: 1.6rem;
 }
 
 .nav-link {
     font-weight: 500;
-    color: rgba(255,255,255,0.85) !important;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem !important;
+    color: rgba(255,255,255,0.9) !important;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
     .nav-link:hover {
-        color: var(--secondary-color) !important;
+        background: rgba(255, 255, 255, 0.15);
         transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        color: #fff !important;
+        text-shadow: 0 0 8px rgba(255,255,255,0.6);
     }
 
-/* CARDURI PREMIUM */
+/* === CARDURI 3D STICLOASE === */
 .card {
-    border: none;
-    border-radius: var(--border-radius);
-    box-shadow: var(--card-shadow);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    background-color: #fff;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 100%);
+    border-radius: 20px;
+    box-shadow: var(--shadow-3d);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
 }
 
     .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+        transform: translateY(-10px) scale(1.01);
+        box-shadow: var(--shadow-hover);
+        border-color: rgba(255, 255, 255, 1);
+        z-index: 10;
     }
 
-/* DASHBOARD STAT CARDS (Nuante de albastru) */
+/* Carduri Statistici */
 .stat-card {
-    position: relative;
-    z-index: 1;
     color: white !important;
     border: none;
+    position: relative;
+    overflow: hidden; /* Asigură că nu iese din card, dar o vom poziționa mai bine */
 }
 
 .bg-admin-primary {
-    background: var(--blue-grade-1) !important;
+    background: linear-gradient(135deg, rgba(13, 71, 161, 0.9), rgba(25, 118, 210, 0.8));
 }
 
 .bg-admin-light {
-    background: var(--blue-grade-2) !important;
-}
-
-.bg-admin-dark {
-    background: var(--blue-grade-3) !important;
+    background: linear-gradient(135deg, rgba(21, 101, 192, 0.9), rgba(33, 150, 243, 0.8));
 }
 
 .bg-admin-accent {
-    background: var(--blue-grade-4) !important;
+    background: linear-gradient(135deg, rgba(2, 119, 189, 0.9), rgba(3, 169, 244, 0.8));
 }
 
 .stat-card i {
     position: absolute;
-    right: 20px;
-    bottom: 20px;
-    font-size: 3rem;
-    opacity: 0.2;
-    z-index: -1;
-    color: white;
+    right: 15px; /* Era -10px, o aducem mai în interior */
+    bottom: 15px; /* Era -10px */
+    font-size: 3.5rem; /* Era 5rem - o facem puțin mai mică pentru a avea loc */
+    opacity: 0.2; /* O facem o idee mai vizibilă */
+    transform: rotate(-15deg);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* BUTOANE */
+.stat-card:hover i {
+    transform: rotate(0deg) scale(1.1); /* Zoom mai mic (1.1 vs 1.2) */
+    opacity: 0.4;
+    right: 20px;
+    bottom: 20px;
+}
+
+/* === BUTOANE 3D === */
 .btn {
-    border-radius: 8px;
-    padding: 0.6rem 1.5rem;
+    border-radius: 12px;
+    padding: 0.7rem 1.5rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: none;
 }
 
 .btn-primary {
-    background-color: var(--primary-color);
-    border: none;
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
 }
 
     .btn-primary:hover {
-        background-color: var(--primary-dark);
-        box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
-        transform: scale(1.02);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.6);
     }
 
-/* TABELE */
+/* === TABELE PLUTITOARE (Floating Rows) === */
 .table {
-    border-radius: var(--border-radius);
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Spațiu între rânduri */
 }
 
     .table thead th {
-        background-color: #f8f9fa;
-        border-bottom: 2px solid #dee2e6;
+        background: transparent;
+        border: none;
+        color: #64748b;
+        font-weight: 700;
         text-transform: uppercase;
         font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        font-weight: 700;
-        color: #666;
+        padding: 1rem;
     }
 
-/* BADGES / STATUS */
-.badge.rounded-pill {
-    padding: 0.5em 1.2em;
-    font-weight: 600;
+    .table tbody tr {
+        transition: all 0.3s ease;
+        background: rgba(255,255,255,0.4); /* Ușor transparent default */
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border: none; /* Fără linii între celule, folosim rânduri ca blocuri */
+    }
+
+    /* Rotunjim colțurile rândurilor */
+    .table tbody tr td:first-child {
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+
+    .table tbody tr td:last-child {
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+/* Efectul de plutire la hover pe rând */
+.table-hover tbody tr:hover {
+    background-color: white !important;
+    transform: scale(1.02);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    cursor: pointer;
+    z-index: 10;
+    position: relative;
 }
 
-.bg-soft-success {
-    background-color: rgba(25, 135, 84, 0.1) !important;
-    color: #198754 !important;
+/* === UTILS & TEXT GRADIENT === */
+.text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* FOOTER */
-footer {
-    background: white;
-    padding: 1.5rem 0;
-    margin-top: auto; /* Impinge footerul jos */
-    border-top: 1px solid #eee;
+.text-gradient {
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
 }
 
-/* UTILS */
-.text-primary {
-    color: var(--primary-color) !important;
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
 }
 
-.mt-n5 {
-    margin-top: -3rem !important;
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
 }
 
-/* Dropdown User (Salut!) */
-.dropdown-menu {
-    border: none;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
     border-radius: 10px;
 }
 
-.dropdown-item:hover {
-    background-color: var(--bg-light);
-    color: var(--primary-color);
-}
-
-
-/* Asigurăm că pagina ocupă tot ecranul */
-html {
-    position: relative;
-    min-height: 100%;
-}
-
-body {
-    /* Adăugăm un spațiu jos egal cu înălțimea footer-ului pentru a nu suprapune elementele */
-    margin-bottom: 70px;
-}
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
 
 .footer {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 60px; /* Înălțime fixă pentru footer */
-    line-height: 60px; /* Centrează textul vertical */
+    height: 60px;
+    line-height: 60px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
 }
