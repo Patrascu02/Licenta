@@ -1,264 +1,331 @@
 ﻿@model Licenta.Models.ViewModels.CreateUserViewModel
 
 @{
-    ViewData["Title"] = "Creează Utilizator Nou";
+    ViewData["Title"] = "Creează Utilizator";
 }
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-admin-primary text-white py-3">
-                    <h4 class="mb-0 fw-bold"><i class="fas fa-user-plus me-2"></i>Înregistrare Personal Nou</h4>
+<div class="container-fluid py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="mb-1 text-gradient" style="font-size: 2rem;">
+                <i class="fas fa-user-plus me-2 text-primary"></i>Utilizator Nou
+            </h2>
+            <p class="text-muted fw-medium fs-5">Înregistrează un nou membru în sistem.</p>
+        </div>
+        <a asp-action="AdminDashboard" class="btn btn-outline-light text-dark border-0 shadow-sm bg-white">
+            <i class="fas fa-times me-2"></i>Anulează
+        </a>
+    </div>
+
+    <form asp-action="CreateUser" method="post" id="createUserForm">
+        <div class="row g-4">
+
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm glass-card h-100">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h5 class="fw-bold text-dark"><i class="fas fa-id-card me-2 text-primary"></i>Date Personale și Cont</h5>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="LastName" class="form-control bg-white border" placeholder="Popescu" />
+                                    <label asp-for="LastName" class="text-muted">Nume de Familie</label>
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FirstName" class="form-control bg-white border" placeholder="Ion" />
+                                    <label asp-for="FirstName" class="text-muted">Prenume</label>
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" id="emailInput" class="form-control bg-white border" placeholder="name@example.com" />
+                            <label asp-for="Email" class="text-muted">Adresă Email</label>
+                            <span asp-validation-for="Email" id="emailError" class="text-danger small fw-bold"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating position-relative">
+                                    <input asp-for="Password" class="form-control bg-white border password-field" placeholder="Parolă" type="password" style="padding-right: 40px;" />
+                                    <label asp-for="Password" class="text-muted">Parolă</label>
+                                    <span class="toggle-password position-absolute top-50 end-0 translate-middle-y me-3 text-muted" style="cursor: pointer; z-index: 10;">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                    <span asp-validation-for="Password" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating position-relative">
+                                    <input asp-for="ConfirmPassword" class="form-control bg-white border password-field" placeholder="Confirmă" type="password" style="padding-right: 40px;" />
+                                    <label asp-for="ConfirmPassword" class="text-muted">Confirmă Parola</label>
+                                    <span class="toggle-password position-absolute top-50 end-0 translate-middle-y me-3 text-muted" style="cursor: pointer; z-index: 10;">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-light my-4">
+
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3">Detalii HR</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="DateOfBirth" class="form-control bg-white border" type="date" />
+                                    <label asp-for="DateOfBirth" class="text-muted">Data Nașterii</label>
+                                    <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="HireDate" class="form-control bg-white border" type="date" />
+                                    <label asp-for="HireDate" class="text-muted">Data Angajării</label>
+                                    <span asp-validation-for="HireDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-4 bg-white">
-                    <form asp-action="CreateUser" method="post" id="createUserForm">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+            </div>
 
-                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
-                            <i class="fas fa-lock me-2"></i>Informații Acces
-                        </h6>
-                        <div class="row mb-4">
-                            <div class="col-md-4 mb-3">
-                                <label asp-for="Email" class="form-label small fw-bold text-muted text-uppercase">Email Oficial</label>
-                                <div class="input-group">
-                                    <input asp-for="Email" class="form-control border-2 shadow-sm" id="emailInput" placeholder="nume@club.ro" />
-                                    <span class="input-group-text bg-white border-2 border-start-0">
-                                        <i id="emailStatusIcon" class="fas fa-envelope text-muted"></i>
-                                    </span>
-                                </div>
-                                <span id="emailErrorCustom" class="text-danger small fw-bold"></span>
-                                <span asp-validation-for="Email" class="text-danger small"></span>
-                            </div>
+            <div class="col-lg-5">
+                <div class="d-flex flex-column gap-4 h-100">
 
-                            <div class="col-md-4 mb-3">
-                                <label asp-for="Password" class="form-label small fw-bold text-muted text-uppercase">Parolă</label>
-                                <div class="input-group">
-                                    <input asp-for="Password" type="password" class="form-control border-2 border-end-0 shadow-sm" id="passwordInput" />
-                                    <button class="btn btn-outline-secondary border-2 border-start-0 border-end-0 bg-white text-muted" type="button" id="togglePassword">
-                                        <i class="fas fa-eye" id="eyeIcon"></i>
-                                    </button>
-                                    <span class="input-group-text bg-white border-2 border-start-0 shadow-sm">
-                                        <i id="pwStatus" class="fas fa-times text-danger"></i>
-                                    </span>
-                                </div>
-                                <div class="small text-muted mt-1" style="font-size: 0.7rem;">Min. 6 caractere, o cifră, o majusculă.</div>
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <label asp-for="ConfirmPassword" class="form-label small fw-bold text-muted text-uppercase">Confirmă Parola</label>
-                                <div class="input-group">
-                                    <input asp-for="ConfirmPassword" type="password" class="form-control border-2 border-end-0 shadow-sm" id="confirmPasswordInput" />
-                                    <span class="input-group-text bg-white border-2 border-start-0 shadow-sm">
-                                        <i id="confirmStatus" class="fas fa-times text-danger"></i>
-                                    </span>
-                                </div>
-                            </div>
+                    <div class="card border-0 shadow-sm glass-card">
+                        <div class="card-body p-4">
+                            <label asp-for="Role" class="form-label fw-bold text-dark">Rol în Club</label>
+                            <select asp-for="Role" class="form-select form-select-lg border-0 bg-primary bg-opacity-10 text-primary fw-bold mb-2" id="roleSelector">
+                                <option value="" disabled selected>-- Selectează Rolul --</option>
+                                <option value="Player">Jucător</option>
+                                <option value="Coach">Antrenor</option>
+                                <option value="Medic">Medic</option>
+                                <option value="Scout">Scouter</option>
+                                <option value="GeneralManager">General Manager</option>
+                            </select>
+                            <div class="form-text small"><i class="fas fa-info-circle me-1"></i>Selectarea rolului va debloca câmpurile specifice.</div>
+                            <span asp-validation-for="Role" class="text-danger small"></span>
                         </div>
+                    </div>
 
-                        <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">
-                            <i class="fas fa-id-card me-2"></i>Date Personale & Contract
-                        </h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="FirstName" class="form-label small fw-bold text-muted text-uppercase">Prenume</label>
-                                <input asp-for="FirstName" class="form-control border-2 shadow-sm" />
-                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    <div id="role-Player" class="role-section d-none">
+                        <div class="card border-0 shadow-sm glass-card role-card-player h-100">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-basketball-ball me-2"></i>Fișă Jucător</h5>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="LastName" class="form-label small fw-bold text-muted text-uppercase">Nume</label>
-                                <input asp-for="LastName" class="form-control border-2 shadow-sm" />
-                                <span asp-validation-for="LastName" class="text-danger small"></span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="Role" class="form-label small fw-bold text-muted text-uppercase">Rol Atribuit</label>
-                                <select asp-for="Role" id="roleSelect" class="form-select border-2 shadow-sm">
-                                    <option value="" disabled selected>Alege rolul...</option>
-                                    <option value="Player">Jucător</option>
-                                    <option value="Coach">Antrenor</option>
-                                    <option value="Medic">Medic</option>
-                                    <option value="Scout">Scouter</option>
-                                    <option value="GeneralManager">General Manager</option>
-                                </select>
-                                <span asp-validation-for="Role" class="text-danger small"></span>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label asp-for="DateOfBirth" class="form-label small fw-bold text-muted text-uppercase">Data Nașterii</label>
-                                <input asp-for="DateOfBirth" type="date" class="form-control border-2 shadow-sm" />
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label asp-for="HireDate" class="form-label small fw-bold text-muted text-uppercase">Data Angajării</label>
-                                <input asp-for="HireDate" type="date" class="form-control border-2 shadow-sm" />
-                            </div>
-                        </div>
-
-                        <div id="dynamicFieldsContainer">
-                            <div id="playerFields" class="role-fields mb-4" style="display:none;">
-                                <h6 class="text-info fw-bold mb-3 border-bottom pb-2"><i class="fas fa-basketball-ball me-2"></i>Detalii Jucător</h6>
-                                <div class="row p-3 bg-light rounded shadow-sm border">
-                                    <div class="col-md-3 mb-3">
-                                        <label class="form-label small fw-bold text-muted">POZIȚIE</label>
-                                        <select asp-for="Position" class="form-select border-2">
-                                            <option value="Point Guard">Point Guard (1)</option>
-                                            <option value="Shooting Guard">Shooting Guard (2)</option>
-                                            <option value="Small Forward">Small Forward (3)</option>
-                                            <option value="Power Forward">Power Forward (4)</option>
-                                            <option value="Center">Center (5)</option>
+                            <div class="card-body p-4">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Poziție</label>
+                                        <select asp-for="Position" class="form-select bg-white bg-opacity-25 border-0 text-white">
+                                            <option class="text-dark" value="">- Alege -</option>
+                                            <option class="text-dark" value="PG">Point Guard (PG)</option>
+                                            <option class="text-dark" value="SG">Shooting Guard (SG)</option>
+                                            <option class="text-dark" value="SF">Small Forward (SF)</option>
+                                            <option class="text-dark" value="PF">Power Forward (PF)</option>
+                                            <option class="text-dark" value="C">Center (C)</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label class="form-label small fw-bold text-muted">NR. TRICOU</label>
-                                        <input asp-for="JerseyNumber" type="number" class="form-control border-2" />
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Nr. Tricou</label>
+                                        <input asp-for="JerseyNumber" class="form-control bg-white bg-opacity-25 border-0 text-white" placeholder="23" />
                                     </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label class="form-label small fw-bold text-muted">ÎNĂLȚIME (cm)</label>
-                                        <input asp-for="Height" type="number" class="form-control border-2" />
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Înălțime (cm)</label>
+                                        <input asp-for="Height" class="form-control bg-white bg-opacity-25 border-0 text-white" placeholder="200" />
                                     </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label class="form-label small fw-bold text-muted">GREUTATE (kg)</label>
-                                        <input asp-for="Weight" type="number" class="form-control border-2" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="coachFields" class="role-fields mb-4" style="display:none;">
-                                <h6 class="text-info fw-bold mb-3 border-bottom pb-2"><i class="fas fa-clipboard-list me-2"></i>Detalii Antrenor</h6>
-                                <div class="row p-3 bg-light rounded shadow-sm border">
-                                    <div class="col-md-12 mb-3">
-                                        <label class="form-label small fw-bold text-muted">NUMĂR LICENȚĂ</label>
-                                        <input asp-for="LicenseNumber" class="form-control border-2" placeholder="Ex: RO-BASKET-2024" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="medicFields" class="role-fields mb-4" style="display:none;">
-                                <h6 class="text-info fw-bold mb-3 border-bottom pb-2"><i class="fas fa-user-md me-2"></i>Detalii Medic</h6>
-                                <div class="row p-3 bg-light rounded shadow-sm border">
-                                    <div class="col-md-12 mb-3">
-                                        <label class="form-label small fw-bold text-muted">SPECIALIZARE MEDICALĂ</label>
-                                        <input asp-for="Specialization" class="form-control border-2" placeholder="Ex: Fizioterapie / Medicină Sportivă" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="scoutFields" class="role-fields mb-4" style="display:none;">
-                                <h6 class="text-info fw-bold mb-3 border-bottom pb-2"><i class="fas fa-search me-2"></i>Detalii Scouter</h6>
-                                <div class="row p-3 bg-light rounded shadow-sm border">
-                                    <div class="col-md-12 mb-3">
-                                        <label class="form-label small fw-bold text-muted">REGIUNE MONITORIZATĂ</label>
-                                        <input name="ScoutRegion" class="form-control border-2" placeholder="Ex: Europa de Est / Juniori U18" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="gmFields" class="role-fields mb-4" style="display:none;">
-                                <h6 class="text-info fw-bold mb-3 border-bottom pb-2"><i class="fas fa-building me-2"></i>Detalii General Manager</h6>
-                                <div class="row p-3 bg-light rounded shadow-sm border">
-                                    <div class="col-md-12 mb-3">
-                                        <label class="form-label small fw-bold text-muted">BIROU</label>
-                                        <input asp-for="Office" class="form-control border-2" placeholder="Ex: Etaj 1, Birou Administrativ" />
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Greutate (kg)</label>
+                                        <input asp-for="Weight" class="form-control bg-white bg-opacity-25 border-0 text-white" placeholder="95" />
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="d-flex gap-2 mt-4">
-                            <button type="submit" id="submitBtn" class="btn btn-primary px-5 shadow" disabled>
-                                <i class="fas fa-save me-2"></i>Salvează Utilizatorul
-                            </button>
-                            <a asp-action="AdminDashboard" class="btn btn-light border px-4 shadow-sm">Anulează</a>
+                    <div id="role-Coach" class="role-section d-none">
+                        <div class="card border-0 shadow-sm glass-card role-card-coach h-100">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-clipboard-list me-2"></i>Detalii Antrenor</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <label class="text-white-50 small text-uppercase">Număr Licență</label>
+                                <input asp-for="LicenseNumber" class="form-control bg-white bg-opacity-25 border-0 text-white" placeholder="LIC-2024-XXX" />
+                            </div>
                         </div>
-                    </form>
+                    </div>
+
+                    <div id="role-Medic" class="role-section d-none">
+                        <div class="card border-0 shadow-sm glass-card role-card-medic h-100">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-user-md me-2"></i>Specializare</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <label class="text-white-50 small text-uppercase">Specializare</label>
+                                <input asp-for="Specialization" class="form-control bg-white bg-opacity-25 border-0 text-white" placeholder="ex: Kinetoterapie" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="role-GeneralManager" class="role-section d-none">
+                        <div class="card border-0 shadow-sm glass-card role-card-gm h-100">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-building me-2"></i>Administrativ</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <label class="text-white-50 small text-uppercase">Birou</label>
+                                <input asp-for="Office" class="form-control bg-white bg-opacity-10 border border-white border-opacity-25 text-white" placeholder="ex: Executiv" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="role-Scout" class="role-section d-none">
+                        <div class="card border-0 shadow-sm glass-card role-card-scout h-100">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-binoculars me-2"></i>Scouting</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <p class="text-white opacity-75 mb-0">Nu sunt necesare detalii suplimentare.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-lg rounded-3">
+                            <i class="fas fa-check-circle me-2"></i>Creează Contul
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
 
+<style>
+    /* === DESIGN FIXES === */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+    }
+
+    /* Input-uri albe cu bordură vizibilă */
+    .form-control {
+        background-color: white !important;
+        border: 1px solid #ced4da !important;
+        color: #212529 !important;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+        }
+
+    /* Placeholders pentru cardurile colorate din dreapta */
+    .role-card-player input, .role-card-coach input, .role-card-medic input, .role-card-gm input {
+        background-color: rgba(255,255,255,0.2) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        color: white !important;
+    }
+
+        .role-card-player input::placeholder,
+        .role-card-coach input::placeholder,
+        .role-card-medic input::placeholder,
+        .role-card-gm input::placeholder {
+            color: rgba(255,255,255,0.7) !important;
+        }
+
+    /* Carduri Roluri */
+    .role-card-player {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        border: none;
+    }
+
+    .role-card-coach {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        border: none;
+    }
+
+    .role-card-medic {
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        border: none;
+    }
+
+    .role-card-gm {
+        background: linear-gradient(135deg, #4c1d95 0%, #312e81 100%);
+        border: none;
+    }
+
+    .role-card-scout {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        border: none;
+    }
+</style>
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script>
-        $(document).ready(function () {
-            const emailInput = $('#emailInput');
-            const passwordInput = $('#passwordInput');
-            const confirmInput = $('#confirmPasswordInput');
-            const submitBtn = $('#submitBtn');
-            const roleSelect = $('#roleSelect');
-
-            let isEmailValid = false;
-
-            // 1. AFIȘARE DINAMICĂ CÂMPURI ROL
-            roleSelect.change(function () {
-                const selectedRole = $(this).val();
-                $('.role-fields').hide();
-
-                if (selectedRole === 'Player') $('#playerFields').fadeIn();
-                else if (selectedRole === 'Coach') $('#coachFields').fadeIn();
-                else if (selectedRole === 'Medic') $('#medicFields').fadeIn();
-                else if (selectedRole === 'Scout') $('#scoutFields').fadeIn();
-                // AFISARE CAMPURI GM
-                else if (selectedRole === 'GeneralManager') $('#gmFields').fadeIn();
-
-                validateAll();
-            });
-
-            // 2. TOGGLE PAROLA
-            $('#togglePassword').click(function() {
-                const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
-                passwordInput.attr('type', type);
-                confirmInput.attr('type', type);
-                $('#eyeIcon').toggleClass('fa-eye fa-eye-slash');
-            });
-
-            // 3. VERIFICARE EMAIL LIVE
-            emailInput.on('blur input', function() {
-                const email = $(this).val();
-                if(email.length < 5) {
-                    $('#emailStatusIcon').attr('class', 'fas fa-envelope text-muted');
-                    return;
+        $(document).ready(function() {
+            // 1. SELECTIE ROL (Simplu, fără animații de mișcare)
+            function toggleRoleFields() {
+                var selectedRole = $('#roleSelector').val();
+                $('.role-section').addClass('d-none'); // Ascunde tot instant
+                if(selectedRole) {
+                    $('#role-' + selectedRole).removeClass('d-none').hide().fadeIn(300); // Doar fade-in
                 }
+            }
+            $('#roleSelector').change(toggleRoleFields);
+            toggleRoleFields();
 
-                $.get('/Admin/CheckEmailExists', { email: email }, function(data) {
-                    if (data.exists) {
-                        $('#emailErrorCustom').text("Email deja folosit!");
-                        $('#emailStatusIcon').attr('class', 'fas fa-times text-danger');
-                        isEmailValid = false;
-                    } else {
-                        $('#emailErrorCustom').text("");
-                        $('#emailStatusIcon').attr('class', 'fas fa-check text-success');
-                        isEmailValid = true;
-                    }
-                    validateAll();
-                });
+            // 2. OCHI PAROLĂ (Funcționează pentru ambele câmpuri)
+            $('.toggle-password').click(function () {
+                // Găsește input-ul asociat (fratele anterior)
+                var input = $(this).siblings('input');
+                var icon = $(this).find('i');
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
             });
 
-            // 4. VALIDARE GENERALĂ PENTRU ACTIVARE BUTON
-            function validatePassword(pw) {
-                return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(pw);
-            }
-
-            function validateAll() {
-                const pwVal = passwordInput.val();
-                const confVal = confirmInput.val();
-
-                const pwValid = validatePassword(pwVal);
-                const matchValid = (confVal === pwVal && confVal !== "");
-                const roleSelected = roleSelect.val() !== null;
-
-                // Update UI Icons
-                $('#pwStatus').attr('class', pwValid ? 'fas fa-check text-success' : 'fas fa-times text-danger');
-                $('#confirmStatus').attr('class', matchValid ? 'fas fa-check text-success' : 'fas fa-times text-danger');
-
-                // Enable/Disable Submit
-                submitBtn.prop('disabled', !(pwValid && matchValid && isEmailValid && roleSelected));
-            }
-
-            passwordInput.on('keyup input', validateAll);
-            confirmInput.on('keyup input', validateAll);
+            // 3. VALIDARE EMAIL LIVE
+            $('#emailInput').blur(function () {
+                var email = $(this).val();
+                var errorSpan = $('#emailError');
+                if (email) {
+                    $.ajax({
+                        url: '@Url.Action("CheckEmailExists", "Admin")',
+                        type: 'GET',
+                        data: { email: email },
+                        success: function (response) {
+                            if (response.exists) {
+                                errorSpan.text("Adresa de email este deja utilizată.");
+                                $('#emailInput').addClass('is-invalid');
+                            } else {
+                                errorSpan.text("");
+                                $('#emailInput').removeClass('is-invalid').addClass('is-valid');
+                            }
+                        }
+                    });
+                }
+            });
         });
     </script>
 }

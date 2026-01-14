@@ -7,6 +7,7 @@ namespace Licenta.Models.ViewModels
         public int StaffId { get; set; }
         public string UserId { get; set; }
         public string UserName { get; set; }
+        public string RoleName { get; set; }
         public List<PermissionCheckbox> PermissionList { get; set; }
     }
 }

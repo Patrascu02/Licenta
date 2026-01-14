@@ -5,14 +5,14 @@ using Licenta.Models.Security;
 using Licenta.Models.Sports;
 using Licenta.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting; // [NOU] Pentru acces la fișiere fizice
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics; // [NOU] Pentru monitorizare RAM
-using System.IO; // [NOU] Pentru monitorizare Stocare
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -25,13 +25,13 @@ namespace Licenta.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IWebHostEnvironment _env; // [NOU] Variabilă pentru mediu
+        private readonly IWebHostEnvironment _env;
 
         public AdminController(
             ApplicationDbContext context,
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IWebHostEnvironment env) // [NOU] Injectăm mediul
+            IWebHostEnvironment env)
         {
             _context = context;
             _userManager = userManager;
@@ -39,7 +39,7 @@ namespace Licenta.Controllers
             _env = env;
         }
 
-        // --- DASHBOARD (Actualizat cu Date Reale) ---
+        // --- DASHBOARD ---
         public async Task<IActionResult> AdminDashboard()
         {
             // 1. Statistici de Bază
@@ -68,7 +68,7 @@ namespace Licenta.Controllers
             catch { storageUsedMb = 0; }
             double storageLimitMb = 500;
 
-            // 4. Sesiuni Active (Useri unici cu activitate în ultimele 30 min)
+            // 4. Sesiuni Active
             var activeThreshold = DateTime.Now.AddMinutes(-30);
             var activeUsersCount = await _context.AuditLogs
                 .Where(l => l.Timestamp >= activeThreshold)
@@ -85,30 +85,22 @@ namespace Licenta.Controllers
                 .Take(6)
                 .ToListAsync();
 
-            // --- MODIFICARE NOUĂ: Calculăm Ultima Activitate Reala ---
-            // Luăm timestamp-ul primului log (cel mai recent)
+            // Ultima Activitate
             var lastLog = recentLogs.FirstOrDefault();
             string lastActivityStr = lastLog != null ? lastLog.Timestamp.ToString("HH:mm") : "--:--";
 
-            // 6. Construim ViewModel-ul
             var model = new AdminDashboardViewModel
             {
                 TotalUsers = totalUsers,
                 TotalPlayers = totalPlayers,
                 TotalCoaches = totalCoaches,
                 TotalStaff = totalStaff,
-
                 RamUsageMb = ramUsedMb,
                 RamTotalMb = ramLimitMb,
-
                 StorageUsageMb = storageUsedMb,
                 StorageLimitMb = storageLimitMb,
-
                 ActiveSessions = activeUsersCount,
-
-                // AICI FOLOSIM ORA REALA
                 LastActivityTime = lastActivityStr,
-
                 CpuUsagePercent = new Random().Next(5, 20),
                 RecentLogs = recentLogs
             };
@@ -159,7 +151,6 @@ namespace Licenta.Controllers
                     if (model.Role == "Player")
                     {
                         var mainTeam = await _context.Teams.FirstOrDefaultAsync();
-
                         var player = new Player
                         {
                             StaffId = staff.StaffId,
@@ -229,7 +220,7 @@ namespace Licenta.Controllers
             return Json(new { exists = (user != null) });
         }
 
-        // --- GESTIUNE UTILIZATORI (LISTĂ) ---
+        // --- GESTIUNE UTILIZATORI ---
         public async Task<IActionResult> ManageUsers()
         {
             var staffList = await _context.Staff
@@ -271,6 +262,7 @@ namespace Licenta.Controllers
                 .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
+                .Include(s => s.GeneralManager) // AM INCLUS GM AICI
                 .FirstOrDefaultAsync(s => s.StaffId == id);
 
             if (staff == null) return NotFound();
@@ -297,7 +289,8 @@ namespace Licenta.Controllers
 
                 // Restul
                 LicenseNumber = staff.Coach?.LicenseNumber,
-                Specialization = staff.Medic?.Specialty
+                Specialization = staff.Medic?.Specialty,
+                Office = staff.GeneralManager?.Office // AM ADĂUGAT ASTA
             };
 
             return View(model);
@@ -314,17 +307,18 @@ namespace Licenta.Controllers
                 .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
+                .Include(s => s.GeneralManager) // AM INCLUS GM AICI
                 .FirstOrDefaultAsync(s => s.StaffId == model.StaffId);
 
             if (staff == null) return NotFound();
 
-            // Actualizare date generale
+            // Update Date Generale
             staff.FirstName = model.FirstName;
             staff.LastName = model.LastName;
             staff.DateOfBirth = model.DateOfBirth;
             staff.HireDate = model.HireDate;
 
-            // Actualizare date specifice Jucător
+            // Update Date Specifice
             if (model.RoleName == "Player" && staff.Player != null)
             {
                 staff.Player.Position = model.Position;
@@ -343,6 +337,11 @@ namespace Licenta.Controllers
                 staff.Medic.Specialty = model.Specialization;
                 _context.Update(staff.Medic);
             }
+            else if (model.RoleName == "GeneralManager" && staff.GeneralManager != null) // AM ADĂUGAT LOGICA GM
+            {
+                staff.GeneralManager.Office = model.Office;
+                _context.Update(staff.GeneralManager);
+            }
 
             _context.Update(staff);
             await LogAuditAction($"Editat utilizator: {staff.FirstName} {staff.LastName}");
@@ -351,7 +350,7 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageUsers));
         }
 
-        // --- ȘTERGERE UTILIZATOR (POST) ---
+        // --- DELETE USER ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
@@ -373,7 +372,7 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageUsers));
         }
 
-        // --- HELPER: LOG AUDIT ---
+        // --- HELPER LOG ---
         private async Task LogAuditAction(string message)
         {
             var currentUserId = _userManager.GetUserId(User);
@@ -395,7 +394,6 @@ namespace Licenta.Controllers
         //         MODUL PERMISIUNI (ACL)
         // ==========================================
 
-        // --- 1. GESTIUNE PERMISIUNI ROLURI ---
         [HttpGet]
         public async Task<IActionResult> ManageRoles()
         {
@@ -468,14 +466,19 @@ namespace Licenta.Controllers
             var userId = staff.UserId;
             var user = await _userManager.FindByIdAsync(userId);
 
+            // 1. Toate permisiunile
             var allPermissions = await _context.Permissions.ToListAsync();
 
+            // 2. Permisiuni EXPLICITE (UserPermission - Extra)
             var userDirectPermissions = await _context.UserPermissions
                 .Where(up => up.UserId == userId)
                 .Select(up => up.PermissionId)
                 .ToListAsync();
 
+            // 3. Permisiuni MOȘTENITE (RolePermission)
             var userRoles = await _userManager.GetRolesAsync(user);
+            var roleName = userRoles.FirstOrDefault() ?? "Nespecificat"; // Luăm numele rolului
+
             var roleIds = await _roleManager.Roles
                 .Where(r => userRoles.Contains(r.Name))
                 .Select(r => r.Id)
@@ -491,6 +494,7 @@ namespace Licenta.Controllers
                 StaffId = staff.StaffId,
                 UserName = $"{staff.FirstName} {staff.LastName}",
                 UserId = userId,
+                RoleName = roleName, // <--- Setăm proprietatea
                 PermissionList = allPermissions.Select(p => new PermissionCheckbox
                 {
                     PermissionId = p.PermissionId,
@@ -536,7 +540,6 @@ namespace Licenta.Controllers
             return RedirectToAction("ManageUsers");
         }
 
-        // --- AUDIT LOGS ---
         [HttpGet]
         public async Task<IActionResult> AuditLogs()
         {

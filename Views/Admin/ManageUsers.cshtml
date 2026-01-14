@@ -2,214 +2,387 @@
 @model IEnumerable<UserManagementViewModel>
 
 @{
-    ViewData["Title"] = "Gestiune Conturi";
+    ViewData["Title"] = "Gestiune Utilizatori";
+
+    // Funcție pentru culoarea avatarului
+    string GetAvatarColor(int id)
+    {
+        var colors = new[] {
+            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
+            "linear-gradient(135deg, #ff0844 0%, #ffb199 100%)",
+            "linear-gradient(135deg, #0093E9 0%, #80D0C7 100%)",
+            "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+            "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+        };
+        return colors[id % colors.Length];
+    }
+
+    string GetInitials(string firstName, string lastName)
+    {
+        var f = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString() : "";
+        var l = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString() : "";
+        return (f + l).ToUpper();
+    }
 }
 
-<style>
-    .nav-pills .nav-link {
-        color: #333 !important;
-        background-color: #f1f1f1;
-        margin-right: 8px;
-        border: 1px solid #ccc;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
+<div class="container-fluid py-5">
 
-        .nav-pills .nav-link:hover {
-            background-color: #e2e2e2;
-            color: #000 !important;
-        }
-
-        .nav-pills .nav-link.active {
-            background-color: #0d6efd !important;
-            color: #ffffff !important;
-            border-color: #0d6efd;
-        }
-
-    .table-responsive {
-        margin-top: 20px;
-    }
-
-    .badge-role {
-        min-width: 100px;
-        font-weight: 500;
-        padding: 8px;
-    }
-</style>
-
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold"><i class="fas fa-users-cog me-2 text-primary"></i>Gestiune Utilizatori</h2>
-        <a asp-action="CreateUser" class="btn btn-primary shadow-sm">
-            <i class="fas fa-user-plus me-1"></i> Adaugă Utilizator Nou
+    <div class="d-flex justify-content-between align-items-center mb-5 fade-in-up">
+        <div>
+            <h2 class="mb-1 text-gradient" style="font-size: 2rem;">
+                <i class="fas fa-users-cog me-2 text-primary"></i>Gestiune Utilizatori
+            </h2>
+            <p class="text-muted fw-medium fs-5">Administrează conturile și rolurile membrilor.</p>
+        </div>
+        <a asp-action="CreateUser" class="btn btn-primary shadow-lg hover-lift">
+            <i class="fas fa-user-plus me-2"></i> Adaugă Utilizator
         </a>
     </div>
 
-    <ul class="nav nav-pills mb-3 p-2 bg-white rounded border shadow-sm" id="pills-tab" role="tablist">
+    <ul class="nav nav-pills mb-4 p-2 rounded-pill bg-white bg-opacity-50 border border-light shadow-sm d-inline-flex" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-all" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab"><i class="fas fa-list me-1"></i> Toți</button>
+            <button class="nav-link active rounded-pill px-4" id="tab-all" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab">
+                <i class="fas fa-list me-2"></i>Toți
+            </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-players" data-bs-toggle="pill" data-bs-target="#players" type="button" role="tab"><i class="fas fa-basketball-ball me-1"></i> Jucători</button>
+            <button class="nav-link rounded-pill px-4" id="tab-players" data-bs-toggle="pill" data-bs-target="#players" type="button" role="tab">
+                <i class="fas fa-basketball-ball me-2"></i>Jucători
+            </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-staff" data-bs-toggle="pill" data-bs-target="#staff" type="button" role="tab"><i class="fas fa-user-tie me-1"></i> Staff</button>
+            <button class="nav-link rounded-pill px-4" id="tab-staff" data-bs-toggle="pill" data-bs-target="#staff" type="button" role="tab">
+                <i class="fas fa-user-tie me-2"></i>Staff Tehnic
+            </button>
         </li>
     </ul>
 
-    <div class="tab-content bg-white p-3 border rounded shadow-sm" id="pills-tabContent">
+    <div class="tab-content" id="pills-tabContent">
 
         <div class="tab-pane fade show active" id="all" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light"><tr><th>Nume</th><th>Rol</th><th>Email</th><th class="text-end">Acțiuni</th></tr></thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td><strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong></td>
-                                <td>
-                                    @if (item.RoleName == "GeneralManager")
-                                    {
-                                        <span class="badge bg-dark badge-role">General Manager</span>
-                                    }
-                                    else if (item.RoleName == "Coach")
-                                    {
-                                        <span class="badge bg-warning text-dark badge-role">Antrenor</span>
-                                    }
-                                    else if (item.RoleName == "Player")
-                                    {
-                                        <span class="badge bg-primary badge-role">Jucător</span>
-                                    }
-                                    else if (item.RoleName == "Medic")
-                                    {
-                                        <span class="badge bg-danger badge-role">Medic</span>
-                                    }
-                                    else if (item.RoleName == "Scout")
-                                    {
-                                        <span class="badge bg-info text-dark badge-role">Scouter</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary badge-role">@item.RoleName</span>
-                                    }
-                                </td>
-                                <td>@item.Email</td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary" title="Editează"><i class="fas fa-edit"></i></a>
+            <div class="card border-0 shadow-sm glass-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light bg-opacity-50 text-uppercase text-muted small">
+                                <tr>
+                                    <th class="ps-4">Utilizator</th>
+                                    <th>Rol</th>
+                                    <th>Email</th>
+                                    <th class="text-end pe-4">Acțiuni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr class="user-row">
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle shadow-sm me-3" style="background: @GetAvatarColor(item.StaffMember.StaffId)">
+                                                    @GetInitials(item.StaffMember.FirstName, item.StaffMember.LastName)
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold text-dark">@item.StaffMember.LastName @item.StaffMember.FirstName</h6>
+                                                    <small class="text-muted">ID: #@item.StaffMember.StaffId</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (item.RoleName == "GeneralManager")
+                                            {
+                                                <span class="badge role-badge role-gm">General Manager</span>
+                                            }
+                                            else if (item.RoleName == "Coach")
+                                            {
 
-                                        <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-info text-dark" title="Permisiuni Speciale">
-                                            <i class="fas fa-key"></i>
-                                        </a>
+                                                <span class="badge role-badge role-coach">Antrenor</span>
+                                            }
+                                            else if (item.RoleName == "Player")
+                                            {
 
-                                        @if (User.IsInRole("GeneralManager"))
-                                        {
-                                            <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Adaugă Contract">
-                                                <i class="fas fa-file-invoice-dollar"></i>
-                                            </a>
-                                        }
+                                                <span class="badge role-badge role-player">Jucător</span>
+                                            }
+                                            else if (item.RoleName == "Medic")
+                                            {
 
-                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Sigur dorești să ștergi acest utilizator?');" class="d-inline">
-                                            <button type="submit" class="btn btn-outline-danger" title="Șterge"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                                <span class="badge role-badge role-medic">Medic</span>
+                                            }
+                                            else if (item.RoleName == "Scout")
+                                            {
+
+                                                <span class="badge role-badge role-scout">Scouter</span>
+                                            }
+                                            else
+                                            {
+
+                                                <span class="badge role-badge bg-secondary">@item.RoleName</span>
+                                            }
+                                        </td>
+                                        <td class="text-muted">@item.Email</td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
+                                                <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-info" title="Permisiuni"><i class="fas fa-key"></i></a>
+                                                @if (User.IsInRole("GeneralManager"))
+                                                {
+                                                    <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-success" title="Contract"><i class="fas fa-file-invoice-dollar"></i></a>
+                                                }
+                                                <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi utilizatorul?');" class="d-inline">
+                                                    <button type="submit" class="btn btn-icon btn-light text-danger" title="Șterge"><i class="fas fa-trash-alt"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="tab-pane fade" id="players" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light"><tr><th>Nume</th><th>Poziție</th><th>Nr.</th><th>Înălțime</th><th class="text-end">Acțiuni</th></tr></thead>
-                    <tbody>
-                        @foreach (var item in Model.Where(u => u.RoleName == "Player"))
-                        {
-                            <tr>
-                                <td><strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong></td>
-                                <td><span class="badge bg-info text-dark">@(item.StaffMember.Player?.Position ?? "N/A")</span></td>
-                                <td>#@(item.StaffMember.Player?.JerseyNumber ?? 0)</td>
-                                <td>@(item.StaffMember.Player?.Height ?? 0) cm</td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
+            <div class="card border-0 shadow-sm glass-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light bg-opacity-50 text-uppercase text-muted small">
+                                <tr>
+                                    <th class="ps-4">Jucător</th>
+                                    <th>Poziție</th>
+                                    <th>Nr.</th>
+                                    <th>Înălțime</th>
+                                    <th class="text-end pe-4">Acțiuni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Where(u => u.RoleName == "Player"))
+                                {
+                                    <tr class="user-row">
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle shadow-sm me-3" style="background: @GetAvatarColor(item.StaffMember.StaffId)">
+                                                    @GetInitials(item.StaffMember.FirstName, item.StaffMember.LastName)
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold text-dark">@item.StaffMember.LastName @item.StaffMember.FirstName</h6>
+                                                    <span class="badge role-badge role-player scale-sm">Jucător Activ</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="fw-bold text-dark">@(item.StaffMember.Player?.Position ?? "-")</span></td>
+                                        <td><span class="fw-bold text-secondary fs-5">#@(item.StaffMember.Player?.JerseyNumber ?? 0)</span></td>
+                                        <td>@(item.StaffMember.Player?.Height ?? 0) cm</td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
 
-                                        @if (User.IsInRole("GeneralManager"))
-                                        {
-                                            <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
-                                                <i class="fas fa-file-invoice-dollar"></i>
-                                            </a>
-                                        }
+                                                <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-info" title="Permisiuni"><i class="fas fa-key"></i></a>
 
-                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi jucătorul?');" class="d-inline">
-                                            <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                                @if (User.IsInRole("GeneralManager"))
+                                                {
+                                                    <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-success" title="Contract"><i class="fas fa-file-invoice-dollar"></i></a>
+                                                }
+                                                <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi jucătorul?');" class="d-inline">
+                                                    <button type="submit" class="btn btn-icon btn-light text-danger" title="Șterge"><i class="fas fa-trash-alt"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="tab-pane fade" id="staff" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light"><tr><th>Nume</th><th>Rol</th><th>Email</th><th class="text-end">Acțiuni</th></tr></thead>
-                    <tbody>
-                        @foreach (var item in Model.Where(u => u.RoleName != "Player"))
-                        {
-                            <tr>
-                                <td><strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong></td>
-                                <td>
-                                    @if (item.RoleName == "GeneralManager")
-                                    {
-                                        <span class="badge bg-dark badge-role">General Manager</span>
-                                    }
-                                    else if (item.RoleName == "Coach")
-                                    {
-                                        <span class="badge bg-warning text-dark badge-role">Antrenor</span>
-                                    }
-                                    else if (item.RoleName == "Medic")
-                                    {
-                                        <span class="badge bg-danger badge-role">Medic</span>
-                                    }
-                                    else if (item.RoleName == "Scout")
-                                    {
-                                        <span class="badge bg-info text-dark badge-role">Scouter</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary badge-role">@item.RoleName</span>
-                                    }
-                                </td>
-                                <td>@item.Email</td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-outline-primary"><i class="fas fa-edit"></i></a>
+            <div class="card border-0 shadow-sm glass-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light bg-opacity-50 text-uppercase text-muted small">
+                                <tr>
+                                    <th class="ps-4">Membru Staff</th>
+                                    <th>Funcție / Rol</th>
+                                    <th>Dată Angajare</th>
+                                    <th class="text-end pe-4">Acțiuni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Where(u => u.RoleName != "Player"))
+                                {
+                                    <tr class="user-row">
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle shadow-sm me-3" style="background: @GetAvatarColor(item.StaffMember.StaffId)">
+                                                    @GetInitials(item.StaffMember.FirstName, item.StaffMember.LastName)
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold text-dark">@item.StaffMember.LastName @item.StaffMember.FirstName</h6>
+                                                    <small class="text-muted">@item.Email</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (item.RoleName == "GeneralManager")
+                                            {
+                                                <span class="badge role-badge role-gm">General Manager</span>
+                                            }
+                                            else if (item.RoleName == "Coach")
+                                            {
 
-                                        @if (User.IsInRole("GeneralManager"))
-                                        {
-                                            <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-outline-success" title="Contract">
-                                                <i class="fas fa-file-invoice-dollar"></i>
-                                            </a>
-                                        }
+                                                <span class="badge role-badge role-coach">Antrenor</span>
+                                            }
+                                            else if (item.RoleName == "Medic")
+                                            {
 
-                                        <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi membrul staff?');" class="d-inline">
-                                            <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                                <span class="badge role-badge role-medic">Medic</span>
+                                            }
+                                            else if (item.RoleName == "Scout")
+                                            {
+
+                                                <span class="badge role-badge role-scout">Scouter</span>
+                                            }
+                                            else
+                                            {
+
+                                                <span class="badge role-badge bg-secondary">@item.RoleName</span>
+                                            }
+                                        </td>
+                                        <td class="text-muted">
+                                            <i class="far fa-calendar-alt me-1"></i> @item.StaffMember.HireDate.ToString("dd MMM yyyy")
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
+                                                <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-info" title="Permisiuni"><i class="fas fa-key"></i></a>
+                                                <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post" onsubmit="return confirm('Ștergi membrul staff?');" class="d-inline">
+                                                    <button type="submit" class="btn btn-icon btn-light text-danger" title="Șterge"><i class="fas fa-trash-alt"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* === FIX FILTRE (TEXT VIZIBIL) === */
+    .nav-pills .nav-link {
+        color: #334155 !important; /* Gri închis pentru contrast */
+        font-weight: 600;
+        background-color: rgba(255, 255, 255, 0.6);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+        .nav-pills .nav-link.active {
+            background: var(--primary-gradient) !important;
+            color: white !important;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            border-color: transparent;
+        }
+
+    /* === CULORI ROLURI UNICE === */
+    .role-badge {
+        padding: 0.5em 1em;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .role-player {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: white;
+    }
+
+    .role-coach {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: white;
+    }
+
+    .role-gm {
+        background: linear-gradient(135deg, #4c1d95 0%, #312e81 100%);
+        color: #e0e7ff;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .role-medic {
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        color: white;
+    }
+
+    .role-scout {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+    }
+
+    .scale-sm {
+        transform: scale(0.9);
+        display: inline-block;
+    }
+
+    /* === STILURI GENERALE === */
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        border: 2px solid white;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-icon {
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        transition: all 0.2s;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .btn-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+
+    .user-row {
+        transition: all 0.2s ease;
+    }
+
+        .user-row:hover {
+            background-color: white;
+            transform: scale(1.005);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            z-index: 10;
+            position: relative;
+        }
+
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out;
+    }
+</style>

@@ -1,107 +1,326 @@
 ﻿@model Licenta.Models.ViewModels.EditUserViewModel
 
 @{
-    ViewData["Title"] = "Editare Profil";
+    ViewData["Title"] = "Editează Utilizator";
+
+    // Funcții ajutătoare pentru afișare
+    string GetRoleCardClass(string roleName)
+    {
+        return roleName switch
+        {
+            "GeneralManager" => "role-card-gm",
+            "Coach" => "role-card-coach",
+            "Player" => "role-card-player",
+            "Medic" => "role-card-medic",
+            "Scout" => "role-card-scout",
+            _ => "bg-secondary"
+        };
+    }
+
+    string GetRoleIcon(string roleName)
+    {
+        return roleName switch
+        {
+            "GeneralManager" => "fa-building",
+            "Coach" => "fa-clipboard-list",
+            "Player" => "fa-basketball-ball",
+            "Medic" => "fa-user-md",
+            "Scout" => "fa-binoculars",
+            _ => "fa-user"
+        };
+    }
+
+    var roleCardClass = GetRoleCardClass(Model.RoleName);
+    var roleIcon = GetRoleIcon(Model.RoleName);
+
+    // Traducere rol pentru afișare
+    string roleDisplay = Model.RoleName;
+    if (roleDisplay == "GeneralManager") roleDisplay = "General Manager";
+    if (roleDisplay == "Coach") roleDisplay = "Antrenor";
+    if (roleDisplay == "Player") roleDisplay = "Jucător";
+    if (roleDisplay == "Scout") roleDisplay = "Scouter";
 }
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Editare: @Model.LastName @Model.FirstName</h5>
+<div class="container-fluid py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="mb-1 text-gradient" style="font-size: 2rem;">
+                <i class="fas fa-user-edit me-2 text-primary"></i>Editează Utilizator
+            </h2>
+            <p class="text-muted fw-medium fs-5">Actualizează informațiile și detaliile specifice.</p>
+        </div>
+        <a asp-action="ManageUsers" class="btn btn-outline-light text-dark border-0 shadow-sm bg-white">
+            <i class="fas fa-times me-2"></i>Anulează
+        </a>
+    </div>
+
+    <form asp-action="EditUser" method="post">
+        <input type="hidden" asp-for="StaffId" />
+        <input type="hidden" asp-for="RoleName" />
+        <input type="hidden" asp-for="Email" />
+
+        <div class="row g-4">
+
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm glass-card h-100">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-id-card me-2 text-primary"></i>Date Personale</h5>
+                        <span class="badge bg-light text-secondary border px-3 py-2">ID: @Model.StaffId</span>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="LastName" class="form-control bg-white border" placeholder="Popescu" />
+                                    <label asp-for="LastName" class="text-muted">Nume de Familie</label>
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FirstName" class="form-control bg-white border" placeholder="Ion" />
+                                    <label asp-for="FirstName" class="text-muted">Prenume</label>
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-light border border-light d-flex align-items-center mb-4 text-muted small">
+                            <i class="fas fa-info-circle me-3 fs-5 text-primary"></i>
+                            <div>
+                                Actualizarea numelui se va reflecta în toate documentele viitoare.
+                            </div>
+                        </div>
+
+                        <h6 class="text-muted text-uppercase small fw-bold mb-3 border-top pt-3">Detalii Resurse Umane</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="DateOfBirth" class="form-control bg-white border" type="date" />
+                                    <label asp-for="DateOfBirth" class="text-muted">Data Nașterii</label>
+                                    <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="HireDate" class="form-control bg-white border" type="date" />
+                                    <label asp-for="HireDate" class="text-muted">Data Angajării</label>
+                                    <span asp-validation-for="HireDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <form asp-action="EditUser" method="post">
-                        <input type="hidden" asp-for="StaffId" />
-                        <input type="hidden" asp-for="RoleName" />
+            </div>
 
-                        <h6 class="text-muted border-bottom pb-2 mb-3">Informații Generale</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="FirstName" class="form-label fw-bold small">Prenume</label>
-                                <input asp-for="FirstName" class="form-control" />
-                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+            <div class="col-lg-5">
+                <div class="d-flex flex-column gap-4">
+                    <div class="card border-0 shadow-sm glass-card">
+                        <div class="card-header bg-transparent border-0 pt-4 px-4">
+                            <h5 class="fw-bold text-dark mb-0"><i class="fas fa-shield-alt me-2 text-secondary"></i>Cont & Acces</h5>
+                        </div>
+                        <div class="card-body p-4 pt-2">
+
+                            <div class="mb-3">
+                                <label class="text-muted small text-uppercase fw-bold mb-1 ms-1">Rol</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted" style="width: 45px; justify-content: center;">
+                                        <i class="fas @roleIcon"></i>
+                                    </span>
+                                    <input type="text" class="form-control bg-light border-start-0 fw-bold text-dark" value="@roleDisplay" readonly>
+                                    <span class="input-group-text bg-light border-start-0 text-secondary" title="Blocat">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="LastName" class="form-label fw-bold small">Nume</label>
-                                <input asp-for="LastName" class="form-control" />
-                                <span asp-validation-for="LastName" class="text-danger small"></span>
+
+                            <div class="mb-3">
+                                <label class="text-muted small text-uppercase fw-bold mb-1 ms-1">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted" style="width: 45px; justify-content: center;">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    <input type="text" class="form-control bg-light border-start-0 text-dark" value="@Model.Email" readonly style="font-size: 0.95rem;">
+                                    <span class="input-group-text bg-light border-start-0 text-secondary" title="Blocat">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="bg-warning bg-opacity-10 p-2 rounded text-warning-emphasis small border border-warning border-opacity-10">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                Rolul și Emailul nu pot fi modificate aici.
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="DateOfBirth" class="form-label fw-bold small">Data Nașterii</label>
-                                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                    @if (Model.RoleName == "Player")
+                    {
+                        <div class="card border-0 shadow-sm glass-card @roleCardClass">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-basketball-ball me-2"></i>Fișă Jucător</h5>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="HireDate" class="form-label fw-bold small">Data Angajării</label>
-                                <input asp-for="HireDate" type="date" class="form-control" />
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small">Email (Doar vizualizare)</label>
-                            <input asp-for="Email" class="form-control bg-light" readonly />
-                        </div>
-
-                        @if (Model.RoleName == "Player")
-                        {
-                            <div class="alert alert-info border-0 shadow-sm">
-                                <h6 class="alert-heading fw-bold mb-3"><i class="fas fa-basketball-ball me-2"></i>Date Sportive</h6>
-                                <div class="row">
-                                    <div class="col-md-3 mb-2">
-                                        <label asp-for="Position" class="form-label small">Poziție</label>
-                                        <select asp-for="Position" class="form-select">
-                                            <option value="Point Guard">Point Guard</option>
-                                            <option value="Shooting Guard">Shooting Guard</option>
-                                            <option value="Small Forward">Small Forward</option>
-                                            <option value="Power Forward">Power Forward</option>
-                                            <option value="Center">Center</option>
+                            <div class="card-body p-4">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Poziție</label>
+                                        <select asp-for="Position" class="form-select bg-white bg-opacity-25 border-0 text-white">
+                                            <option class="text-dark" value="PG">Point Guard</option>
+                                            <option class="text-dark" value="SG">Shooting Guard</option>
+                                            <option class="text-dark" value="SF">Small Forward</option>
+                                            <option class="text-dark" value="PF">Power Forward</option>
+                                            <option class="text-dark" value="C">Center</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-3 mb-2">
-                                        <label asp-for="JerseyNumber" class="form-label small">Nr. Tricou</label>
-                                        <input asp-for="JerseyNumber" class="form-control" />
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Nr. Tricou</label>
+                                        <input asp-for="JerseyNumber" class="form-control bg-white bg-opacity-25 border-0 text-white" />
                                     </div>
-                                    <div class="col-md-3 mb-2">
-                                        <label asp-for="Height" class="form-label small">Înălțime (cm)</label>
-                                        <input asp-for="Height" class="form-control" />
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Înălțime (cm)</label>
+                                        <input asp-for="Height" class="form-control bg-white bg-opacity-25 border-0 text-white" />
                                     </div>
-                                    <div class="col-md-3 mb-2">
-                                        <label asp-for="Weight" class="form-label small">Greutate (kg)</label>
-                                        <input asp-for="Weight" class="form-control" />
+                                    <div class="col-6">
+                                        <label class="text-white-50 small text-uppercase">Greutate (kg)</label>
+                                        <input asp-for="Weight" class="form-control bg-white bg-opacity-25 border-0 text-white" />
                                     </div>
                                 </div>
                             </div>
-                        }
-
-                        @if (Model.RoleName == "Coach")
-                        {
-                            <div class="alert alert-warning border-0 shadow-sm text-dark">
-                                <h6 class="alert-heading fw-bold mb-3"><i class="fas fa-clipboard-list me-2"></i>Date Tehnice</h6>
-                                <label asp-for="LicenseNumber" class="form-label small">Număr Licență</label>
-                                <input asp-for="LicenseNumber" class="form-control" />
-                            </div>
-                        }
-
-                        @if (Model.RoleName == "Medic")
-                        {
-                            <div class="alert alert-success border-0 shadow-sm">
-                                <h6 class="alert-heading fw-bold mb-3"><i class="fas fa-user-md me-2"></i>Date Medicale</h6>
-                                <label asp-for="Specialization" class="form-label small">Specializare</label>
-                                <input asp-for="Specialization" class="form-control" />
-                            </div>
-                        }
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <a asp-action="ManageUsers" class="btn btn-outline-secondary px-4">Anulează</a>
-                            <button type="submit" class="btn btn-success px-5 shadow"><i class="fas fa-save me-2"></i>Salvează</button>
                         </div>
-                    </form>
+                    }
+                    else if (Model.RoleName == "Coach")
+                    {
+                        <div class="card border-0 shadow-sm glass-card @roleCardClass">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-clipboard-list me-2"></i>Detalii Antrenor</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <label class="text-white-50 small text-uppercase">Număr Licență</label>
+                                <input asp-for="LicenseNumber" class="form-control bg-white bg-opacity-25 border-0 text-white" />
+                            </div>
+                        </div>
+                    }
+                    else if (Model.RoleName == "Medic")
+                    {
+                        <div class="card border-0 shadow-sm glass-card @roleCardClass">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-user-md me-2"></i>Date Medicale</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <label class="text-white-50 small text-uppercase">Specializare</label>
+                                <input asp-for="Specialization" class="form-control bg-white bg-opacity-25 border-0 text-white" />
+                            </div>
+                        </div>
+                    }
+                    else if (Model.RoleName == "GeneralManager")
+                    {
+                        <div class="card border-0 shadow-sm glass-card @roleCardClass">
+                            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                <h5 class="fw-bold text-white"><i class="fas fa-building me-2"></i>Administrativ</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <label class="text-white-50 small text-uppercase">Birou</label>
+                                <input asp-for="Office" class="form-control bg-white bg-opacity-10 border border-white border-opacity-25 text-white" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card border-0 shadow-sm glass-card @roleCardClass">
+                            <div class="card-body p-4">
+                                <p class="text-white opacity-75 mb-0"><i class="fas fa-info-circle me-2"></i>Nu sunt date specifice editabile.</p>
+                            </div>
+                        </div>
+                    }
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-lg rounded-3 mt-2">
+                        <i class="fas fa-save me-2"></i>Salvează Modificările
+                    </button>
+
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
+
+<style>
+    /* === GLASSMORPHISM (Static) === */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95); /* Opacitate crescută pentru contrast */
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        /* overflow: hidden;  <-- SCOASĂ PENTRU A EVITA TĂIEREA CONȚINUTULUI */
+    }
+
+    /* === FORM STYLE === */
+    .form-control {
+        background-color: white !important;
+        border: 1px solid #ced4da !important;
+        color: #212529 !important;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+        }
+
+        /* Stil specific pentru Readonly */
+        .form-control[readonly] {
+            background-color: #f8f9fa !important;
+            border-color: #e9ecef !important;
+            color: #495057 !important;
+            cursor: not-allowed;
+        }
+
+    /* Input Groups */
+    .input-group-text {
+        border-color: #e9ecef !important;
+    }
+
+    /* === ROLE CARDS COLORS === */
+    .role-card-player {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    }
+
+    .role-card-coach {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    }
+
+    .role-card-medic {
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+    }
+
+    .role-card-gm {
+        background: linear-gradient(135deg, #4c1d95 0%, #312e81 100%);
+    }
+
+    .role-card-scout {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    /* Input-uri in carduri colorate */
+    .role-card-player input, .role-card-coach input, .role-card-medic input, .role-card-gm input {
+        background-color: rgba(255,255,255,0.2) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        color: white !important;
+    }
+
+    .role-card-player select {
+        background-color: rgba(255,255,255,0.2) !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+        color: white !important;
+    }
+
+        .role-card-player select option {
+            color: #333 !important;
+            background-color: white !important;
+        }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

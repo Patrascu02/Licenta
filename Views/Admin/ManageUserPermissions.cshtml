@@ -4,92 +4,140 @@
     ViewData["Title"] = "Permisiuni Individuale";
 }
 
-<div class="container mt-5">
-    <div class="card shadow-lg border-0">
-        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="fas fa-user-lock me-2"></i>Permisiuni Speciale: <strong>@Model.UserName</strong></h4>
-        </div>
-        <div class="card-body bg-light">
-            <div class="alert alert-warning border-0 shadow-sm mb-4">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Atenție!</strong> Permisiunile bifate aici sunt <strong>excepții</strong> acordate direct acestui utilizator.
-                Ele se adaugă peste permisiunile rolului său de bază. Folosește asta pentru cazuri speciale (ex: Antrenor Principal, Căpitan).
-            </div>
+<div class="container-fluid py-5">
 
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="mb-1 text-gradient" style="font-size: 2rem;">
+                <i class="fas fa-user-lock me-2 text-primary"></i>Permisiuni Speciale
+            </h2>
+            <div class="d-flex align-items-center mt-2">
+                <span class="text-muted fw-medium fs-5 me-2">Utilizator:</span>
+                <span class="fw-bold fs-5 text-dark me-2">@Model.UserName</span>
+                <span class="badge bg-secondary bg-opacity-25 text-secondary border">@Model.RoleName</span>
+            </div>
+        </div>
+        <a asp-action="ManageUsers" class="btn btn-outline-light text-dark border-0 shadow-sm bg-white">
+            <i class="fas fa-arrow-left me-2"></i>Înapoi
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm glass-card">
+        <div class="card-body p-0">
             <form asp-action="UpdateUserPermissions" method="post">
                 <input type="hidden" asp-for="StaffId" />
                 <input type="hidden" asp-for="UserId" />
 
-                <div class="bg-white p-3 rounded shadow-sm border">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 30%;">Cod Permisiune</th>
-                                    <th style="width: 55%;">Descriere</th>
-                                    <th style="width: 15%;" class="text-center">Activează</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (int i = 0; i < Model.PermissionList.Count; i++)
-                                {
-                                    <tr>
-                                        <td>
-                                            <input type="hidden" asp-for="PermissionList[i].PermissionId" />
-                                            <input type="hidden" asp-for="PermissionList[i].Name" />
-                                            <input type="hidden" asp-for="PermissionList[i].Description" />
-                                            <input type="hidden" asp-for="PermissionList[i].IsInherited" />
-
-                                            @{
-                                                var badgeClass = "bg-secondary";
-                                                if (Model.PermissionList[i].Name.StartsWith("Players")) badgeClass = "bg-primary";
-                                                else if (Model.PermissionList[i].Name.StartsWith("Medical")) badgeClass = "bg-success";
-                                                else if (Model.PermissionList[i].Name.StartsWith("Contracts")) badgeClass = "bg-warning text-dark";
-                                                else if (Model.PermissionList[i].Name.StartsWith("Training")) badgeClass = "bg-info text-dark";
-                                            }
-                                            <span class="badge @badgeClass">@Model.PermissionList[i].Name</span>
-                                        </td>
-                                        <td class="text-muted">
-                                            @Model.PermissionList[i].Description
-
-                                            @if (Model.PermissionList[i].IsInherited)
-                                            {
-                                                <span class="badge bg-light text-dark border ms-2">
-                                                    <i class="fas fa-users me-1"></i> Inclus în Rol
-                                                </span>
-                                            }
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="form-check form-switch d-flex justify-content-center">
-                                                @if (Model.PermissionList[i].IsInherited)
-                                                {
-                                                    @* CAZ 1: Permisiune din ROL -> Afișăm Bifat dar Dezactivat (Read-Only) *@
-                                                    <input class="form-check-input" type="checkbox" checked disabled
-                                                           style="width: 3em; height: 1.5em; opacity: 0.6; cursor: not-allowed;"
-                                                           title="Această permisiune este deja activă prin rolul utilizatorului">
-                                                }
-                                                else
-                                                {
-                                                    @* CAZ 2: Permisiune EXTRA -> Checkbox Editabil legat de model *@
-                                                    <input asp-for="PermissionList[i].IsSelected" class="form-check-input" type="checkbox"
-                                                           style="width: 3em; height: 1.5em; cursor: pointer;">
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                <div class="p-4 bg-primary bg-opacity-10 border-bottom border-light">
+                    <div class="d-flex align-items-center text-primary">
+                        <i class="fas fa-info-circle fs-4 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Configurare Acces</h6>
+                            <p class="mb-0 small opacity-75">
+                                Permisiunile bifate aici se adaugă peste cele ale rolului de <strong>@Model.RoleName</strong>.
+                                Cele moștenite sunt blocate (gri).
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between mt-4">
-                    <a asp-action="ManageUsers" class="btn btn-outline-secondary px-4"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
-                    <button type="submit" class="btn btn-success px-5 fw-bold shadow">
-                        <i class="fas fa-save me-2"></i>Salvează Permisiunile
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light bg-opacity-50 text-uppercase text-muted small">
+                            <tr>
+                                <th class="ps-5 py-3" style="width: 30%;">Permisiune</th>
+                                <th style="width: 50%;">Descriere</th>
+                                <th class="text-center" style="width: 20%;">Stare</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.PermissionList.Count; i++)
+                            {
+                                <tr class="user-row border-bottom border-light">
+                                    <td class="ps-5 py-3">
+                                        <input type="hidden" asp-for="PermissionList[i].PermissionId" />
+                                        <input type="hidden" asp-for="PermissionList[i].Name" />
+                                        <input type="hidden" asp-for="PermissionList[i].Description" />
+                                        <input type="hidden" asp-for="PermissionList[i].IsInherited" />
+
+                                        <span class="badge bg-light text-dark border font-monospace px-2 py-1">
+                                            @Model.PermissionList[i].Name
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark fw-medium">@Model.PermissionList[i].Description</span>
+
+                                        @if (Model.PermissionList[i].IsInherited)
+                                        {
+                                            <span class="badge bg-light text-secondary border ms-2 rounded-pill small">
+                                                <i class="fas fa-link me-1"></i>Moștenit
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            @if (Model.PermissionList[i].IsInherited)
+                                            {
+                                                <input class="form-check-input custom-switch inherited-switch" type="checkbox" checked disabled>
+                                            }
+                                            else
+                                            {
+                                                <input asp-for="PermissionList[i].IsSelected" class="form-check-input custom-switch active-switch" type="checkbox" role="switch">
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 border-top border-light d-flex justify-content-end bg-light bg-opacity-25 rounded-bottom-4">
+                    <button type="submit" class="btn btn-success shadow px-5 py-2 fw-bold rounded-pill">
+                        <i class="fas fa-save me-2"></i>Salvează
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    /* === Glassmorphism Simplu === */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    /* === Switch Style === */
+    .custom-switch {
+        width: 3rem !important;
+        height: 1.5rem !important;
+        cursor: pointer;
+    }
+
+    /* Switch Verde (Manual) */
+    .active-switch:checked {
+        background-color: var(--success-color, #10b981);
+        border-color: var(--success-color, #10b981);
+    }
+
+    /* Switch Gri (Moștenit) */
+    .inherited-switch:checked {
+        background-color: #94a3b8; /* Gri neutru */
+        border-color: #94a3b8;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* === Table Static === */
+    .user-row {
+        background-color: transparent;
+    }
+
+        .user-row:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+</style>

@@ -37,10 +37,8 @@ namespace Licenta.Models.ViewModels
         [Display(Name = "Înălțime (cm)")]
         public int? Height { get; set; }
 
-        
         [Display(Name = "Greutate (kg)")]
         public int? Weight { get; set; }
-        // -------------------
 
         // --- Date Specifice Antrenor ---
         [Display(Name = "Licență")]
@@ -49,5 +47,9 @@ namespace Licenta.Models.ViewModels
         // --- Date Specifice Medic ---
         [Display(Name = "Specializare")]
         public string? Specialization { get; set; }
+
+        // --- Date Specifice General Manager (ADAUGAT ACUM) ---
+        [Display(Name = "Birou")]
+        public string? Office { get; set; }
     }
 }
