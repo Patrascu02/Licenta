@@ -1,66 +1,110 @@
 ﻿@model Licenta.Models.Roles.Player
 
 @{
-    ViewData["Title"] = "Detalii Jucător";
+    ViewData["Title"] = "Profil Jucător";
 }
 
-<div class="container mt-4">
-    <div class="card shadow border-0 mb-4">
-        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">
-                <i class="fas fa-user-graduate me-2"></i>@Model.Staff.FirstName @Model.Staff.LastName
-            </h3>
-            <span class="badge bg-light text-dark fs-6">#@Model.JerseyNumber | @Model.Position</span>
+<div class="container py-5">
+
+    <div class="card border-0 shadow-lg glass-card mb-5 overflow-hidden">
+        <div class="bg-gradient-primary p-5 text-white position-relative">
+            <div class="d-flex align-items-center position-relative z-1">
+                <div class="avatar-xl me-4 shadow-lg border border-4 border-white">
+                    @(Model.Staff.FirstName[0])@(Model.Staff.LastName[0])
+                </div>
+                <div>
+                    <h1 class="display-5 fw-bold mb-1">@Model.Staff.FirstName @Model.Staff.LastName</h1>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-white text-primary px-3 py-2 rounded-pill fs-6">
+                            <i class="fas fa-tshirt me-2"></i>#@Model.JerseyNumber
+                        </span>
+                        <span class="badge bg-white bg-opacity-25 border border-white px-3 py-2 rounded-pill fs-6">
+                            @Model.Position
+                        </span>
+                        <span class="d-flex align-items-center text-white-50">
+                            <i class="fas fa-users me-2"></i>@(Model.CurrentTeam?.Name ?? "Fără echipă")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                <i class="fas fa-basketball-ball fa-10x text-white"></i>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <p><strong>Înălțime:</strong> @Model.Height cm</p>
-                    <p><strong>Greutate:</strong> @Model.Weight kg</p>
+
+        <div class="card-body p-4">
+            <div class="row g-4 text-center">
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Înălțime</small>
+                        <h4 class="mb-0 fw-bold text-dark">@Model.Height <span class="fs-6 text-muted">cm</span></h4>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <p><strong>Echipa:</strong> @(Model.CurrentTeam?.Name ?? "Fără echipă")</p>
-                    <p><strong>Data Nașterii:</strong> @Model.Staff.DateOfBirth.ToShortDateString()</p>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Greutate</small>
+                        <h4 class="mb-0 fw-bold text-dark">@Model.Weight <span class="fs-6 text-muted">kg</span></h4>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <p><strong>Experiență:</strong> @Model.Staff.ExperienceYears ani</p>
-                    <p><strong>Angajat din:</strong> @Model.Staff.HireDate.ToShortDateString()</p>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Vârstă</small>
+                        <h4 class="mb-0 fw-bold text-dark">
+                            @(DateTime.Now.Year - Model.Staff.DateOfBirth.Year) <span class="fs-6 text-muted">ani</span>
+                        </h4>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Experiență</small>
+                        <h4 class="mb-0 fw-bold text-dark">@Model.Staff.ExperienceYears <span class="fs-6 text-muted">ani</span></h4>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow border-0 mb-4">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Istoric Performanță (Rapoarte Scouting)</h5>
+    <div class="card border-0 shadow-sm glass-card mb-5">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex align-items-center">
+            <div class="icon-circle bg-warning bg-opacity-10 text-warning me-3">
+                <i class="fas fa-chart-line fs-5"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold text-dark mb-0">Rapoarte Scouting</h5>
+                <p class="text-muted small mb-0">Istoricul performanțelor lunare înregistrate.</p>
+            </div>
         </div>
-        <div class="card-body">
+
+        <div class="card-body p-4">
             @if (Model.GameStats != null && Model.GameStats.Any(s => s.IsScoutingReport))
             {
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-uppercase text-muted small">
                             <tr>
-                                <th>Lună/An</th>
-                                <th>Puncte</th>
-                                <th>Recuperări</th>
-                                <th>Pase</th>
-                                <th>Intercepții</th>
-                                <th>Capace</th>
-                                <th>Minute</th>
+                                <th class="ps-3 border-0 rounded-start">Perioadă</th>
+                                <th class="border-0">PCT</th>
+                                <th class="border-0">REC</th>
+                                <th class="border-0">PAS</th>
+                                <th class="border-0">INT</th>
+                                <th class="border-0">CAP</th>
+                                <th class="border-0 rounded-end text-end pe-3">MIN</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var stat in Model.GameStats.Where(s => s.IsScoutingReport).OrderByDescending(s => s.Year).ThenByDescending(s => s.Month))
                             {
                                 <tr>
-                                    <td><strong>@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(stat.Month) @stat.Year</strong></td>
-                                    <td>@stat.Points.ToString("F1")</td>
+                                    <td class="ps-3 fw-bold text-dark">
+                                        @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(stat.Month) @stat.Year
+                                    </td>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary">@stat.Points.ToString("F1")</span></td>
                                     <td>@stat.Rebounds.ToString("F1")</td>
                                     <td>@stat.Assists.ToString("F1")</td>
                                     <td>@stat.Steals.ToString("F1")</td>
                                     <td>@stat.Blocks.ToString("F1")</td>
-                                    <td>@stat.MinutesPlayed.ToString("F1")'</td>
+                                    <td class="text-end pe-3 text-muted">@stat.MinutesPlayed.ToString("F0")'</td>
                                 </tr>
                             }
                         </tbody>
@@ -69,8 +113,11 @@
             }
             else
             {
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Nu există încă rapoarte de scouting introduse pentru acest jucător.
+                <div class="text-center py-5">
+                    <div class="mb-3 text-muted opacity-50">
+                        <i class="fas fa-clipboard-list fa-3x"></i>
+                    </div>
+                    <h6 class="text-muted">Nu există rapoarte de scouting disponibile.</h6>
                 </div>
             }
         </div>
@@ -78,55 +125,109 @@
 
     @if (User.IsInRole("GeneralManager"))
     {
-        <div class="card shadow border-0 mb-4">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Situație Contractuală (Acces GM)</h5>
+        <div class="card border-0 shadow-sm glass-card mb-5 border-start border-4 border-success">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex align-items-center">
+                <div class="icon-circle bg-success bg-opacity-10 text-success me-3">
+                    <i class="fas fa-file-contract fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Detalii Contractuale</h5>
+                    <span class="badge bg-warning text-dark border border-warning">CONFIDENȚIAL (GM ONLY)</span>
+                </div>
             </div>
-            <div class="card-body">
+
+            <div class="card-body p-4">
                 @if (Model.Staff.Contracts != null && Model.Staff.Contracts.Any())
                 {
-                    <table class="table table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Data Start</th>
-                                <th>Data Final</th>
-                                <th>Salariu</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var contract in Model.Staff.Contracts.OrderByDescending(c => c.StartDate))
-                            {
-                                <tr class="@(contract.IsActive ? "table-success" : "")">
-                                    <td>@contract.StartDate.ToShortDateString()</td>
-                                    <td>@(contract.EndDate?.ToShortDateString() ?? "Nedeterminat")</td>
-                                    <td>@contract.Salary.ToString("C0")</td>
-                                    <td>
-                                        @if (contract.IsActive)
-                                        {
-                                            <span class="badge bg-success">ACTIV</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">INACTIV</span>
-                                        }
-                                    </td>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="bg-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-3 border-0">Data Start</th>
+                                    <th class="border-0">Data Final</th>
+                                    <th class="border-0">Salariu</th>
+                                    <th class="border-0 pe-3 text-end">Status</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var contract in Model.Staff.Contracts.OrderByDescending(c => c.StartDate))
+                                {
+                                    <tr class="@(contract.IsActive ? "bg-success bg-opacity-10" : "")">
+                                        <td class="ps-3">@contract.StartDate.ToShortDateString()</td>
+                                        <td>@(contract.EndDate?.ToShortDateString() ?? "Nedeterminat")</td>
+                                        <td class="fw-bold font-monospace">@contract.Salary.ToString("C0")</td>
+                                        <td class="text-end pe-3">
+                                            @if (contract.IsActive)
+                                            {
+                                                <span class="badge bg-success">ACTIV</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">ISTORIC</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 }
                 else
                 {
-                    <p class="text-muted">Nu există contracte înregistrate în sistem.</p>
+                    <p class="text-muted mb-0">Nu există contracte înregistrate.</p>
                 }
             </div>
         </div>
     }
 
-    <div class="mt-4 mb-5">
-        <a asp-action="Index" class="btn btn-secondary px-4">
-            <i class="fas fa-arrow-left me-2"></i>Înapoi la listă
+    <div class="d-flex justify-content-between">
+
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light text-dark border shadow-sm bg-white rounded-pill px-4">
+            <i class="fas fa-home me-2"></i>Acasă
         </a>
+
+        @if (!User.IsInRole("Player"))
+        {
+            <a asp-action="Index" class="btn btn-secondary rounded-pill px-4 shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>Înapoi la Listă
+            </a>
+        }
     </div>
+
 </div>
+
+<style>
+    /* === STILURI PERSONALIZATE === */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    }
+
+    .avatar-xl {
+        width: 100px;
+        height: 100px;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(5px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

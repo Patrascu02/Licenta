@@ -1,5 +1,5 @@
 using Licenta.Data;
-using Licenta.Models.Core; // Adăugat pentru a accesa clasa Staff
+using Licenta.Models.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,71 +13,88 @@ namespace Licenta
 
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
+
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // --- LOGICA PENTRU SEEDING (Admin și Roluri) ---
+            // --- LOGICA PENTRU SEEDING (Admin, Roluri ȘI Echipe) ---
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                var context = services.GetRequiredService<ApplicationDbContext>();
-
-                await context.Database.MigrateAsync();
-
-                // 1. Creare Roluri
-                string[] roleNames = { "Admin", "GeneralManager", "Coach", "Player", "Medic", "Scout" };
-                foreach (var roleName in roleNames)
+                try
                 {
-                    if (!await roleManager.RoleExistsAsync(roleName))
+                    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+
+                    await context.Database.MigrateAsync();
+
+                    // 1. Creare Roluri
+                    string[] roleNames = { "Admin", "GeneralManager", "Coach", "Player", "Medic", "Scout" };
+                    foreach (var roleName in roleNames)
                     {
-                        await roleManager.CreateAsync(new IdentityRole(roleName));
-                    }
-                }
-
-                // 2. Creare Admin Predefinit
-                string adminEmail = "admin@clubbaschet.ro";
-                string adminPassword = "Password123!";
-
-                var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-                if (adminUser == null)
-                {
-                    var user = new IdentityUser
-                    {
-                        UserName = adminEmail,
-                        Email = adminEmail,
-                        EmailConfirmed = true
-                    };
-
-                    var createPowerUser = await userManager.CreateAsync(user, adminPassword);
-                    if (createPowerUser.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(user, "Admin");
-
-                        // --- CREARE PROFIL STAFF PENTRU ADMIN ---
-                        var adminStaff = new Staff
+                        if (!await roleManager.RoleExistsAsync(roleName))
                         {
-                            UserId = user.Id,
-                            FirstName = "Admin",
-                            LastName = "Sistem",
-                            HireDate = DateTime.Now,
-                            DateOfBirth = new DateTime(1990, 1, 1),
-                            ExperienceYears = 5
-                        };
-                        context.Staff.Add(adminStaff);
-                        await context.SaveChangesAsync();
-                        // ----------------------------------------
+                            await roleManager.CreateAsync(new IdentityRole(roleName));
+                        }
                     }
+
+                    // 2. Creare Admin Predefinit
+                    string adminEmail = "admin@clubbaschet.ro";
+                    string adminPassword = "Password123!";
+
+                    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+                    if (adminUser == null)
+                    {
+                        var user = new IdentityUser
+                        {
+                            UserName = adminEmail,
+                            Email = adminEmail,
+                            EmailConfirmed = true
+                        };
+
+                        var createPowerUser = await userManager.CreateAsync(user, adminPassword);
+                        if (createPowerUser.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(user, "Admin");
+
+                            // --- CREARE PROFIL STAFF PENTRU ADMIN ---
+                            var adminStaff = new Staff
+                            {
+                                UserId = user.Id,
+                                FirstName = "Admin",
+                                LastName = "Sistem",
+                                HireDate = DateTime.Now,
+                                DateOfBirth = new DateTime(1990, 1, 1),
+                                ExperienceYears = 5
+                            };
+                            context.Staff.Add(adminStaff);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+
+                    // ====================================================================
+                    // 3. APELĂM DBINITIALIZER PENTRU ECHIPĂ ȘI JUCĂTORI (Linia Nouă)
+                    // ====================================================================
+                    Licenta.Data.DbInitializer.Seed(context);
+                    // ====================================================================
+
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "A apărut o eroare la popularea bazei de date (Seeding).");
                 }
             }
 
@@ -97,7 +114,7 @@ namespace Licenta
 
             app.UseRouting();
 
-            app.UseAuthentication(); // Asigură-te că UseAuthentication este înaintea UseAuthorization
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
