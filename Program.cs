@@ -11,23 +11,25 @@ namespace Licenta
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            // Configurare Bază de Date
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+            // Configurare Identity
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
+                .AddRoles<IdentityRole>() // Activăm Rolurile
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // --- LOGICA PENTRU SEEDING (Admin, Roluri ȘI Echipe) ---
+            // --- SEEDING MINIMAL (Doar Structură, Fără Date de Business) ---
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -37,9 +39,10 @@ namespace Licenta
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     var context = services.GetRequiredService<ApplicationDbContext>();
 
+                    // 1. Aplicăm Migrările (Update Database automat)
                     await context.Database.MigrateAsync();
 
-                    // 1. Creare Roluri
+                    // 2. Asigurăm că Rolurile există (dar sunt GOLE, fără permisiuni)
                     string[] roleNames = { "Admin", "GeneralManager", "Coach", "Player", "Medic", "Scout" };
                     foreach (var roleName in roleNames)
                     {
@@ -49,28 +52,21 @@ namespace Licenta
                         }
                     }
 
-                    // 2. Creare Admin Predefinit
+                    // 3. Asigurăm că există un cont de Admin pentru a putea intra în sistem
                     string adminEmail = "admin@clubbaschet.ro";
-                    string adminPassword = "Password123!";
-
                     var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
                     if (adminUser == null)
                     {
-                        var user = new IdentityUser
-                        {
-                            UserName = adminEmail,
-                            Email = adminEmail,
-                            EmailConfirmed = true
-                        };
+                        var user = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+                        var result = await userManager.CreateAsync(user, "Password123!");
 
-                        var createPowerUser = await userManager.CreateAsync(user, adminPassword);
-                        if (createPowerUser.Succeeded)
+                        if (result.Succeeded)
                         {
                             await userManager.AddToRoleAsync(user, "Admin");
 
-                            // --- CREARE PROFIL STAFF PENTRU ADMIN ---
-                            var adminStaff = new Staff
+                            // Profil Staff minimal pentru Admin
+                            context.Staff.Add(new Staff
                             {
                                 UserId = user.Id,
                                 FirstName = "Admin",
@@ -78,27 +74,19 @@ namespace Licenta
                                 HireDate = DateTime.Now,
                                 DateOfBirth = new DateTime(1990, 1, 1),
                                 ExperienceYears = 5
-                            };
-                            context.Staff.Add(adminStaff);
+                            });
                             await context.SaveChangesAsync();
                         }
                     }
-
-                    // ====================================================================
-                    // 3. APELĂM DBINITIALIZER PENTRU ECHIPĂ ȘI JUCĂTORI (Linia Nouă)
-                    // ====================================================================
-                    Licenta.Data.DbInitializer.Seed(context);
-                    // ====================================================================
-
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "A apărut o eroare la popularea bazei de date (Seeding).");
+                    logger.LogError(ex, "Eroare la inițializarea minimală a bazei de date.");
                 }
             }
 
-            // Configure the HTTP request pipeline.
+            // Configurare Pipeline HTTP
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
