@@ -1,0 +1,200 @@
+﻿@page
+@model IndexModel
+@{
+    // 1. SCHIMBARE TITLU TAB/BROWSER
+    ViewData["Title"] = "Administrare Identitate";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<div class="container-fluid py-4">
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm glass-card h-100 text-center position-relative overflow-hidden">
+                <div class="bg-gradient-primary h-25 w-100 position-absolute top-0 start-0" style="opacity: 0.8;"></div>
+
+                <div class="card-body p-4 position-relative z-1 mt-5">
+                    <div class="avatar-profile mx-auto shadow-lg mb-3 d-flex align-items-center justify-content-center">
+                        <span class="display-4 fw-bold text-primary">
+                            @if (!string.IsNullOrEmpty(Model.Username))
+                            {
+                                @Model.Username.Substring(0, 1).ToUpper()
+                            }
+                            else
+                            {
+                                <i class="fas fa-user"></i>
+                            }
+                        </span>
+                    </div>
+
+                    <h4 class="fw-bold text-dark mb-1">@Model.Username</h4>
+
+                    <p class="text-muted small mb-3">Membru Platformă</p>
+
+                    <div class="d-flex justify-content-center gap-2 mb-4">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">
+                            <i class="fas fa-check-circle me-1"></i> Activ
+                        </span>
+                    </div>
+
+                    <hr class="border-light opacity-50">
+
+                    <div class="text-start px-2">
+                        <small class="text-uppercase text-muted fw-bold d-block mb-3">Date de Identificare</small>
+
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="icon-box-sm bg-light text-primary me-3 rounded-circle">
+                                <i class="fas fa-id-badge"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block lh-1">Cont Utilizator</small>
+                                <span class="fw-medium text-dark">@Model.Username</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box-sm bg-light text-secondary me-3 rounded-circle">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block lh-1">Contact Rapid</small>
+                                <span class="fw-medium text-dark">
+                                    @(string.IsNullOrEmpty(Model.Input.PhoneNumber) ? "Nedefinit" : Model.Input.PhoneNumber)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm glass-card h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fas fa-sliders-h me-2 text-primary"></i>Configurare Profil & Acces
+                    </h5>
+                    <p class="text-muted small mt-1">
+                        Gestionează informațiile personale și preferințele de contact asociate acestui cont.
+                        Pentru modificări critice, contactează administratorul.
+                    </p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form id="profile-form" method="post">
+
+                        <div class="bg-light bg-opacity-50 p-3 rounded-3 border border-light mb-4">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3">
+                                <i class="fas fa-shield-alt me-1"></i> Credențiale Sistem (Nu pot fi modificate )
+                            </h6>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input asp-for="Username" class="form-control bg-white text-muted" placeholder="Username" disabled />
+                                        <label asp-for="Username" class="text-muted">ID Utilizator</label> <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-secondary">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input class="form-control bg-white text-muted" value="@Model.Username" placeholder="Email" disabled />
+                                        <label class="text-muted">Email Asociat</label> <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-secondary">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-text small text-end mt-0">
+                                        <i class="fas fa-info-circle me-1"></i>Aceste date asigură unicitatea ta în platformă.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="text-uppercase text-muted small fw-bold mb-3 mt-2">
+                            <i class="fas fa-pen-fancy me-1"></i> Informații de Contact
+                        </h6>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.PhoneNumber" class="form-control bg-white border" placeholder="Telefon" />
+                            <label asp-for="Input.PhoneNumber" class="text-muted">Telefon Mobil</label>
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="alert alert-info border-0 bg-info bg-opacity-10 d-flex align-items-center small">
+                            <i class="fas fa-user-shield me-3 fs-5 text-info"></i>
+                            <div>
+                                Securitatea contului (resetare parolă, 2FA) se administrează din meniul dedicat.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button id="update-profile-button" type="submit" class="btn btn-primary shadow-lg rounded-pill px-5 py-2 fw-bold">
+                                <i class="fas fa-check me-2"></i>Actualizează Datele
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* === STILURILE RĂMÂN ACELEAȘI (GLASSMORPHISM) === */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+    }
+
+    .avatar-profile {
+        width: 100px;
+        height: 100px;
+        background-color: white;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.8);
+        position: relative;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
+    }
+
+    .form-control {
+        background-color: white !important;
+        border: 1px solid #ced4da !important;
+        color: #212529 !important;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+        }
+
+        .form-control:disabled {
+            background-color: #f8f9fa !important;
+            border-color: #e9ecef !important;
+            opacity: 1;
+            cursor: not-allowed;
+        }
+
+    .icon-box-sm {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

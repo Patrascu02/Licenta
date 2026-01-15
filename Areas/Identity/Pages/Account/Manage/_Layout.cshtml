@@ -1,0 +1,44 @@
+﻿@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
+    {
+        Layout = parentLayout.ToString();
+    }
+    else
+    {
+        // IMPORTANT: Aici facem legătura cu designul principal al site-ului
+        Layout = "/Views/Shared/_Layout.cshtml";
+    }
+}
+
+<div class="container-fluid py-5">
+    <div class="row g-4">
+
+        <div class="col-lg-3 col-md-4">
+            <div class="card border-0 shadow-sm glass-sidebar mb-4">
+                <div class="card-body p-3">
+                    <h6 class="text-uppercase text-muted fw-bold small mb-3 ps-2 pt-2 border-bottom pb-2">
+                        <i class="fas fa-bars me-2"></i>Meniu Cont
+                    </h6>
+                    <partial name="_ManageNav" />
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9 col-md-8">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}
+
+<style>
+    /* Stil specific pentru Sidebar-ul din cont */
+    .glass-sidebar {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+    }
+</style>

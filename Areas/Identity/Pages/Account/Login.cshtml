@@ -1,0 +1,233 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Autentificare";
+}
+
+<div class="login-background d-flex align-items-center justify-content-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+
+                <div class="card glass-card border-0 shadow-lg fade-in-up">
+                    <div class="card-body p-5">
+
+                        <div class="text-center mb-4">
+                            <div class="icon-circle-lg mx-auto mb-3 shadow-sm bg-primary bg-gradient text-white">
+                                <i class="fas fa-basketball-ball fa-2x"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark mb-1">Bine ai venit!</h3>
+                            <p class="text-muted small">Introdu datele pentru a accesa platforma.</p>
+                        </div>
+
+                        <form id="account" method="post">
+
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger d-flex align-items-center mb-4 fade-in-up" role="alert">
+                                    <i class="fas fa-exclamation-circle me-3 fs-4"></i>
+                                    <div>
+                                        <span class="fw-bold d-block">Parola/Username invalide !Mai incearca o data !</span>
+                                        <div asp-validation-summary="ModelOnly" class="small mb-0"></div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                <label asp-for="Input.Email" class="text-muted"><i class="fas fa-envelope me-2"></i>Email</label>
+                                <span asp-validation-for="Input.Email" class="text-danger small ms-2"></span>
+                            </div>
+
+                            <div class="input-group mb-4">
+                                <div class="form-floating flex-grow-1">
+                                    <input asp-for="Input.Password" id="passwordInput" class="form-control border-end-0 rounded-end-0" autocomplete="current-password" aria-required="true" placeholder="password" />
+                                    <label asp-for="Input.Password" class="text-muted"><i class="fas fa-lock me-2"></i>Parolă</label>
+                                </div>
+                                <button type="button" class="btn btn-light border border-start-0 bg-white text-muted rounded-end-3" onclick="togglePassword()">
+                                    <i id="toggleIcon" class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Input.Password" class="text-danger small d-block mt-n3 mb-3 ms-2"></span>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" asp-for="Input.RememberMe" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                    <label class="form-check-label text-muted small" for="flexSwitchCheckDefault">
+                                        Ține-mă minte
+                                    </label>
+                                </div>
+                                <a id="forgot-password" asp-page="./ForgotPassword" class="text-primary small fw-bold text-decoration-none">
+                                    Ai uitat parola?
+                                </a>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button id="login-submit" type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm fw-bold hover-scale">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Autentificare
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer bg-light bg-opacity-50 border-0 text-center py-3 rounded-bottom-4">
+                        <small class="text-muted">
+                            &copy; @DateTime.Now.Year Club Baschet Management.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 fade-in-up" style="animation-delay: 0.1s;">
+                    <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none small opacity-75 hover-white">
+                        <i class="fas fa-arrow-left me-1"></i> Înapoi la pagina principală
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* === FUNDAL PAGINĂ === */
+    .login-background {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .login-background::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+        .login-background::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+        }
+
+    /* === CARD DE STICLĂ === */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+    }
+
+    /* === ICON CERC === */
+    .icon-circle-lg {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* === FORM INPUTS === */
+    .form-control {
+        background-color: rgba(248, 249, 250, 0.7) !important;
+        border: 1px solid #e9ecef !important;
+        border-radius: 12px;
+        padding-left: 1rem;
+    }
+
+        .form-control:focus {
+            background-color: white !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1) !important;
+            z-index: 1; /* Ca să vină peste border-ul vecin */
+        }
+
+    .form-floating > label {
+        padding-left: 1rem;
+    }
+
+    /* Input group pentru parolă */
+    .input-group .form-control {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    .input-group .btn {
+        border-color: #e9ecef !important;
+        z-index: 0;
+    }
+
+        .input-group .btn:hover {
+            background-color: #e9ecef !important;
+        }
+
+    /* === ANIMATIONS === */
+    .fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .hover-scale {
+        transition: transform 0.2s ease;
+    }
+
+        .hover-scale:hover {
+            transform: translateY(-2px);
+        }
+
+    .hover-white:hover {
+        opacity: 1 !important;
+    }
+
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Listele de erori implicite Identity */
+    .alert ul {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Funcție simplă pentru a arăta/ascunde parola
+        function togglePassword() {
+            var input = document.getElementById("passwordInput");
+            var icon = document.getElementById("toggleIcon");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+}

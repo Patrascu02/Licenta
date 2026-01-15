@@ -1,4 +1,4 @@
-﻿using Licenta.Data;
+using Licenta.Data;
 using Licenta.Models.Core; // Adăugat pentru a accesa clasa Staff
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
