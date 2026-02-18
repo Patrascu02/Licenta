@@ -1,134 +1,198 @@
-﻿@using Licenta.Models.ViewModels
-@model AdminDashboardViewModel
+﻿@model Licenta.Models.ViewModels.AdminDashboardViewModel
+
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container-fluid py-5">
-    <div class="d-flex justify-content-between align-items-center mb-5 fade-in-up">
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
-            <h2 class="mb-1 text-gradient" style="font-size: 2.5rem;">
-                <i class="fas fa-layer-group me-2 text-primary"></i>Admin Dashboard
-            </h2>
-            <p class="text-muted fw-medium fs-5">Bine ai venit în centrul de comandă.</p>
+            <h1 class="display-5 fw-bold text-gradient mb-0">
+                <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+            </h1>
+            <p class="text-muted mt-2 mb-0">Panou de control centralizat</p>
         </div>
         <div class="d-flex gap-3">
-            <a asp-action="ManageRoles" class="btn btn-light bg-white text-dark shadow-sm">
-                <i class="fas fa-shield-alt me-2 text-warning"></i>Roluri
+            <a asp-action="ManageRoles" class="btn btn-outline-primary px-4 py-2 shadow-sm d-flex align-items-center">
+                <i class="fas fa-user-shield me-2"></i>Gestionează Roluri
             </a>
-            <a asp-action="CreateUser" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Utilizator Nou
+            <a asp-action="CreateUser" class="btn btn-cyber px-4 py-2 shadow-sm d-flex align-items-center">
+                <i class="fas fa-user-plus me-2"></i>Utilizator Nou
             </a>
         </div>
     </div>
 
     <div class="row g-4 mb-5">
-        <div class="col-xl-4 col-md-6">
-            <div class="card stat-card bg-admin-primary h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start">
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card glass-card h-100 stat-card border-primary">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
                         <div>
-                            <h6 class="text-uppercase text-white-50 fw-bold mb-2">Total Utilizatori</h6>
-                            <h2 class="display-4 fw-bold mb-0 text-white">@Model.TotalUsers</h2>
+                            <p class="text-uppercase small fw-bold text-muted mb-1">Total Utilizatori</p>
+                            <h2 class="display-6 fw-bold mb-0 text-primary" style="text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);">
+                                @Model.TotalUsers
+                            </h2>
                         </div>
-                        <span class="badge bg-white bg-opacity-25 rounded-pill p-2 px-3 text-white backdrop-blur">
-                            <i class="fas fa-check me-1"></i> Activ
-                        </span>
+                        <div class="icon-shape bg-primary bg-opacity-10 text-primary rounded-3 p-3 shadow-sm">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
                     </div>
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-users position-absolute text-primary" style="bottom: -15px; right: -15px; font-size: 6rem; transform: rotate(-15deg); opacity: 0.1;"></i>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6">
-            <div class="card stat-card bg-admin-light h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start">
+        <div class="col-md-6 col-lg-3">
+            <div class="card glass-card h-100 stat-card border-info">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
                         <div>
-                            <h6 class="text-uppercase text-white-50 fw-bold mb-2">Jucători Înregistrați</h6>
-                            <h2 class="display-4 fw-bold mb-0 text-white">@Model.TotalPlayers</h2>
+                            <p class="text-uppercase small fw-bold text-muted mb-1">Jucători</p>
+                            <h2 class="display-6 fw-bold mb-0 text-info" style="text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);">
+                                @Model.TotalPlayers
+                            </h2>
                         </div>
-                        <span class="badge bg-white bg-opacity-25 rounded-pill p-2 px-3 text-white backdrop-blur">
-                            +@Model.TotalCoaches Staff
-                        </span>
+                        <div class="icon-shape bg-info bg-opacity-10 text-info rounded-3 p-3 shadow-sm">
+                            <i class="fas fa-basketball-ball fa-2x"></i>
+                        </div>
                     </div>
-                    <i class="fas fa-basketball-ball"></i>
+                    <i class="fas fa-basketball-ball position-absolute text-info" style="bottom: -15px; right: -15px; font-size: 6rem; transform: rotate(-15deg); opacity: 0.1;"></i>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6">
-            <div class="card stat-card bg-admin-accent h-100">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start">
+        <div class="col-md-6 col-lg-3">
+            <div class="card glass-card h-100 stat-card border-warning">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
                         <div>
-                            <h6 class="text-uppercase text-white-50 fw-bold mb-2">Log-uri Sistem</h6>
-                            <h2 class="display-4 fw-bold mb-0 text-white">@Model.RecentLogs?.Count()</h2>
+                            <p class="text-uppercase small fw-bold text-muted mb-1">Antrenori</p>
+                            <h2 class="display-6 fw-bold mb-0 text-warning" style="text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);">
+                                @Model.TotalCoaches
+                            </h2>
                         </div>
-                        <span class="badge bg-white bg-opacity-25 rounded-pill p-2 px-3 text-white backdrop-blur">
-                            Audit
-                        </span>
+                        <div class="icon-shape bg-warning bg-opacity-10 text-warning rounded-3 p-3 shadow-sm">
+                            <i class="fas fa-clipboard-list fa-2x"></i>
+                        </div>
                     </div>
-                    <i class="fas fa-fingerprint"></i>
+                    <i class="fas fa-clipboard-list position-absolute text-warning" style="bottom: -15px; right: -15px; font-size: 6rem; transform: rotate(-15deg); opacity: 0.1;"></i>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card glass-card h-100 stat-card border-success">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
+                        <div>
+                            <p class="text-uppercase small fw-bold text-muted mb-1">Staff Tehnic</p>
+                            <h2 class="display-6 fw-bold mb-0 text-success" style="text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);">
+                                @Model.TotalStaff
+                            </h2>
+                        </div>
+                        <div class="icon-shape bg-success bg-opacity-10 text-success rounded-3 p-3 shadow-sm">
+                            <i class="fas fa-user-md fa-2x"></i>
+                        </div>
+                    </div>
+                    <i class="fas fa-user-md position-absolute text-success" style="bottom: -15px; right: -15px; font-size: 6rem; transform: rotate(-15deg); opacity: 0.1;"></i>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card h-100 border-0">
-                <div class="card-header bg-transparent border-bottom border-light py-4 px-4 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold text-dark">
-                        <i class="fas fa-history text-primary me-2"></i>Istoric Activitate
-                    </h5>
-                    <a asp-action="AuditLogs" class="btn btn-sm btn-outline-primary rounded-pill px-3">Vezi tot</a>
+        <div class="col-lg-5">
+            <div class="card glass-card h-100 border-0 shadow-sm">
+                <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-server me-2 text-danger"></i>Resurse Sistem</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-bold small text-white">RAM Usage</span>
+                            <span class="small text-muted">@Model.RamUsageMb MB / @Model.RamTotalMb MB</span>
+                        </div>
+                        <div class="progress bg-dark bg-opacity-50" style="height: 10px;">
+                            @{
+                                var ramPercent = (Model.RamUsageMb / Model.RamTotalMb) * 100;
+                                var ramColor = ramPercent > 80 ? "bg-danger" : "bg-primary";
+                            }
+                            <div class="progress-bar @ramColor progress-bar-striped progress-bar-animated" role="progressbar" style="width: @ramPercent%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-bold small text-white">Storage</span>
+                            <span class="small text-muted">@Model.StorageUsageMb MB / @Model.StorageLimitMb MB</span>
+                        </div>
+                        <div class="progress bg-dark bg-opacity-50" style="height: 10px;">
+                            @{
+                                var storagePercent = (Model.StorageUsageMb / Model.StorageLimitMb) * 100;
+                            }
+                            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: @storagePercent%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-bold small text-white">CPU Load</span>
+                            <span class="small text-muted">@Model.CpuUsagePercent %</span>
+                        </div>
+                        <div class="progress bg-dark bg-opacity-50" style="height: 10px;">
+                            <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar" style="width: @Model.CpuUsagePercent%"></div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-4" />
+
+                    <div class="row text-center">
+                        <div class="col-6 border-end border-secondary">
+                            <h6 class="small text-muted mb-1">Sesiuni Active</h6>
+                            <h4 class="fw-bold text-success mb-0">@Model.ActiveSessions</h4>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="small text-muted mb-1">Ultima Activitate</h6>
+                            <h4 class="fw-bold text-primary mb-0">@Model.LastActivityTime</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card glass-card h-100 border-0 shadow-sm">
+                <div class="card-header bg-transparent border-bottom border-secondary py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-history me-2 text-primary"></i>Activitate Recentă</h5>
+                    <a asp-action="AuditLogs" class="btn btn-sm btn-outline-light">Vezi Tot</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light bg-opacity-50">
+                        <table class="table align-middle mb-0">
+                            <thead>
                                 <tr>
                                     <th class="ps-4">Utilizator</th>
-                                    <th>Eveniment</th>
-                                    <th>Data</th>
-                                    <th class="text-center">Stare</th>
+                                    <th>Acțiune</th>
+                                    <th class="text-end pe-4">Timp</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (Model.RecentLogs != null && Model.RecentLogs.Any())
-                                {
-                                    foreach (var log in Model.RecentLogs)
-                                    {
-                                        <tr>
-                                            <td class="ps-4">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
-                                                        <i class="fas fa-user-tie"></i>
-                                                    </div>
-                                                    <div>
-                                                        <span class="d-block fw-bold text-dark">ID: @log.StaffId</span>
-                                                        <small class="text-muted">Staff Member</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="fw-medium text-dark">@log.Action</span>
-                                            </td>
-                                            <td class="text-muted small">
-                                                <i class="far fa-clock me-1"></i> @log.Timestamp.ToString("dd MMM HH:mm")
-                                            </td>
-                                            <td class="text-center">
-                                                <i class="fas fa-check-circle text-success fs-5 shadow-sm rounded-circle bg-white"></i>
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
+                                @foreach (var log in Model.RecentLogs)
                                 {
                                     <tr>
-                                        <td colspan="4" class="text-center py-5 text-muted">
-                                            Nu există date recente.
+                                        <td class="ps-4 fw-bold text-primary">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle bg-primary bg-opacity-25 text-primary me-2 rounded-circle d-flex align-items-center justify-content-center" style="width:30px; height:30px; font-size:0.8rem;">
+                                                    @(log.Staff?.FirstName.Substring(0, 1) ?? "U")
+                                                </div>
+                                                <span class="text-white">@log.Staff?.FirstName @log.Staff?.LastName</span>
+                                            </div>
+                                        </td>
+                                        <td class="small text-muted">@log.Action</td>
+                                        <td class="text-end pe-4 text-muted small">
+                                            <i class="far fa-clock me-1"></i>@log.Timestamp.ToString("HH:mm")
                                         </td>
                                     </tr>
                                 }
@@ -138,100 +202,5 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4">
-            <div class="card h-100 bg-white border-0 shadow-sm">
-                <div class="card-body p-4 d-flex flex-column">
-                    <h5 class="fw-bold text-dark mb-4 d-flex align-items-center">
-                        <i class="fas fa-server text-primary me-2"></i>Monitorizare Resurse
-                        <span class="badge bg-success bg-opacity-10 text-success ms-auto small" style="font-size: 0.7rem;">Live</span>
-                    </h5>
-
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-end mb-1">
-                            <span class="text-muted small fw-bold text-uppercase">Procesor (CPU)</span>
-                            <span class="fw-bold text-dark">@Model.CpuUsagePercent%</span>
-                        </div>
-                        <div class="progress" style="height: 6px; background-color: #e9ecef;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: @Model.CpuUsagePercent%; border-radius: 10px;"></div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-end mb-1">
-                            <span class="text-muted small fw-bold text-uppercase">Memorie RAM (App)</span>
-                            <span class="fw-bold text-dark">@Model.RamUsageMb MB / @Model.RamTotalMb MB</span>
-                        </div>
-                        <div class="progress" style="height: 6px; background-color: #e9ecef;">
-                            @{
-                                var ramClass = Model.RamPercentage > 80 ? "bg-danger" : "bg-info";
-                            }
-                            <div class="progress-bar @ramClass" role="progressbar" style="width: @Model.RamPercentage%; border-radius: 10px;"></div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-end mb-1">
-                            <span class="text-muted small fw-bold text-uppercase">Stocare (wwwroot)</span>
-                            <span class="fw-bold text-warning">@Model.StorageUsageMb MB</span>
-                        </div>
-                        <div class="progress" style="height: 6px; background-color: #e9ecef;">
-                            <div class="progress-bar bg-warning" role="progressbar" style="width: @Model.StoragePercentage%; border-radius: 10px;"></div>
-                        </div>
-                        <small class="text-muted" style="font-size: 0.75rem;">Imagini, Documente și Scripturi</small>
-                    </div>
-
-                    <div class="row g-3 mt-1">
-                        <div class="col-6">
-                            <div class="p-3 rounded-3 bg-light border border-light text-center h-100">
-                                <i class="fas fa-users text-primary mb-2 fs-5"></i>
-                                <h6 class="fw-bold mb-0 text-dark">@Model.ActiveSessions</h6>
-                                <small class="text-muted">Useri Activi</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-3 rounded-3 bg-light border border-light text-center h-100">
-                                <i class="fas fa-save text-success mb-2 fs-5"></i>
-                                <h6 class="fw-bold mb-0 text-dark">@Model.LastActivityTime</h6>
-                                <small class="text-muted">Ultima Modificare</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-auto pt-4">
-                        <div class="d-flex align-items-center p-3 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-10">
-                            <i class="fas fa-shield-alt text-primary fs-4 me-3"></i>
-                            <div>
-                                <small class="d-block fw-bold text-primary">Sistem Securizat</small>
-                                <small class="text-muted lh-1" style="font-size: 0.75rem;">Server ASP.NET Core Active</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
-
-<style>
-    .backdrop-blur {
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-    }
-
-    .fade-in-up {
-        animation: fadeInUp 0.8s ease-out;
-    }
-
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>

@@ -12,10 +12,12 @@ using Licenta.Models.Calendar;
 using Licenta.Models.HR;
 using Licenta.Models.Files;
 using Licenta.Models.Scouting;
+using Licenta.Models.Identity; // <--- ESENȚIAL: Pentru ApplicationUser
 
 namespace Licenta.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    // SCHIMBARE AICI: Moștenim IdentityDbContext<ApplicationUser> în loc de simplu IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -61,7 +63,7 @@ namespace Licenta.Data
             builder.Entity<Injury>().HasKey(i => i.InjuryId);
             builder.Entity<UserPermission>().HasKey(up => up.UserPermissionId);
 
-            // --- REZOLVARE WARNINGS PENTRU DECIMAL (AICI AM ADĂUGAT TEAM) ---
+            // --- REZOLVARE WARNINGS PENTRU DECIMAL ---
             builder.Entity<Contract>()
                 .Property(c => c.Salary)
                 .HasColumnType("decimal(18,2)");
@@ -74,7 +76,6 @@ namespace Licenta.Data
                 .Property(s => s.Budget)
                 .HasColumnType("decimal(18,2)");
 
-            // NOU: Configurare pentru bugetul echipei
             builder.Entity<Team>()
                 .Property(t => t.BudgetLimit)
                 .HasColumnType("decimal(18,2)");

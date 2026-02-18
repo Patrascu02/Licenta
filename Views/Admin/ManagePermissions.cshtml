@@ -34,7 +34,8 @@
                 </span>
             </div>
         </div>
-        <a asp-action="ManageRoles" class="btn btn-outline-light">
+
+        <a asp-action="ManageRoles" class="btn btn-outline-primary d-flex align-items-center shadow-sm px-4 py-2 fw-bold">
             <i class="fas fa-arrow-left me-2"></i>Înapoi la Roluri
         </a>
     </div>
@@ -72,7 +73,7 @@
                                         <input type="hidden" asp-for="PermissionList[i].Name" />
                                         <input type="hidden" asp-for="PermissionList[i].Description" />
 
-                                        <span class="badge bg-dark text-info border border-info font-monospace px-3 py-2">
+                                        <span class="badge badge-cyber font-monospace px-3 py-2 rounded-1">
                                             @Model.PermissionList[i].Name
                                         </span>
                                     </td>
@@ -103,7 +104,7 @@
 </div>
 
 <style>
-    /* Păstrăm DOAR culorile pentru badge-urile de rol */
+    /* Stiluri specifice doar pentru culorile rolurilor (GM, Coach etc.) */
     .role-gm {
         background: linear-gradient(135deg, #4c1d95 0%, #312e81 100%);
         color: #e0e7ff;

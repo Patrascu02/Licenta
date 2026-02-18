@@ -1,78 +1,88 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Licenta.Data
 @using Microsoft.EntityFrameworkCore
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@using Licenta.Models.Identity
+
+@* Injectăm Managerii standard și Contextul Bazei de Date pentru a accesa Staff *@
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @inject ApplicationDbContext _context
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
+        // 1. Obținem utilizatorul logat (Identity)
         var user = await UserManager.GetUserAsync(User);
 
         if (user != null)
         {
-            // 1. Preluare Date
+            // 2. Căutăm profilul de STAFF asociat acestui cont
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
-            string displayName = staff != null ? $"{staff.FirstName} {staff.LastName}" : user.Email;
-            string email = user.Email;
 
-            // 2. Initiale
-            string initials = staff != null && !string.IsNullOrEmpty(staff.FirstName) && !string.IsNullOrEmpty(staff.LastName)
-            ? $"{staff.FirstName[0]}{staff.LastName[0]}".ToUpper()
-            : (user.Email != null && user.Email.Length > 0 ? user.Email.Substring(0, 1).ToUpper() : "U");
+            // 3. Determinăm Numele de Afișat (Din Staff sau Email de rezervă)
+            string displayName = (staff != null && !string.IsNullOrEmpty(staff.FirstName))
+            ? $"{staff.FirstName} {staff.LastName}"
+            : user.Email;
 
-            // 3. Preluare Rol (pentru afișare în dropdown)
+            // 4. Generăm Inițialele (Ex: "IP" pentru Ion Popescu)
+            string initials = "U";
+            if (staff != null && !string.IsNullOrEmpty(staff.FirstName) && !string.IsNullOrEmpty(staff.LastName))
+            {
+                initials = $"{staff.FirstName[0]}{staff.LastName[0]}".ToUpper();
+            }
+            else if (!string.IsNullOrEmpty(user.Email))
+            {
+                initials = user.Email.Substring(0, 1).ToUpper();
+            }
+
+            // 5. Obținem Rolul (pentru afișare)
             var roles = await UserManager.GetRolesAsync(user);
-            var roleName = roles.FirstOrDefault() ?? "Membru";
+            var roleName = roles.FirstOrDefault() ?? "Utilizator";
 
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 user-trigger" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="text-end d-none d-md-block lh-1">
-                        <span class="d-block fw-bold text-white" style="font-size: 0.9rem;">@displayName</span>
-                        <span class="text-white-50" style="font-size: 0.75rem;">@roleName</span>
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 cyber-profile-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                    <div class="cyber-avatar">
+                        <span>@initials</span>
                     </div>
 
-                    <div class="position-relative">
-                        <div class="avatar-circle">@initials</div>
-                        <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle">
-                            <span class="visually-hidden">Online</span>
-                        </span>
+                    <div class="d-none d-md-block lh-1 text-start">
+                        <span class="d-block fw-bold text-neon-small">@displayName</span>
+                        <span class="small text-muted" style="font-size: 0.7rem;">@roleName</span>
                     </div>
                 </a>
 
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-3 p-0 overflow-hidden animate-slide" aria-labelledby="userDropdown">
+                <ul class="dropdown-menu dropdown-menu-end cyber-dropdown" aria-labelledby="userDropdown">
 
-                    <li class="p-4 bg-gradient-primary text-white text-center position-relative">
-                        <div class="avatar-circle-lg mx-auto mb-3 shadow">@initials</div>
-                        <h6 class="fw-bold mb-0 text-white">@displayName</h6>
-                        <small class="text-white-50">@email</small>
-                        <span class="badge bg-white bg-opacity-25 text-white border border-white border-opacity-25 mt-2 rounded-pill px-3">
-                            @roleName
-                        </span>
+                    <li class="px-3 py-3 border-bottom border-secondary mb-2 text-center">
+                        <div class="cyber-avatar mx-auto mb-2" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                            <span>@initials</span>
+                        </div>
+                        <span class="d-block fw-bold text-white">@displayName</span>
+                        <small class="text-muted">@user.Email</small>
                     </li>
 
-                    <li class="p-2">
-                        <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center mb-1" asp-area="Identity" asp-page="/Account/Manage/Index">
-                            <div class="icon-box me-3 text-primary bg-primary bg-opacity-10">
-                                <i class="fas fa-user-cog"></i>
-                            </div>
-                            <div>
-                                <span class="d-block fw-bold text-dark">Profilul Meu</span>
-                                <small class="text-muted">Setări cont și parolă</small>
-                            </div>
+                    <li>
+                        <a class="dropdown-item cyber-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            <i class="fas fa-id-card me-2 text-info"></i>Profilul Meu
                         </a>
                     </li>
 
-                    <li><hr class="dropdown-divider my-1 mx-3 border-light"></li>
+                    @if (User.IsInRole("Admin") || User.IsInRole("GeneralManager"))
+                    {
+                        <li>
+                            <a class="dropdown-item cyber-item" asp-controller="Admin" asp-action="AdminDashboard">
+                                <i class="fas fa-tachometer-alt me-2 text-success"></i>Dashboard
+                            </a>
+                        </li>
+                    }
 
-                    <li class="p-2">
-                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                            <button type="submit" class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center text-danger logout-btn">
-                                <div class="icon-box me-3 text-danger bg-danger bg-opacity-10">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </div>
-                                <span class="fw-bold">Deconectare</span>
+                    <li><hr class="dropdown-divider bg-secondary opacity-50 my-2"></li>
+
+                    <li>
+                        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                            <button id="logout" type="submit" class="dropdown-item cyber-item text-danger">
+                                <i class="fas fa-power-off me-2"></i>Deconectare
                             </button>
                         </form>
                     </li>
@@ -83,107 +93,14 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-link btn btn-primary text-white px-4 rounded-pill fw-bold shadow-sm ms-2 hover-scale" asp-area="Identity" asp-page="/Account/Login">
-                <i class="fas fa-sign-in-alt me-2"></i> Autentificare
+            <a class="nav-link text-uppercase fw-bold mx-2 cyber-link" id="register" asp-area="Identity" asp-page="/Account/Register">
+                <i class="fas fa-user-plus me-1"></i> Înregistrare
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-outline-primary btn-sm ms-2 px-3 fw-bold mt-1 cyber-btn-glow" id="login" asp-area="Identity" asp-page="/Account/Login">
+                <i class="fas fa-sign-in-alt me-1"></i> Autentificare
             </a>
         </li>
     }
 </ul>
-
-<style>
-    /* === STILURI AVATAR === */
-    .avatar-circle {
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(5px);
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.9rem;
-        transition: transform 0.2s;
-    }
-
-    .user-trigger:hover .avatar-circle {
-        transform: scale(1.1);
-        background: white;
-        color: var(--primary-color);
-    }
-
-    .avatar-circle-lg {
-        width: 60px;
-        height: 60px;
-        background: white;
-        color: var(--primary-color);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-        font-size: 1.5rem;
-    }
-
-    /* === HEADER MENU === */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-    }
-
-    /* === ITEMS & ICONS === */
-    .icon-box {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-    }
-
-    .dropdown-menu {
-        min-width: 280px;
-        border-radius: 16px !important;
-        animation: slideDown 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-
-    .dropdown-item {
-        transition: all 0.2s;
-    }
-
-        .dropdown-item:hover {
-            background-color: transparent;
-            transform: translateX(5px);
-        }
-
-            .dropdown-item:hover .fw-bold {
-                color: var(--primary-color);
-            }
-
-    .logout-btn:hover .fw-bold {
-        color: #dc3545 !important; /* Red for logout */
-    }
-
-    .hover-scale {
-        transition: transform 0.2s;
-    }
-
-    .hover-scale:hover {
-        transform: scale(1.05); /* Mărește puțin butonul la hover */
-    }
-
-    /* === ANIMATION === */
-    @@keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(10px) scale(0.95);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-</style>
