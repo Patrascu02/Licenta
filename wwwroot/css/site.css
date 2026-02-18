@@ -1,248 +1,406 @@
-﻿:root {
-    /* Culori de bază */
-    --primary-color: #2563eb;
-    --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    --secondary-color: #f59e0b;
-    --bg-body: #edf2f9;
-    /* Variabile pentru efectul GLASS (Sticlă) */
-    --glass-bg: rgba(255, 255, 255, 0.85); /* Puțin mai opac pentru contrast cu fundalul animat */
-    --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    --glass-blur: blur(12px);
-    /* Efecte 3D */
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-3d: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.1);
-    --shadow-hover: 0 20px 40px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.1);
+﻿/* =========================================
+   CYBER-SPORT THEME VARIABLES
+   ========================================= */
+:root {
+    /* --- Core Colors (Fundal Dark Navy) --- */
+    --cyber-bg-main: #0f172a;
+    --cyber-bg-secondary: #1e293b;
+    /* --- Text Colors (SCHIMBAT: Gri în loc de Alb) --- */
+    --cyber-text-primary: #cbd5e1; /* Gri deschis (Slate-300) - mult mai soft decât albul */
+    --cyber-text-secondary: #94a3b8; /* Gri mediu (Slate-400) */
+    --cyber-text-highlight: #e2e8f0; /* Un gri foarte deschis doar pentru Hover */
+    /* --- Neon Accents --- */
+    --neon-primary: #06b6d4; /* Cyan electric */
+    --neon-secondary: #3b82f6; /* Albastru regal */
+
+    --neon-success: #10b981;
+    --neon-danger: #ef4444;
+    --neon-warning: #f59e0b;
+    /* --- Effects --- */
+    --cyber-box-shadow: 0 4px 20px rgba(6, 182, 212, 0.1);
+    --panel-border: 1px solid rgba(148, 163, 184, 0.2); /* Bordură gri subtilă */
+    /* --- Typography --- */
+    --font-cyber: 'Orbitron', sans-serif;
+    --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-/* === FUNDAL ANIMAT (Aurora Effect) === */
-body {
-    font-family: 'Inter', sans-serif;
-    /* Gradient dinamic care se mișcă lent */
-    background: linear-gradient(-45deg, #e0e7ff, #c7d2fe, #bae6fd, #f0f9ff);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    color: #334155;
-    min-height: 100vh;
+/* =========================================
+   GLOBAL RESETS & TYPOGRAPHY
+   ========================================= */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: var(--font-ui);
+    background-color: var(--cyber-bg-main);
+    color: var(--cyber-text-primary);
+    overflow-x: hidden;
+}
+
+    /* Cyber Background Pattern */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+/* Titluri - Păstrăm Neon-ul dar reducem intensitatea */
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3 {
+    font-family: var(--font-cyber), var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--neon-primary) !important;
+    text-shadow: 0 0 5px rgba(6, 182, 212, 0.3); /* Glow mai mic */
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--neon-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    a:hover {
+        color: var(--neon-secondary);
+    }
+
+/* Fix pentru textele standard Bootstrap */
+.text-dark, .text-body {
+    color: var(--cyber-text-primary) !important;
+}
+
+.text-muted {
+    color: var(--cyber-text-secondary) !important;
+}
+
+.text-white {
+    color: var(--cyber-text-primary) !important; /* Transformăm orice "white" forțat în gri */
+}
+
+/* =========================================
+   LAYOUT STRUCTURE
+   ========================================= */
+.page-wrapper {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
 }
 
-@keyframes gradientBG {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
+.content-wrapper {
+    flex: 1 0 auto;
+    padding-bottom: 2rem;
 }
 
-/* === NAVBAR 3D GLASS === */
+.container {
+    max-width: 1400px;
+}
+
+/* =========================================
+   CYBER PANELS (Cards)
+   ========================================= */
+.glass-card, .card {
+    background: rgba(30, 41, 59, 0.7) !important; /* Slate-800 cu transparență */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--panel-border) !important;
+    border-radius: 6px !important;
+    box-shadow: var(--cyber-box-shadow) !important;
+    color: var(--cyber-text-primary);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+    .glass-card:hover, .card:hover {
+        border-color: var(--cyber-text-secondary) !important; /* Bordură gri la hover, nu albă */
+        transform: translateY(-2px);
+    }
+
+.card-header {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+    color: var(--neon-primary) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.card-body {
+    color: var(--cyber-text-primary) !important;
+}
+
+.card-footer {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.1) !important;
+}
+
+/* =========================================
+   NAVBAR
+   ========================================= */
 .navbar {
-    background: rgba(13, 71, 161, 0.85) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--neon-primary);
     padding: 1rem 2rem;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
 }
 
 .navbar-brand {
+    font-family: var(--font-cyber), sans-serif;
     font-weight: 800;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    font-size: 1.6rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--neon-primary) !important;
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+    font-size: 1.5rem;
 }
 
 .nav-link {
-    font-weight: 500;
-    color: rgba(255,255,255,0.9) !important;
-    border-radius: 8px;
-    padding: 0.5rem 1.2rem !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-    .nav-link:hover {
-        background: rgba(255, 255, 255, 0.15);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        color: #fff !important;
-        text-shadow: 0 0 8px rgba(255,255,255,0.6);
-    }
-
-/* === CARDURI 3D STICLOASE === */
-.card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: var(--glass-border);
-    background: linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 100%);
-    border-radius: 20px;
-    box-shadow: var(--shadow-3d);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    overflow: hidden;
-}
-
-    .card:hover {
-        transform: translateY(-10px) scale(1.01);
-        box-shadow: var(--shadow-hover);
-        border-color: rgba(255, 255, 255, 1);
-        z-index: 10;
-    }
-
-/* Carduri Statistici */
-.stat-card {
-    color: white !important;
-    border: none;
-    position: relative;
-    overflow: hidden; /* Asigură că nu iese din card, dar o vom poziționa mai bine */
-}
-
-.bg-admin-primary {
-    background: linear-gradient(135deg, rgba(13, 71, 161, 0.9), rgba(25, 118, 210, 0.8));
-}
-
-.bg-admin-light {
-    background: linear-gradient(135deg, rgba(21, 101, 192, 0.9), rgba(33, 150, 243, 0.8));
-}
-
-.bg-admin-accent {
-    background: linear-gradient(135deg, rgba(2, 119, 189, 0.9), rgba(3, 169, 244, 0.8));
-}
-
-.stat-card i {
-    position: absolute;
-    right: 15px; /* Era -10px, o aducem mai în interior */
-    bottom: 15px; /* Era -10px */
-    font-size: 3.5rem; /* Era 5rem - o facem puțin mai mică pentru a avea loc */
-    opacity: 0.2; /* O facem o idee mai vizibilă */
-    transform: rotate(-15deg);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.stat-card:hover i {
-    transform: rotate(0deg) scale(1.1); /* Zoom mai mic (1.1 vs 1.2) */
-    opacity: 0.4;
-    right: 20px;
-    bottom: 20px;
-}
-
-/* === BUTOANE 3D === */
-.btn {
-    border-radius: 12px;
-    padding: 0.7rem 1.5rem;
+    color: var(--cyber-text-secondary) !important;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    border: none;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    position: relative;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.3s;
 }
 
-.btn-primary {
-    background: var(--primary-gradient);
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-}
-
-    .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.6);
+    .nav-link:hover, .nav-link.active {
+        color: var(--cyber-text-highlight) !important; /* Gri deschis, nu alb */
     }
 
-/* === TABELE PLUTITOARE (Floating Rows) === */
+    /* Linie sub meniu */
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        bottom: 5px;
+        left: 10%;
+        width: 0;
+        height: 2px;
+        background: var(--neon-primary);
+        transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::before,
+    .nav-link.active::before {
+        width: 80%;
+    }
+
+/* =========================================
+   BUTTONS & INPUTS (SCHIMBAT: Fără alb)
+   ========================================= */
+.btn {
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.3s ease;
+}
+
+/* Buton Principal */
+.btn-primary, .btn-cyber {
+    background: transparent !important;
+    color: var(--neon-primary) !important;
+    border: 1px solid var(--neon-primary) !important;
+    box-shadow: inset 0 0 10px rgba(6, 182, 212, 0.1);
+}
+
+    .btn-primary:hover, .btn-cyber:hover {
+        background: rgba(6, 182, 212, 0.1) !important; /* Doar un fundal tintat, nu plin */
+        color: var(--cyber-text-highlight) !important;
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.4) !important;
+        border-color: var(--neon-primary) !important;
+    }
+
+/* Buton Secundar (Gri) */
+.btn-secondary, .btn-light, .btn-outline-secondary {
+    background: transparent !important;
+    border: 1px solid var(--cyber-text-secondary) !important;
+    color: var(--cyber-text-secondary) !important;
+}
+
+    .btn-secondary:hover {
+        background: rgba(148, 163, 184, 0.1) !important;
+        color: var(--cyber-text-highlight) !important;
+        border-color: var(--cyber-text-highlight) !important;
+    }
+
+/* Input-uri (Căsuțe de text) */
+.form-control, .form-select {
+    background-color: rgba(30, 41, 59, 0.6) !important; /* Fundal închis */
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+    color: var(--cyber-text-primary) !important; /* Text Gri, NU Alb */
+    border-radius: 4px;
+}
+
+    .form-control:focus, .form-select:focus {
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        border-color: var(--neon-primary) !important;
+        box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2) !important;
+        color: var(--cyber-text-highlight) !important;
+    }
+
+/* =========================================
+   TABLES (SCHIMBAT: Text Gri)
+   ========================================= */
 .table {
-    margin-bottom: 0;
+    color: var(--cyber-text-primary) !important;
+    --bs-table-color: var(--cyber-text-primary);
+    --bs-table-bg: transparent;
     border-collapse: separate;
-    border-spacing: 0 8px; /* Spațiu între rânduri */
+    border-spacing: 0 4px;
 }
 
     .table thead th {
-        background: transparent;
-        border: none;
-        color: #64748b;
-        font-weight: 700;
+        background-color: rgba(6, 182, 212, 0.05) !important;
+        color: var(--neon-primary) !important;
+        border-bottom: 1px solid rgba(6, 182, 212, 0.3) !important;
         text-transform: uppercase;
-        font-size: 0.75rem;
+        font-size: 0.85rem;
         padding: 1rem;
     }
 
     .table tbody tr {
-        transition: all 0.3s ease;
-        background: rgba(255,255,255,0.4); /* Ușor transparent default */
+        background-color: rgba(255, 255, 255, 0.02);
+        transition: all 0.2s ease;
     }
 
-    .table tbody td {
+        .table tbody tr:hover {
+            background-color: rgba(148, 163, 184, 0.1) !important; /* Hover gri subtil */
+        }
+
+    .table td {
+        border: none;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
         padding: 1rem;
         vertical-align: middle;
-        border: none; /* Fără linii între celule, folosim rânduri ca blocuri */
+        color: var(--cyber-text-primary) !important; /* AICI e schimbarea majoră: Gri, nu Alb */
     }
 
-    /* Rotunjim colțurile rândurilor */
-    .table tbody tr td:first-child {
-        border-top-left-radius: 12px;
-        border-bottom-left-radius: 12px;
+        /* Link-uri în tabele */
+        .table td a {
+            color: var(--neon-secondary) !important;
+            font-weight: 500;
+        }
+
+            .table td a:hover {
+                color: var(--cyber-text-highlight) !important;
+            }
+
+/* =========================================
+   DROPDOWNS & MODALS (FIX PENTRU CĂSUȚE ALBE)
+   ========================================= */
+/* Asigurăm că meniurile dropdown nu sunt albe */
+.dropdown-menu {
+    background-color: var(--cyber-bg-secondary) !important;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.dropdown-item {
+    color: var(--cyber-text-primary) !important;
+}
+
+    .dropdown-item:hover {
+        background-color: rgba(255,255,255,0.05) !important;
+        color: var(--neon-primary) !important;
     }
 
-    .table tbody tr td:last-child {
-        border-top-right-radius: 12px;
-        border-bottom-right-radius: 12px;
-    }
-
-/* Efectul de plutire la hover pe rând */
-.table-hover tbody tr:hover {
-    background-color: white !important;
-    transform: scale(1.02);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-    cursor: pointer;
-    z-index: 10;
-    position: relative;
+/* Asigurăm că ferestrele modale nu sunt albe */
+.modal-content {
+    background-color: var(--cyber-bg-main) !important;
+    border: 1px solid var(--neon-primary);
+    box-shadow: 0 0 30px rgba(0,0,0,0.7);
 }
 
-/* === UTILS & TEXT GRADIENT === */
-.text-shadow {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.modal-header, .modal-footer {
+    border-color: rgba(148, 163, 184, 0.1) !important;
 }
 
-.text-gradient {
-    background: linear-gradient(to right, #2563eb, #9333ea);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
+.close, .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* Face X-ul vizibil pe dark mode */
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 10px;
-}
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-
+/* =========================================
+   FOOTER
+   ========================================= */
 .footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    line-height: 60px;
-    background: rgba(255,255,255,0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    color: var(--cyber-text-secondary);
+    padding: 1.5rem 0;
+    margin-top: auto;
+    font-size: 0.9rem;
+}
+
+
+/* =======================================================
+   FIX PERMISIUNI & CHECKBOX-uri (Cererea ta specifică)
+   ======================================================= */
+
+/* 1. Lista de Permisiuni (Fundal Gri, Scris Albastru) */
+.list-group-item {
+    background-color: rgba(30, 41, 59, 0.9) !important; /* Fundal Gri (Slate) */
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    color: var(--neon-primary) !important; /* Scris Albastru Neon (Cyan) */
+    margin-bottom: 5px;
+    border-radius: 4px !important;
+    transition: all 0.3s ease;
+}
+
+    /* Efect când pui mouse-ul pe un rând din listă */
+    .list-group-item:hover {
+        background-color: rgba(15, 23, 42, 1) !important; /* Puțin mai închis la hover */
+        box-shadow: 0 0 10px rgba(6, 182, 212, 0.2); /* Strălucire albastră fină */
+        transform: translateX(5px); /* Se mișcă puțin la dreapta */
+    }
+
+/* 2. Butoanele de stare / Checkbox-urile */
+
+/* STAREA NESELECTATĂ -> ALB (să iasă în evidență) */
+.form-check-input {
+    background-color: #ffffff !important; /* Alb pur */
+    border: 2px solid #94a3b8 !important; /* Bordură gri */
+    width: 1.4em;
+    height: 1.4em;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+    /* STAREA SELECTATĂ -> VERDE NEON (Active) */
+    .form-check-input:checked {
+        background-color: var(--neon-success) !important; /* Verde Electric */
+        border-color: var(--neon-success) !important;
+        box-shadow: 0 0 15px var(--neon-success); /* Strălucire Verde */
+        /* Desenăm bifa (check-ul) cu alb */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+    }
+
+/* Label-ul de lângă checkbox (dacă există text descriptiv lângă buton) */
+.form-check-label {
+    color: var(--cyber-text-primary) !important; /* Text gri deschis */
+    font-weight: 500;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+/* OPȚIONAL: Dacă butoanele sunt de tip "Label Button" (cele mari rectangulare) */
+.btn-check + .btn {
+    background-color: #ffffff !important; /* Alb când nu e selectat */
+    color: #0f172a !important; /* Scris negru/închis */
+    border: 1px solid #cbd5e1;
+}
+
+.btn-check:checked + .btn {
+    background-color: var(--neon-success) !important; /* Verde când e selectat */
+    color: #ffffff !important; /* Scris alb */
+    border-color: var(--neon-success) !important;
+    box-shadow: 0 0 15px var(--neon-success);
 }
