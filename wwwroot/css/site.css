@@ -540,3 +540,89 @@ a {
 .dropdown-divider {
     border-top: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
+
+/* =======================================================
+   FIX NAVBAR & USER PROFILE (CYBER DROPDOWN)
+   ======================================================= */
+
+/* 1. Navbar deasupra tuturor */
+.navbar {
+    position: relative;
+    z-index: 1030;
+}
+
+/* 2. Avatar Cyber */
+.cyber-avatar {
+    width: 35px;
+    height: 35px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 2px solid var(--neon-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--neon-primary);
+    font-weight: bold;
+    font-family: var(--font-cyber);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+    transition: all 0.3s ease;
+}
+
+.cyber-profile-link:hover .cyber-avatar {
+    background: var(--neon-primary);
+    color: #000;
+    box-shadow: 0 0 20px var(--neon-primary);
+    transform: scale(1.1);
+}
+
+.text-neon-small {
+    color: var(--cyber-text-primary);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+.cyber-profile-link:hover .text-neon-small {
+    color: var(--neon-primary);
+    text-shadow: 0 0 5px var(--neon-primary);
+}
+
+/* 3. Dropdown Menu Cyber */
+.cyber-dropdown {
+    background: #0f172a !important; /* Fundal solid */
+    border: 1px solid var(--neon-primary) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0;
+    margin-top: 15px !important;
+    min-width: 220px;
+    z-index: 9999 !important;
+}
+
+.cyber-item {
+    color: var(--cyber-text-primary) !important;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+    .cyber-item:hover {
+        background: rgba(6, 182, 212, 0.1) !important;
+        color: #fff !important;
+        transform: translateX(5px);
+        border-left: 3px solid var(--neon-primary);
+    }
+
+    .cyber-item i {
+        width: 20px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+
+    .cyber-item:hover i {
+        transform: scale(1.2);
+    }
+
+.dropdown-divider {
+    border-top: 1px solid rgba(148, 163, 184, 0.2) !important;
+}

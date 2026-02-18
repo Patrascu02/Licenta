@@ -12,12 +12,12 @@ using Licenta.Models.Calendar;
 using Licenta.Models.HR;
 using Licenta.Models.Files;
 using Licenta.Models.Scouting;
-using Licenta.Models.Identity; // <--- ESENȚIAL: Pentru ApplicationUser
+using Licenta.Models.Identity;
 
 namespace Licenta.Data
 {
-    // SCHIMBARE AICI: Moștenim IdentityDbContext<ApplicationUser> în loc de simplu IdentityDbContext
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    // FIX: Folosim IdentityDbContext simplu pentru compatibilitate cu Program.cs
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

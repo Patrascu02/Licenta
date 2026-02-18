@@ -1,32 +1,30 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Licenta.Data
 @using Microsoft.EntityFrameworkCore
-@using Licenta.Models.Identity
 
-@* Injectăm Managerii standard și Contextul Bazei de Date pentru a accesa Staff *@
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+@* PĂSTRĂM IdentityUser AICI PENTRU COMPATIBILITATE CU Program.cs *@
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 @inject ApplicationDbContext _context
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        // 1. Obținem utilizatorul logat (Identity)
         var user = await UserManager.GetUserAsync(User);
 
         if (user != null)
         {
-            // 2. Căutăm profilul de STAFF asociat acestui cont
+            // Căutăm manual profilul STAFF asociat acestui cont de login
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
 
-            // 3. Determinăm Numele de Afișat (Din Staff sau Email de rezervă)
+            // Determinăm ce nume afișăm (Numele din Staff sau Email-ul dacă nu e configurat Staff)
             string displayName = (staff != null && !string.IsNullOrEmpty(staff.FirstName))
             ? $"{staff.FirstName} {staff.LastName}"
             : user.Email;
 
-            // 4. Generăm Inițialele (Ex: "IP" pentru Ion Popescu)
+            // Generăm inițialele
             string initials = "U";
-            if (staff != null && !string.IsNullOrEmpty(staff.FirstName) && !string.IsNullOrEmpty(staff.LastName))
+            if (staff != null && !string.IsNullOrEmpty(staff.FirstName))
             {
                 initials = $"{staff.FirstName[0]}{staff.LastName[0]}".ToUpper();
             }
@@ -35,7 +33,7 @@
                 initials = user.Email.Substring(0, 1).ToUpper();
             }
 
-            // 5. Obținem Rolul (pentru afișare)
+            // Luăm rolul (pentru afișare sub nume)
             var roles = await UserManager.GetRolesAsync(user);
             var roleName = roles.FirstOrDefault() ?? "Utilizator";
 
@@ -93,12 +91,12 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-uppercase fw-bold mx-2 cyber-link" id="register" asp-area="Identity" asp-page="/Account/Register">
+            <a class="nav-link text-uppercase fw-bold mx-2" id="register" asp-area="Identity" asp-page="/Account/Register" style="color: var(--cyber-text-secondary);">
                 <i class="fas fa-user-plus me-1"></i> Înregistrare
             </a>
         </li>
         <li class="nav-item">
-            <a class="btn btn-outline-primary btn-sm ms-2 px-3 fw-bold mt-1 cyber-btn-glow" id="login" asp-area="Identity" asp-page="/Account/Login">
+            <a class="btn btn-outline-primary btn-sm ms-2 px-3 fw-bold mt-1" id="login" asp-area="Identity" asp-page="/Account/Login">
                 <i class="fas fa-sign-in-alt me-1"></i> Autentificare
             </a>
         </li>
