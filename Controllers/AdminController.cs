@@ -1,4 +1,5 @@
 ﻿using Licenta.Data;
+using Licenta.Models.Communication;
 using Licenta.Models.Core;
 using Licenta.Models.Roles;
 using Licenta.Models.Security;
@@ -538,6 +539,182 @@ namespace Licenta.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction("ManageUsers");
+        }
+
+
+        // ==========================================
+        //         MODUL COMUNICAȚII (GRUPURI)
+        // ==========================================
+
+        [HttpGet]
+        public async Task<IActionResult> CreateMessageGroup()
+        {
+            var staffList = await _context.Staff.ToListAsync();
+            var model = new CreateMessageGroupViewModel();
+
+            foreach (var staff in staffList)
+            {
+                var user = await _userManager.FindByIdAsync(staff.UserId);
+                if (user == null) continue;
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                model.AvailableStaff.Add(new StaffCheckboxItem
+                {
+                    StaffId = staff.StaffId,
+                    FullName = $"{staff.FirstName} {staff.LastName}",
+                    RoleName = roles.FirstOrDefault() ?? "Staff"
+                });
+            }
+
+            // Sortăm după rol ca să fie mai ușor de găsit
+            model.AvailableStaff = model.AvailableStaff.OrderBy(s => s.RoleName).ThenBy(s => s.FullName).ToList();
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateMessageGroup(CreateMessageGroupViewModel model)
+        {
+            var selectedIds = model.AvailableStaff.Where(s => s.IsSelected).Select(s => s.StaffId).ToList();
+
+            if (string.IsNullOrWhiteSpace(model.Name) || !selectedIds.Any())
+            {
+                ModelState.AddModelError("", "Numele este obligatoriu și trebuie selectat cel puțin un membru.");
+                return View(model);
+            }
+
+            // 1. Creăm grupul
+            var group = new MessageGroup { Name = model.Name, CreatedAt = DateTime.Now };
+            _context.MessageGroups.Add(group);
+            await _context.SaveChangesAsync(); // Salvăm ca să primim GroupId
+
+            // 2. Adăugăm membrii
+            foreach (var staffId in selectedIds)
+            {
+                _context.MessageGroupMembers.Add(new MessageGroupMember
+                {
+                    GroupId = group.GroupId,
+                    StaffId = staffId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            await LogAuditAction($"A creat grupul de mesaje '{group.Name}' cu {selectedIds.Count} membri.");
+
+            return RedirectToAction("AdminDashboard");
+        }
+
+        // --- AFIȘEAZĂ TOATE GRUPURILE ---
+        [HttpGet]
+        public async Task<IActionResult> ManageMessageGroups()
+        {
+            var groups = await _context.MessageGroups
+                .Include(g => g.Members)
+                .OrderByDescending(g => g.CreatedAt)
+                .ToListAsync();
+
+            return View(groups);
+        }
+
+        // --- EDITARE GRUP (GET) ---
+        [HttpGet]
+        public async Task<IActionResult> EditMessageGroup(int id)
+        {
+            var group = await _context.MessageGroups
+                .Include(g => g.Members)
+                .FirstOrDefaultAsync(g => g.GroupId == id);
+
+            if (group == null) return NotFound();
+
+            var staffList = await _context.Staff.ToListAsync();
+            var model = new EditMessageGroupViewModel
+            {
+                GroupId = group.GroupId,
+                Name = group.Name
+            };
+
+            foreach (var staff in staffList)
+            {
+                var user = await _userManager.FindByIdAsync(staff.UserId);
+                if (user == null) continue;
+                var roles = await _userManager.GetRolesAsync(user);
+
+                model.AvailableStaff.Add(new StaffCheckboxItem
+                {
+                    StaffId = staff.StaffId,
+                    FullName = $"{staff.FirstName} {staff.LastName}",
+                    RoleName = roles.FirstOrDefault() ?? "Staff",
+                    // Marcăm bifați pe cei care sunt deja în grup
+                    IsSelected = group.Members.Any(m => m.StaffId == staff.StaffId)
+                });
+            }
+
+            model.AvailableStaff = model.AvailableStaff.OrderBy(s => s.RoleName).ThenBy(s => s.FullName).ToList();
+            return View(model);
+        }
+
+        // --- EDITARE GRUP (POST) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditMessageGroup(EditMessageGroupViewModel model)
+        {
+            var group = await _context.MessageGroups
+                .Include(g => g.Members)
+                .FirstOrDefaultAsync(g => g.GroupId == model.GroupId);
+
+            if (group == null) return NotFound();
+
+            var selectedIds = model.AvailableStaff.Where(s => s.IsSelected).Select(s => s.StaffId).ToList();
+
+            if (string.IsNullOrWhiteSpace(model.Name) || !selectedIds.Any())
+            {
+                ModelState.AddModelError("", "Numele este obligatoriu și trebuie selectat cel puțin un membru.");
+                return View(model);
+            }
+
+            // Update nume
+            group.Name = model.Name;
+
+            // Ștergem membrii care au fost debifați
+            var membersToRemove = group.Members.Where(m => !selectedIds.Contains(m.StaffId)).ToList();
+            _context.MessageGroupMembers.RemoveRange(membersToRemove);
+
+            // Adăugăm membrii noi bifați
+            var existingIds = group.Members.Select(m => m.StaffId).ToList();
+            foreach (var id in selectedIds)
+            {
+                if (!existingIds.Contains(id))
+                {
+                    _context.MessageGroupMembers.Add(new MessageGroupMember
+                    {
+                        GroupId = group.GroupId,
+                        StaffId = id,
+                        LastReadAt = DateTime.Now // Inițializăm ceasul pentru noul membru
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            await LogAuditAction($"A editat grupul de mesaje '{group.Name}' (ID: {group.GroupId}).");
+
+            return RedirectToAction(nameof(ManageMessageGroups));
+        }
+
+        // --- ȘTERGERE GRUP (POST) ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMessageGroup(int id)
+        {
+            var group = await _context.MessageGroups.FindAsync(id);
+            if (group != null)
+            {
+                _context.MessageGroups.Remove(group);
+                await LogAuditAction($"A șters grupul de mesaje '{group.Name}'.");
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(ManageMessageGroups));
         }
 
         [HttpGet]

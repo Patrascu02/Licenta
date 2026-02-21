@@ -1,0 +1,85 @@
+﻿@model Licenta.Models.ViewModels.InboxViewModel
+@{
+    ViewData["Title"] = "Centru Comunicații";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-info mb-0 fw-bold" style="text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);">
+            <i class="fas fa-satellite-dish me-2"></i>Terminal Comunicații
+        </h2>
+    </div>
+
+    <div class="card glass-card">
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush bg-transparent">
+                @foreach (var conv in Model.Conversations)
+                {
+                    var actionName = conv.IsGroup ? "GroupChat" : "Chat";
+                    var routeId = conv.IsGroup ? conv.Group.GroupId : conv.OtherStaff.StaffId;
+                    var displayName = conv.IsGroup ? conv.Group.Name : $"{conv.OtherStaff.FirstName} {conv.OtherStaff.LastName}";
+                    var initials = conv.IsGroup ? "GR" : $"{conv.OtherStaff.FirstName?.Substring(0, 1)}{conv.OtherStaff.LastName?.Substring(0, 1)}";
+                    var avatarColor = conv.IsGroup ? "bg-primary text-white" : "";
+
+                    <a asp-action="@actionName" asp-route-id="@routeId" class="list-group-item list-group-item-action bg-transparent border-bottom border-secondary p-4 cyber-item-hover">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="cyber-avatar me-3 position-relative @avatarColor" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                    @if (conv.IsGroup)
+                                    {
+                                        <i class="fas fa-users fs-5"></i>
+                                    }
+                                    else
+                                    {
+
+                                        <span>@initials</span>
+                                    }
+
+                                    @if (conv.UnreadCount > 0)
+                                    {
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark">@conv.UnreadCount</span>
+                                    }
+                                </div>
+                                <div>
+                                    <h6 class="text-white fw-bold mb-1">
+                                        @displayName
+                                        @if (conv.IsGroup)
+                                        {
+                                            <span class="badge bg-secondary ms-2" style="font-size: 0.6rem;">GRUP</span>
+                                        }
+                                    </h6>
+                                    @if (conv.LastMessage != null)
+                                    {
+                                        <small class="@(conv.UnreadCount > 0 ? "text-white fw-bold" : "text-muted")">
+                                            @if (conv.IsGroup)
+                                            {
+                                                <span class="text-info">@conv.LastMessage.FromStaff?.FirstName: </span>
+                                            }
+                                            @(conv.LastMessage.Text.Length > 40 ? conv.LastMessage.Text.Substring(0, 40) + "..." : conv.LastMessage.Text)
+                                        </small>
+                                    }
+                                    else
+                                    {
+
+                                        <small class="text-muted fst-italic">Niciun mesaj.</small>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cyber-item-hover {
+        transition: all 0.3s ease;
+    }
+
+        .cyber-item-hover:hover {
+            background: rgba(6, 182, 212, 0.1) !important;
+            transform: translateX(5px);
+        }
+</style>

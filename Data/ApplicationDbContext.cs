@@ -50,7 +50,8 @@ namespace Licenta.Data
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
-
+        public DbSet<MessageGroup> MessageGroups { get; set; }
+        public DbSet<MessageGroupMember> MessageGroupMembers { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -177,6 +178,25 @@ namespace Licenta.Data
                 .WithMany()
                 .HasForeignKey(up => up.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Reguli pentru Mesajele de Grup
+            builder.Entity<Message>()
+                .HasOne(m => m.Group)
+                .WithMany(g => g.Messages)
+                .HasForeignKey(m => m.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MessageGroupMember>()
+                .HasOne(mgm => mgm.Group)
+                .WithMany(g => g.Members)
+                .HasForeignKey(mgm => mgm.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MessageGroupMember>()
+                .HasOne(mgm => mgm.Staff)
+                .WithMany()
+                .HasForeignKey(mgm => mgm.StaffId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

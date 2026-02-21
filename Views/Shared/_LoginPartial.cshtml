@@ -2,104 +2,161 @@
 @using Licenta.Data
 @using Microsoft.EntityFrameworkCore
 
-@* PĂSTRĂM IdentityUser AICI PENTRU COMPATIBILITATE CU Program.cs *@
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 @inject ApplicationDbContext _context
 
-<ul class="navbar-nav">
-    @if (SignInManager.IsSignedIn(User))
+<ul class="navbar-nav align-items-center">
+@if (SignInManager.IsSignedIn(User))
+{
+    var user = await UserManager.GetUserAsync(User);
+    
+    if (user != null)
     {
-        var user = await UserManager.GetUserAsync(User);
+        // 1. Căutăm manual profilul STAFF asociat
+        var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
 
-        if (user != null)
+        // --- NOU: CALCULĂM MESAJELE NECITITE ---
+        int unreadMessagesCount = 0;
+        if (staff != null)
         {
-            // Căutăm manual profilul STAFF asociat acestui cont de login
-            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
+            // 1. Mesaje 1-la-1 necitite
+            int unread1on1 = await _context.Messages
+                .CountAsync(m => m.ToStaffId == staff.StaffId && m.GroupId == null && !m.IsRead);
 
-            // Determinăm ce nume afișăm (Numele din Staff sau Email-ul dacă nu e configurat Staff)
-            string displayName = (staff != null && !string.IsNullOrEmpty(staff.FirstName))
-            ? $"{staff.FirstName} {staff.LastName}"
-            : user.Email;
+            // 2. Mesaje Grup necitite
+            var groupMemberships = await _context.MessageGroupMembers
+                .Where(mgm => mgm.StaffId == staff.StaffId)
+                .ToListAsync();
 
-            // Generăm inițialele
-            string initials = "U";
-            if (staff != null && !string.IsNullOrEmpty(staff.FirstName))
+            int unreadGroup = 0;
+            foreach(var membership in groupMemberships)
             {
-                initials = $"{staff.FirstName[0]}{staff.LastName[0]}".ToUpper();
+                unreadGroup += await _context.Messages
+                    .CountAsync(m => m.GroupId == membership.GroupId && 
+                                     m.SentAt > membership.LastReadAt && 
+                                     m.FromStaffId != staff.StaffId);
             }
-            else if (!string.IsNullOrEmpty(user.Email))
-            {
-                initials = user.Email.Substring(0, 1).ToUpper();
-            }
 
-            // Luăm rolul (pentru afișare sub nume)
-            var roles = await UserManager.GetRolesAsync(user);
-            var roleName = roles.FirstOrDefault() ?? "Utilizator";
+            unreadMessagesCount = unread1on1 + unreadGroup;
+        }
+        // ---------------------------------------
 
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 cyber-profile-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        // 2. Nume și Inițiale
+        string displayName = (staff != null && !string.IsNullOrEmpty(staff.FirstName)) 
+                             ? $"{staff.FirstName} {staff.LastName}" 
+                             : user.Email;
+                             
+        string initials = "U";
+        if (staff != null && !string.IsNullOrEmpty(staff.FirstName))
+        {
+            initials = $"{staff.FirstName[0]}{staff.LastName[0]}".ToUpper();
+        }
+        else if (!string.IsNullOrEmpty(user.Email))
+        {
+             initials = user.Email.Substring(0, 1).ToUpper();
+        }
 
-                    <div class="cyber-avatar">
+        // 3. Rol
+        var roles = await UserManager.GetRolesAsync(user);
+        var roleName = roles.FirstOrDefault() ?? "Utilizator";
+
+
+        <li class="nav-item me-4 d-flex align-items-center">
+            <a asp-controller="Messages" asp-action="Index" class="nav-link cyber-link position-relative" title="Mesaje">
+                <i class="fas fa-envelope fs-4 text-info cyber-icon-hover"></i>
+                
+                @if (unreadMessagesCount > 0)
+                {
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark shadow-sm" style="font-size: 0.65rem; padding: 0.35em 0.5em; animation: pulse-danger 2s infinite;">
+                        @unreadMessagesCount
+                    </span>
+                }
+            </a>
+        </li>
+
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 cyber-profile-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                
+                <div class="cyber-avatar">
+                    <span>@initials</span>
+                </div>
+                
+                <div class="d-none d-md-block lh-1 text-start">
+                    <span class="d-block fw-bold text-neon-small">@displayName</span>
+                    <span class="small text-muted" style="font-size: 0.7rem;">@roleName</span>
+                </div>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end cyber-dropdown" aria-labelledby="userDropdown">
+                <li class="px-3 py-3 border-bottom border-secondary mb-2 text-center">
+                    <div class="cyber-avatar mx-auto mb-2" style="width: 50px; height: 50px; font-size: 1.2rem;">
                         <span>@initials</span>
                     </div>
+                    <span class="d-block fw-bold text-white">@displayName</span>
+                    <small class="text-muted">@user.Email</small>
+                </li>
 
-                    <div class="d-none d-md-block lh-1 text-start">
-                        <span class="d-block fw-bold text-neon-small">@displayName</span>
-                        <span class="small text-muted" style="font-size: 0.7rem;">@roleName</span>
-                    </div>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-end cyber-dropdown" aria-labelledby="userDropdown">
-
-                    <li class="px-3 py-3 border-bottom border-secondary mb-2 text-center">
-                        <div class="cyber-avatar mx-auto mb-2" style="width: 50px; height: 50px; font-size: 1.2rem;">
-                            <span>@initials</span>
-                        </div>
-                        <span class="d-block fw-bold text-white">@displayName</span>
-                        <small class="text-muted">@user.Email</small>
-                    </li>
-
+                <li>
+                    <a class="dropdown-item cyber-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                        <i class="fas fa-id-card me-2 text-info"></i>Profilul Meu
+                    </a>
+                </li>
+                
+                @if (User.IsInRole("Admin") || User.IsInRole("GeneralManager"))
+                {
                     <li>
-                        <a class="dropdown-item cyber-item" asp-area="Identity" asp-page="/Account/Manage/Index">
-                            <i class="fas fa-id-card me-2 text-info"></i>Profilul Meu
+                        <a class="dropdown-item cyber-item" asp-controller="Admin" asp-action="AdminDashboard">
+                            <i class="fas fa-tachometer-alt me-2 text-success"></i>Dashboard Admin
                         </a>
                     </li>
+                }
 
-                    @if (User.IsInRole("Admin") || User.IsInRole("GeneralManager"))
-                    {
-                        <li>
-                            <a class="dropdown-item cyber-item" asp-controller="Admin" asp-action="AdminDashboard">
-                                <i class="fas fa-tachometer-alt me-2 text-success"></i>Dashboard
-                            </a>
-                        </li>
-                    }
-                  
-
-                    <li><hr class="dropdown-divider bg-secondary opacity-50 my-2"></li>
-
+                @if (User.IsInRole("Player"))
+                {
                     <li>
-                        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                            <button id="logout" type="submit" class="dropdown-item cyber-item text-danger">
-                                <i class="fas fa-power-off me-2"></i>Deconectare
-                            </button>
-                        </form>
+                        <a class="dropdown-item cyber-item" asp-controller="PlayerPanel" asp-action="Dashboard">
+                            <i class="fas fa-gamepad me-2 text-warning"></i>Panou Jucător
+                        </a>
                     </li>
-                </ul>
-            </li>
-        }
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link text-uppercase fw-bold mx-2" id="register" asp-area="Identity" asp-page="/Account/Register" style="color: var(--cyber-text-secondary);">
-                <i class="fas fa-user-plus me-1"></i> Înregistrare
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="btn btn-outline-primary btn-sm ms-2 px-3 fw-bold mt-1" id="login" asp-area="Identity" asp-page="/Account/Login">
-                <i class="fas fa-sign-in-alt me-1"></i> Autentificare
-            </a>
+                }
+
+                <li><hr class="dropdown-divider bg-secondary opacity-50 my-2"></li>
+
+                <li>
+                    <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button id="logout" type="submit" class="dropdown-item cyber-item text-danger">
+                            <i class="fas fa-power-off me-2"></i>Deconectare
+                        </button>
+                    </form>
+                </li>
+            </ul>
         </li>
     }
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-uppercase fw-bold mx-2" id="register" asp-area="Identity" asp-page="/Account/Register" style="color: var(--cyber-text-secondary);">
+            <i class="fas fa-user-plus me-1"></i> Înregistrare
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-outline-primary btn-sm ms-2 px-3 fw-bold mt-1" id="login" asp-area="Identity" asp-page="/Account/Login">
+            <i class="fas fa-sign-in-alt me-1"></i> Autentificare
+        </a>
+    </li>
+}
 </ul>
+
+<style>
+    .cyber-icon-hover { transition: text-shadow 0.3s ease, color 0.3s ease; }
+    .cyber-icon-hover:hover { color: var(--neon-primary) !important; text-shadow: 0 0 15px var(--neon-primary); }
+    
+    @@keyframes pulse-danger {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+</style>

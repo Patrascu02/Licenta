@@ -177,15 +177,6 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // --- MyProfile, PlayerExists, LogAuditAction (neschimbate) ---
-        [HttpGet]
-        public async Task<IActionResult> MyProfile()
-        {
-            var userId = _userManager.GetUserId(User);
-            var staffMember = await _context.Staff.Include(s => s.Player).FirstOrDefaultAsync(s => s.UserId == userId);
-            if (staffMember == null || staffMember.Player == null) return RedirectToAction("Index", "Home");
-            return RedirectToAction("Details", new { id = staffMember.Player.PlayerId });
-        }
 
         private bool PlayerExists(int id) => _context.Players.Any(e => e.PlayerId == id);
 

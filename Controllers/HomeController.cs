@@ -22,7 +22,7 @@ namespace Licenta.Controllers
 
             if (User.IsInRole("Player"))
             {
-                return RedirectToAction("MyProfile", "Players");
+                return RedirectToAction("Dashboard", "PlayerPanel");
             }
 
             return View();
