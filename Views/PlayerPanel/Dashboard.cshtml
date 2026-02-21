@@ -1,0 +1,198 @@
+﻿@model Licenta.Models.ViewModels.PlayerDashboardViewModel
+
+@{
+    ViewData["Title"] = "Player Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="card glass-card border-info mb-4 shadow-sm" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(6, 182, 212, 0.15)) !important;">
+        <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
+
+            <div class="d-flex align-items-center mb-3 mb-md-0">
+                <div class="cyber-avatar me-4 shadow-lg border-info" style="width: 90px; height: 90px; font-size: 2.5rem; background: rgba(0,0,0,0.5);">
+                    <span>@(Model.StaffInfo.FirstName?.Substring(0, 1))@(Model.StaffInfo.LastName?.Substring(0, 1))</span>
+                </div>
+                <div>
+                    <h1 class="text-info fw-bold mb-1" style="text-shadow: 0 0 15px rgba(6, 182, 212, 0.6);">
+                        @Model.StaffInfo.FirstName @Model.StaffInfo.LastName
+                    </h1>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge badge-cyber fs-6 px-3 py-2">
+                            <i class="fas fa-tshirt me-1"></i> #@Model.PlayerInfo.JerseyNumber
+                        </span>
+                        <span class="badge badge-cyber fs-6 px-3 py-2">
+                            <i class="fas fa-bullseye me-1"></i> @Model.PlayerInfo.Position
+                        </span>
+                        <span class="badge badge-cyber fs-6 px-3 py-2 text-white">
+                            <i class="fas fa-arrows-alt-v me-1"></i> @Model.PlayerInfo.Height cm
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-md-end">
+                <p class="text-muted text-uppercase fw-bold small mb-1">Echipa Curentă</p>
+                <h4 class="text-white fw-bold mb-3">@(Model.CurrentTeam?.Name ?? "Fără echipă")</h4>
+
+                @if (Model.ActiveContract != null)
+                {
+                    <span class="badge bg-dark text-success border border-success px-3 py-2 shadow-sm">
+                        <i class="fas fa-file-signature me-2"></i>Contract Activ până în @(Model.ActiveContract.EndDate.HasValue? Model.ActiveContract.EndDate.Value.Year.ToString() : "nedeterminat")
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-dark text-warning border border-warning px-3 py-2 shadow-sm">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Fără contract activ
+                    </span>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card glass-card h-100 stat-card border-info text-center py-3">
+                <i class="fas fa-basketball-ball fs-1 text-info opacity-50 mb-2"></i>
+                <h2 class="display-5 fw-bold text-white mb-0">@Model.AvgPoints</h2>
+                <p class="text-muted text-uppercase small fw-bold mb-0">Medie Puncte (PPG)</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card glass-card h-100 stat-card border-warning text-center py-3">
+                <i class="fas fa-hands fs-1 text-warning opacity-50 mb-2"></i>
+                <h2 class="display-5 fw-bold text-white mb-0">@Model.AvgRebounds</h2>
+                <p class="text-muted text-uppercase small fw-bold mb-0">Recuperări (RPG)</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card glass-card h-100 stat-card border-success text-center py-3">
+                <i class="fas fa-people-carry fs-1 text-success opacity-50 mb-2"></i>
+                <h2 class="display-5 fw-bold text-white mb-0">@Model.AvgAssists</h2>
+                <p class="text-muted text-uppercase small fw-bold mb-0">Pase (APG)</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card glass-card h-100 stat-card border-primary text-center py-3">
+                <i class="fas fa-stopwatch fs-1 text-primary opacity-50 mb-2"></i>
+                <h2 class="display-5 fw-bold text-white mb-0">@Model.GamesPlayed</h2>
+                <p class="text-muted text-uppercase small fw-bold mb-0">Meciuri Jucate</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card glass-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-info fw-bold"><i class="fas fa-chart-line me-2"></i>Ultimele Performanțe</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Data Meciului</th>
+                                    <th>Puncte</th>
+                                    <th>Rec</th>
+                                    <th>Pase</th>
+                                    <th>Evoluție</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentPerformances.Any())
+                                {
+                                    @foreach (var stat in Model.RecentPerformances)
+                                    {
+                                        <tr>
+                                            <td class="ps-4 text-white">
+                                                <i class="far fa-calendar-alt text-muted me-2"></i>
+                                                @stat.Game.GameDate.ToString("dd MMM yyyy")
+                                            </td>
+                                            <td class="fw-bold text-info fs-5">@stat.Points</td>
+                                            <td class="text-white">@stat.Rebounds</td>
+                                            <td class="text-white">@stat.Assists</td>
+                                            <td>
+                                                <span class="badge bg-dark text-success border border-success">Înregistrat</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">Nu există date recente.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card glass-card mb-4 @(Model.ActiveInjuries.Any() ? "border-danger" : "border-success")">
+                <div class="card-header">
+                    <h5 class="mb-0 fw-bold @(Model.ActiveInjuries.Any() ? "text-danger" : "text-success")">
+                        <i class="fas fa-heartbeat me-2"></i>Status Medical
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.ActiveInjuries.Any())
+                    {
+                        foreach (var injury in Model.ActiveInjuries)
+                        {
+                            <div class="d-flex align-items-center mb-2 p-2 bg-dark bg-opacity-50 rounded border border-danger border-opacity-25">
+                                <i class="fas fa-briefcase-medical fs-4 text-danger me-3"></i>
+                                <div>
+                                    <h6 class="text-white fw-bold mb-0">@injury.Description</h6>
+                                    <small class="text-muted">Din: @injury.StartDate.ToString("dd MMM yyyy")</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-2">
+                            <i class="fas fa-check-circle fs-1 text-success mb-2 shadow-sm"></i>
+                            <h6 class="text-white">Apt pentru joc</h6>
+                            <small class="text-muted">Nu sunt înregistrate accidentări active.</small>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card glass-card border-secondary">
+                <div class="card-header">
+                    <h5 class="mb-0 text-white fw-bold"><i class="fas fa-calendar-day me-2 text-primary"></i>Meciuri Programate</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush bg-transparent">
+                        @if (Model.UpcomingGames.Any())
+                        {
+                            foreach (var game in Model.UpcomingGames)
+                            {
+                                <li class="list-group-item bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center p-3">
+                                    <div>
+                                        <h6 class="text-white mb-1">@(string.IsNullOrEmpty(game.GameType) ? "Meci Echipă" : game.GameType)</h6>
+                                        <small class="text-primary d-block"><i class="fas fa-map-marker-alt me-1"></i> @(game.Location ?? "Locație nesetată")</small>
+                                        <small class="text-muted"><i class="far fa-clock me-1"></i> @game.GameDate.ToString("dd MMM HH:mm")</small>
+                                    </div>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item bg-transparent text-muted p-3 text-center">Niciun meci programat.</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
