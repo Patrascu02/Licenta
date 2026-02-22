@@ -1,4 +1,5 @@
 ﻿using Licenta.Data;
+using Licenta.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -81,5 +82,49 @@ namespace Licenta.Controllers
 
             return View(coach);
         }
+
+
+        [Authorize(Roles = "Coach")]
+        public async Task<IActionResult> Dashboard()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound("User-ul nu a fost găsit.");
+
+            var staff = await _context.Staff
+                .Include(s => s.Coach)
+                .FirstOrDefaultAsync(s => s.UserId == user.Id);
+
+            if (staff == null || staff.Coach == null)
+                return NotFound("Profilul de antrenor nu a putut fi identificat.");
+
+            int totalPlayers = await _context.Players.CountAsync();
+            int injuredCount = await _context.Injuries.CountAsync(i => i.Status != "Recuperat");
+
+            var upcomingGames = await _context.Games
+                .Where(g => g.GameDate >= DateTime.Now)
+                .OrderBy(g => g.GameDate)
+                .Take(4)
+                .ToListAsync();
+
+            var recentGames = await _context.Games
+                .Where(g => g.GameDate < DateTime.Now)
+                .OrderByDescending(g => g.GameDate)
+                .Take(5)
+                .ToListAsync();
+
+            var model = new CoachDashboardViewModel
+            {
+                StaffInfo = staff,
+                CoachInfo = staff.Coach,
+                UpcomingGames = upcomingGames,
+                RecentGames = recentGames,
+                TotalPlayers = totalPlayers,
+                InjuredPlayersCount = injuredCount
+            };
+
+            return View(model);
+        }
+
+
     }
 }

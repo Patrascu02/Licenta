@@ -1,0 +1,141 @@
+﻿@model Licenta.Models.ViewModels.CoachDashboardViewModel
+
+@{
+    ViewData["Title"] = "Panou Antrenor";
+}
+
+<div class="container-fluid py-4">
+    <div class="card glass-card border-success mb-4 shadow-sm" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(16, 185, 129, 0.15)) !important;">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="cyber-avatar me-4 shadow-lg border-success text-success" style="width: 90px; height: 90px; font-size: 2.5rem; background: rgba(0,0,0,0.5);">
+                    <i class="fas fa-whistle"></i>
+                </div>
+                <div>
+                    <h1 class="text-success fw-bold mb-1" style="text-shadow: 0 0 15px rgba(16, 185, 129, 0.6);">
+                        @Model.StaffInfo.FirstName @Model.StaffInfo.LastName
+                    </h1>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge badge-cyber fs-6 px-3 py-2 border-success text-success">
+                            <i class="fas fa-clipboard-list me-1"></i> Antrenor Principal
+                        </span>
+                        <span class="badge badge-cyber fs-6 px-3 py-2 text-white">
+                            <i class="fas fa-calendar-check me-1"></i> Experiență: @Model.StaffInfo.ExperienceYears ani
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end d-none d-md-block">
+                <div class="d-flex gap-3">
+                    <div class="p-3 bg-dark bg-opacity-50 border border-secondary rounded text-center">
+                        <h3 class="text-white mb-0">@Model.TotalPlayers</h3>
+                        <small class="text-muted text-uppercase">Total Jucători</small>
+                    </div>
+                    <div class="p-3 bg-dark bg-opacity-50 border border-danger rounded text-center">
+                        <h3 class="text-danger mb-0">@Model.InjuredPlayersCount</h3>
+                        <small class="text-danger text-opacity-75 text-uppercase">Accidentați</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card glass-card h-100 border-secondary">
+                <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-white fw-bold"><i class="fas fa-history me-2 text-info"></i>Ultimele Rezultate</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-dark align-middle mb-0 bg-transparent text-center">
+                            <thead class="border-secondary text-muted">
+                                <tr>
+                                    <th class="text-start ps-4">Dată Meci</th>
+                                    <th>Tip Meci</th>
+                                    <th>Scor (Acasă - Deplasare)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentGames.Any())
+                                {
+                                    @foreach (var meci in Model.RecentGames)
+                                    {
+                                        <tr>
+                                            <td class="text-start ps-4">
+                                                <i class="far fa-calendar-alt text-muted me-2"></i>
+                                                <span class="text-white">@meci.GameDate.ToString("dd MMM yyyy")</span>
+                                            </td>
+                                            <td class="text-info">@(string.IsNullOrEmpty(meci.GameType) ? "Meci Oficial" : meci.GameType)</td>
+                                            <td>
+                                                <span class="fs-5 fw-bold @(meci.HomeScore > meci.AwayScore ? "text-success" : "text-white")">@meci.HomeScore</span>
+                                                <span class="mx-2 text-muted">-</span>
+                                                <span class="fs-5 fw-bold @(meci.AwayScore > meci.HomeScore ? "text-success" : "text-white")">@meci.AwayScore</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">Jucat</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-5">Nu există meciuri jucate înregistrate.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card glass-card mb-4 border-info">
+                <div class="card-header border-bottom border-info">
+                    <h5 class="mb-0 text-info fw-bold"><i class="fas fa-bolt me-2"></i>Acțiuni Rapide</h5>
+                </div>
+                <div class="card-body p-2">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-info text-start cyber-item-hover"><i class="fas fa-clipboard me-2"></i>Planificare Antrenament</button>
+                        <button class="btn btn-outline-success text-start cyber-item-hover"><i class="fas fa-chart-pie me-2"></i>Rapoarte Tactice</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card glass-card border-secondary">
+                <div class="card-header border-bottom border-secondary">
+                    <h5 class="mb-0 text-white fw-bold"><i class="fas fa-calendar-day me-2 text-primary"></i>Următoarele Meciuri</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush bg-transparent">
+                        @if (Model.UpcomingGames.Any())
+                        {
+                            foreach (var game in Model.UpcomingGames)
+                            {
+                                <li class="list-group-item bg-transparent border-bottom border-secondary p-3 cyber-item-hover">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="text-white mb-1 fw-bold">@(string.IsNullOrEmpty(game.GameType) ? "Meci Oficial" : game.GameType)</h6>
+                                            <small class="text-primary d-block"><i class="fas fa-map-marker-alt me-1"></i> @(game.Location ?? "Acasă")</small>
+                                            <small class="text-muted"><i class="far fa-clock me-1"></i> @game.GameDate.ToString("dd MMM yyyy, HH:mm")</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item bg-transparent text-muted p-3 text-center">Niciun meci programat.</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

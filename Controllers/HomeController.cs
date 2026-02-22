@@ -25,6 +25,11 @@ namespace Licenta.Controllers
                 return RedirectToAction("Dashboard", "PlayerPanel");
             }
 
+            if (User.IsInRole("Coach"))
+            {
+                return RedirectToAction("Dashboard", "Coaches");
+            }
+
             return View();
         }
 
