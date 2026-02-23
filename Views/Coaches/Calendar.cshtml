@@ -1,0 +1,149 @@
+﻿@model IEnumerable<Licenta.Models.Calendar.Event>
+@{
+    ViewData["Title"] = "Planificare Antrenamente";
+    var viitoare = Model.Where(e => e.EndTime >= DateTime.Now).ToList();
+    var trecute = Model.Where(e => e.EndTime < DateTime.Now).OrderByDescending(e => e.StartTime).ToList();
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-info fw-bold mb-0"><i class="fas fa-calendar-alt me-2"></i>Program Echipă</h2>
+        <div>
+            <a asp-action="CreateEvent" class="btn btn-cyber me-2"><i class="fas fa-plus me-2"></i>Eveniment Nou</a>
+            <a asp-action="Dashboard" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <h5 class="text-white mb-3 border-bottom border-secondary pb-2"><i class="fas fa-clock text-success me-2"></i>Urmează</h5>
+
+            @if (viitoare.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var ev in viitoare)
+                    {
+                        <div class="col-md-6">
+                            <div class="card glass-card h-100 border-start border-4 border-success">
+                                <div class="card-body p-3 position-relative">
+
+                                    <form asp-action="DeleteEvent" asp-route-id="@ev.EventId" method="post" class="position-absolute top-0 end-0 p-2 delete-form" data-bs-message="Ești sigur că vrei să ștergi planificarea: <strong class='text-info fs-5 d-block mt-2'>@ev.Title</strong>?">
+                                        <button type="submit" class="btn btn-sm text-danger cyber-link-hover p-0" title="Șterge"><i class="fas fa-times fs-5"></i></button>
+                                    </form>
+
+                                    <span class="badge bg-dark border border-secondary text-info mb-2">@ev.RelatedEntity</span>
+                                    <h5 class="text-white fw-bold mb-1 pe-4">@ev.Title</h5>
+                                    <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1"></i> @(string.IsNullOrEmpty(ev.Description) ? "Fără locație specificată" : ev.Description)</p>
+
+                                    <div class="d-flex align-items-center mt-3 pt-2 border-top border-secondary">
+                                        <div class="bg-dark bg-opacity-50 p-2 rounded text-center me-3 border border-secondary">
+                                            <span class="d-block text-success fw-bold fs-5 lh-1">@ev.StartTime.ToString("dd")</span>
+                                            <small class="text-muted text-uppercase" style="font-size: 0.65rem;">@ev.StartTime.ToString("MMM")</small>
+                                        </div>
+                                        <div>
+                                            <small class="text-white d-block"><i class="fas fa-play me-1 text-success opacity-75"></i> @ev.StartTime.ToString("HH:mm")</small>
+                                            <small class="text-muted d-block"><i class="fas fa-stop me-1 text-danger opacity-75"></i> @ev.EndTime.ToString("HH:mm")</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="card glass-card border-secondary text-center p-5">
+                    <i class="fas fa-calendar-times fs-1 text-muted opacity-50 mb-3"></i>
+                    <h5 class="text-muted">Nu există evenimente programate.</h5>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <h5 class="text-white mb-3 border-bottom border-secondary pb-2"><i class="fas fa-history text-secondary me-2"></i>Finalizate</h5>
+
+            <div class="list-group list-group-flush bg-transparent">
+                @if (trecute.Any())
+                {
+                    foreach (var ev in trecute.Take(5))
+                    {
+                        <div class="list-group-item bg-transparent border-bottom border-secondary p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1 text-decoration-line-through">@ev.Title</h6>
+                                    <small class="text-secondary d-block">@ev.StartTime.ToString("dd MMM yyyy")</small>
+                                </div>
+                                <span class="badge bg-secondary opacity-50">@ev.RelatedEntity</span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-muted text-center py-3 small">Istoric gol.</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: #0f172a; border: 1px solid #ef4444; box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-danger fw-bold">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Avertizare Sistem
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-calendar-times text-danger" style="font-size: 3.5rem; filter: drop-shadow(0 0 10px rgba(239,68,68,0.8));"></i>
+                </div>
+                <h4 class="text-white mb-3">Anulare Eveniment</h4>
+                <p class="text-muted" id="deleteModalMessage">Ești sigur?</p>
+            </div>
+            <div class="modal-footer border-secondary justify-content-center bg-dark bg-opacity-50">
+                <button type="button" class="btn btn-outline-secondary px-4 fw-bold" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Nu, Închide
+                </button>
+                <button type="button" id="confirmDeleteBtn" class="btn btn-danger px-4 fw-bold shadow-lg" style="box-shadow: 0 0 15px rgba(239,68,68,0.5) !important;">
+                    <i class="fas fa-trash-alt me-2"></i>Da, Șterge
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .cyber-link-hover:hover {
+        color: #ef4444 !important;
+        text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let formToSubmit = null;
+
+            $('.delete-form').on('submit', function (e) {
+                e.preventDefault(); 
+                formToSubmit = this;
+
+                var message = $(this).attr('data-bs-message');
+                $('#deleteModalMessage').html(message);
+
+                var myModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+                myModal.show();
+            });
+
+            $('#confirmDeleteBtn').on('click', function () {
+                if (formToSubmit) {
+                    formToSubmit.submit(); 
+                }
+            });
+        });
+    </script>
+}

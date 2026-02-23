@@ -19,9 +19,6 @@
                         <span class="badge badge-cyber fs-6 px-3 py-2 border-success text-success">
                             <i class="fas fa-clipboard-list me-1"></i> Antrenor Principal
                         </span>
-                        <span class="badge badge-cyber fs-6 px-3 py-2 text-white">
-                            <i class="fas fa-calendar-check me-1"></i> Experiență: @Model.StaffInfo.ExperienceYears ani
-                        </span>
                     </div>
                 </div>
             </div>
@@ -94,6 +91,40 @@
         </div>
 
         <div class="col-lg-4">
+            @if (Model.NextEvent != null)
+            {
+                <div class="card glass-card border-warning mb-4 shadow-lg" style="background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(245,158,11,0.1));">
+                    <div class="card-body p-4 text-center">
+                        <h6 class="text-warning fw-bold mb-1 text-uppercase letter-spacing">
+                            <i class="fas fa-stopwatch me-2"></i>Următorul Eveniment
+                        </h6>
+                        <h4 class="text-white fw-bold mb-1">@Model.NextEvent.Title</h4>
+                        <p class="text-muted small mb-3">
+                            <span class="badge bg-secondary me-2">@Model.NextEvent.RelatedEntity</span>
+                            @Model.NextEvent.StartTime.ToString("dd MMM yyyy, HH:mm")
+                        </p>
+
+                        <div id="event-countdown" class="d-flex justify-content-center gap-2" data-time="@Model.NextEvent.StartTime.ToString("yyyy-MM-ddTHH:mm:ss")">
+                            <div class="bg-dark border border-warning rounded p-2 text-center" style="min-width: 70px; box-shadow: 0 0 10px rgba(245,158,11,0.2);">
+                                <h3 class="text-white mb-0 fw-bold" id="cd-days">00</h3>
+                                <small class="text-muted text-uppercase" style="font-size:0.6rem;">Zile</small>
+                            </div>
+                            <div class="bg-dark border border-warning rounded p-2 text-center" style="min-width: 70px; box-shadow: 0 0 10px rgba(245,158,11,0.2);">
+                                <h3 class="text-white mb-0 fw-bold" id="cd-hours">00</h3>
+                                <small class="text-muted text-uppercase" style="font-size:0.6rem;">Ore</small>
+                            </div>
+                            <div class="bg-dark border border-warning rounded p-2 text-center" style="min-width: 70px; box-shadow: 0 0 10px rgba(245,158,11,0.2);">
+                                <h3 class="text-white mb-0 fw-bold" id="cd-mins">00</h3>
+                                <small class="text-muted text-uppercase" style="font-size:0.6rem;">Min</small>
+                            </div>
+                            <div class="bg-dark border border-warning rounded p-2 text-center" style="min-width: 70px; box-shadow: 0 0 10px rgba(245,158,11,0.2);">
+                                <h3 class="text-white mb-0 fw-bold" id="cd-secs">00</h3>
+                                <small class="text-muted text-uppercase" style="font-size:0.6rem;">Sec</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
 
             <div class="card glass-card mb-4 border-info">
                 <div class="card-header border-bottom border-info">
@@ -101,8 +132,12 @@
                 </div>
                 <div class="card-body p-2">
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-info text-start cyber-item-hover"><i class="fas fa-clipboard me-2"></i>Planificare Antrenament</button>
-                        <button class="btn btn-outline-success text-start cyber-item-hover"><i class="fas fa-chart-pie me-2"></i>Rapoarte Tactice</button>
+                        <a asp-action="Calendar" class="btn btn-outline-info text-start cyber-item-hover text-decoration-none">
+                            <i class="fas fa-clipboard me-2"></i>Planificare Antrenament
+                        </a>
+                        <a asp-action="TacticalReports" class="btn btn-outline-success text-start cyber-item-hover text-decoration-none">
+                            <i class="fas fa-chart-pie me-2"></i>Rapoarte Tactice
+                        </a>
                     </div>
                 </div>
             </div>
@@ -139,3 +174,39 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var cdElement = document.getElementById('event-countdown');
+            if(!cdElement) return; // Dacă nu există eveniment, oprim scriptul
+
+            // Luăm data din atributul data-time pe care l-am setat in HTML
+            var targetDate = new Date(cdElement.getAttribute('data-time')).getTime();
+
+            var timer = setInterval(function() {
+                var now = new Date().getTime();
+                var distance = targetDate - now;
+
+                // Dacă timpul a expirat
+                if (distance < 0) {
+                    clearInterval(timer);
+                    cdElement.innerHTML = "<h5 class='text-success mt-3 fw-bold pulse-danger'><i class='fas fa-play-circle me-2'></i>Evenimentul a început!</h5>";
+                    return;
+                }
+
+                // Calculăm timpul
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Afișăm cu un '0' în față dacă numărul e mai mic de 10
+                document.getElementById('cd-days').innerText = days < 10 ? '0' + days : days;
+                document.getElementById('cd-hours').innerText = hours < 10 ? '0' + hours : hours;
+                document.getElementById('cd-mins').innerText = minutes < 10 ? '0' + minutes : minutes;
+                document.getElementById('cd-secs').innerText = seconds < 10 ? '0' + seconds : seconds;
+            }, 1000);
+        });
+    </script>
+}

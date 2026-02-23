@@ -1,0 +1,57 @@
+﻿@model Licenta.Models.Sports.Game
+@{
+    ViewData["Title"] = "Meci Nou";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-info fw-bold mb-0"><i class="fas fa-plus-circle me-2"></i>Programare Meci</h2>
+        <a asp-action="ManageGames" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
+    </div>
+
+    <div class="card glass-card border-info" style="max-width: 600px;">
+        <div class="card-body p-4">
+            <form asp-action="CreateGame" method="post">
+
+                <div class="mb-4">
+                    <label class="form-label text-white fw-bold">Sezon Competițional</label>
+                    <select asp-for="SeasonId" class="form-select border-secondary text-white shadow-none" style="background-color: #0f172a; cursor: pointer;" asp-items="ViewBag.Seasons" required>
+                        <option value="">-- Alege Sezonul --</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-white fw-bold">Data și Ora</label>
+                    <input asp-for="GameDate" type="datetime-local" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" required />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-white fw-bold">Tip Competiție</label>
+                    <input asp-for="GameType" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Liga Națională, Cupa României" required />
+                </div>
+
+                <div class="mb-5">
+                    <label class="form-label text-white fw-bold">Locație</label>
+                    <input asp-for="Location" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Acasă, Deplasare - Oradea" required />
+                </div>
+
+                <button type="submit" class="btn btn-cyber w-100 fw-bold fs-5 py-2">
+                    <i class="fas fa-save me-2"></i>Salvează Meciul
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    select option {
+        background-color: #0f172a !important;
+        color: #fff !important;
+    }
+
+    /* Efect vizual la focus pentru input-uri */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--neon-primary) !important;
+        box-shadow: 0 0 10px rgba(6, 182, 212, 0.5) !important;
+    }
+</style>

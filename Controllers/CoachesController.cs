@@ -112,6 +112,11 @@ namespace Licenta.Controllers
                 .Take(5)
                 .ToListAsync();
 
+            var nextEvent = await _context.Events
+                .Where(e => e.StartTime >= DateTime.Now)
+                .OrderBy(e => e.StartTime)
+                .FirstOrDefaultAsync();
+
             var model = new CoachDashboardViewModel
             {
                 StaffInfo = staff,
@@ -119,12 +124,142 @@ namespace Licenta.Controllers
                 UpcomingGames = upcomingGames,
                 RecentGames = recentGames,
                 TotalPlayers = totalPlayers,
-                InjuredPlayersCount = injuredCount
+                InjuredPlayersCount = injuredCount,
+                NextEvent = nextEvent
             };
 
             return View(model);
         }
 
+        // ==========================================
+        //         MODUL PLANIFICARE (CALENDAR)
+        // ==========================================
+
+        [HttpGet]
+        [Authorize(Roles = "Coach")]
+        public async Task<IActionResult> Calendar()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
+
+            // Extragem evenimentele create de acest antrenor (viitoare și din trecutul recent)
+            var events = await _context.Events
+                .Where(e => e.StaffId == staff.StaffId)
+                .OrderBy(e => e.StartTime)
+                .ToListAsync();
+
+            return View(events);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Coach")]
+        public IActionResult CreateEvent()
+        {
+            return View(new CreateEventViewModel());
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Coach")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateEvent(CreateEventViewModel model)
+        {
+            if (model.StartTime >= model.EndTime)
+            {
+                ModelState.AddModelError("EndTime", "Ora de sfârșit trebuie să fie după ora de început.");
+            }
+
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+            var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
+
+            var newEvent = new Licenta.Models.Calendar.Event
+            {
+                Title = model.Title,
+                Description = model.Description,
+                StartTime = model.StartTime,
+                EndTime = model.EndTime,
+                StaffId = staff.StaffId,
+                RelatedEntity = model.RelatedEntity 
+            };
+
+            _context.Events.Add(newEvent);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Calendar));
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Coach")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteEvent(int id)
+        {
+            var ev = await _context.Events.FindAsync(id);
+            if (ev != null)
+            {
+                _context.Events.Remove(ev);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Calendar));
+        }
+
+        // ==========================================
+        //  MODUL TACTIC ANTRENOR (DOAR VIZUALIZARE)
+        // ==========================================
+
+        [HttpGet]
+        [Authorize(Roles = "Coach")]
+        public async Task<IActionResult> TacticalReports()
+        {
+            var pastGames = await _context.Games
+                .Where(g => g.GameDate < DateTime.Now)
+                .OrderByDescending(g => g.GameDate)
+                .ToListAsync();
+
+            return View(pastGames); // Folosește view-ul TacticalReports.cshtml
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Coach")]
+        public async Task<IActionResult> ViewGameStats(int id)
+        {
+            var game = await _context.Games.FindAsync(id);
+            if (game == null) return NotFound();
+
+            var model = new Licenta.Models.ViewModels.EditGameStatsViewModel
+            {
+                GameId = game.GameId,
+                GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location} | {game.GameType}",
+                HomeScore = game.HomeScore,
+                AwayScore = game.AwayScore
+            };
+
+            var roster = await _context.Players.Include(p => p.Staff).ToListAsync();
+            var existingStats = await _context.PlayerGameStats.Where(s => s.GameId == id && !s.IsScoutingReport).ToListAsync();
+
+            foreach (var player in roster)
+            {
+                var stat = existingStats.FirstOrDefault(s => s.PlayerId == player.PlayerId);
+                model.PlayerStats.Add(new Licenta.Models.ViewModels.PlayerStatItemViewModel
+                {
+                    PlayerId = player.PlayerId,
+                    PlayerName = $"{player.Staff.FirstName} {player.Staff.LastName}",
+                    Position = player.Position ?? "-",
+                    JerseyNumber = player.JerseyNumber,
+                    Points = stat?.Points ?? 0,
+                    Rebounds = stat?.Rebounds ?? 0,
+                    Assists = stat?.Assists ?? 0,
+                    Steals = stat?.Steals ?? 0,
+                    Blocks = stat?.Blocks ?? 0,
+                    MinutesPlayed = stat?.MinutesPlayed ?? 0
+                });
+            }
+
+            model.PlayerStats = model.PlayerStats.OrderBy(p => p.JerseyNumber).ToList();
+            return View(model); // Folosește view-ul ViewGameStats.cshtml
+        }
 
     }
 }

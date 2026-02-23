@@ -13,5 +13,6 @@ namespace Licenta.Models.ViewModels
         public List<Game> RecentGames { get; set; }
         public int TotalPlayers { get; set; }
         public int InjuredPlayersCount { get; set; }
+        public Licenta.Models.Calendar.Event NextEvent { get; set; }
     }
 }

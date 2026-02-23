@@ -1,0 +1,52 @@
+﻿@model IEnumerable<Licenta.Models.Sports.Game>
+@{
+    ViewData["Title"] = "Gestiune Meciuri";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-info fw-bold mb-0"><i class="fas fa-basketball-ball me-2"></i>Calendar Competițional</h2>
+        <div>
+            <a asp-action="CreateGame" class="btn btn-cyber me-2"><i class="fas fa-plus me-2"></i>Adaugă Meci</a>
+            <a asp-action="AdminDashboard" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
+        </div>
+    </div>
+
+    <div class="card glass-card">
+        <div class="card-body p-0">
+            <table class="table table-dark table-hover mb-0 bg-transparent text-center align-middle">
+                <thead class="border-secondary text-info">
+                    <tr>
+                        <th class="text-start ps-4">Dată</th>
+                        <th>Sezon</th>
+                        <th>Competiție</th>
+                        <th>Locație</th>
+                        <th>Scor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var g in Model)
+                    {
+                        <tr>
+                            <td class="text-start ps-4 fw-bold text-white">@g.GameDate.ToString("dd MMM yyyy, HH:mm")</td>
+                            <td class="text-muted">@g.Season?.Name</td>
+                            <td>@g.GameType</td>
+                            <td>@g.Location</td>
+                            <td>
+                                @if (g.GameDate < DateTime.Now)
+                                {
+                                    <span class="fw-bold text-success">@g.HomeScore - @g.AwayScore</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge bg-secondary">Urmează</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

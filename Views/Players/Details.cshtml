@@ -35,30 +35,24 @@
 
         <div class="card-body p-4">
             <div class="row g-4 text-center">
-                <div class="col-md-3 col-6">
+                <div class="col-md-4 col-6">
                     <div class="p-3 bg-light rounded-3 border">
                         <small class="text-muted text-uppercase fw-bold d-block mb-1">Înălțime</small>
                         <h4 class="mb-0 fw-bold text-dark">@Model.Height <span class="fs-6 text-muted">cm</span></h4>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col-md-4 col-6">
                     <div class="p-3 bg-light rounded-3 border">
                         <small class="text-muted text-uppercase fw-bold d-block mb-1">Greutate</small>
                         <h4 class="mb-0 fw-bold text-dark">@Model.Weight <span class="fs-6 text-muted">kg</span></h4>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col-md-4 col-12">
                     <div class="p-3 bg-light rounded-3 border">
                         <small class="text-muted text-uppercase fw-bold d-block mb-1">Vârstă</small>
                         <h4 class="mb-0 fw-bold text-dark">
                             @(DateTime.Now.Year - Model.Staff.DateOfBirth.Year) <span class="fs-6 text-muted">ani</span>
                         </h4>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="p-3 bg-light rounded-3 border">
-                        <small class="text-muted text-uppercase fw-bold d-block mb-1">Experiență</small>
-                        <h4 class="mb-0 fw-bold text-dark">@Model.Staff.ExperienceYears <span class="fs-6 text-muted">ani</span></h4>
                     </div>
                 </div>
             </div>

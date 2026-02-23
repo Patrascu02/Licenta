@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Licenta.Controllers
 {
@@ -726,6 +727,45 @@ namespace Licenta.Controllers
                 .ToListAsync();
 
             return View(logs);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageGames()
+        {
+            var games = await _context.Games
+                .Include(g => g.Season)
+                .OrderByDescending(g => g.GameDate)
+                .ToListAsync();
+
+            return View(games);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateGame()
+        {
+            ViewBag.Seasons = new SelectList(await _context.Seasons.ToListAsync(), "SeasonId", "Name");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateGame(Game model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Scorul începe default de la 0-0
+                model.HomeScore = 0;
+                model.AwayScore = 0;
+
+                _context.Games.Add(model);
+                await _context.SaveChangesAsync();
+                await LogAuditAction($"A programat un meci nou pentru data {model.GameDate:dd MMM yyyy}.");
+
+                return RedirectToAction(nameof(ManageGames));
+            }
+
+            ViewBag.Seasons = new SelectList(await _context.Seasons.ToListAsync(), "SeasonId", "Name", model.SeasonId);
+            return View(model);
         }
     }
 }

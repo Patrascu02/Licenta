@@ -78,6 +78,11 @@ namespace Licenta
                             await context.SaveChangesAsync();
                         }
                     }
+
+                    // =======================================================
+                    // 4. Apelăm Seeder-ul nostru pentru Sezon și Echipă !!!
+                    // =======================================================
+                    Licenta.Data.DbInitializer.Seed(context);
                 }
                 catch (Exception ex)
                 {
