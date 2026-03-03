@@ -1,12 +1,23 @@
 ﻿@model IEnumerable<Licenta.Models.Sports.Game>
 @{
-    ViewData["Title"] = "Rapoarte Tactice Meciuri";
+    ViewData["Title"] = "Rapoarte Meciuri";
 }
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-success fw-bold mb-0"><i class="fas fa-chart-pie me-2"></i>Rapoarte Tactice</h2>
-        <a asp-action="Dashboard" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Înapoi la Panou</a>
+        <div>
+            <h2 class="text-success fw-bold mb-0"><i class="fas fa-chart-line me-2"></i>Rapoarte Meciuri</h2>
+            <div class="mt-2 text-white">
+                <span class="badge bg-success fs-6 me-2 shadow-sm"><i class="fas fa-trophy me-1"></i> @ViewBag.Wins Victorii</span>
+                <span class="badge bg-danger fs-6 shadow-sm"><i class="fas fa-times-circle me-1"></i> @ViewBag.Losses Înfrângeri</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4 d-flex gap-2">
+        <a asp-action="MatchReports" asp-route-status="all" class="btn @(ViewBag.CurrentStatus == "all" ? "btn-cyber" : "btn-outline-secondary")"><i class="fas fa-list me-1"></i> Toate</a>
+        <a asp-action="MatchReports" asp-route-status="pending" class="btn @(ViewBag.CurrentStatus == "pending" ? "btn-warning text-dark fw-bold" : "btn-outline-warning")"><i class="fas fa-clock me-1"></i> De Completat</a>
+        <a asp-action="MatchReports" asp-route-status="completed" class="btn @(ViewBag.CurrentStatus == "completed" ? "btn-success text-dark fw-bold" : "btn-outline-success")"><i class="fas fa-check-double me-1"></i> Finalizate</a>
     </div>
 
     <div class="card glass-card border-success">
@@ -16,8 +27,9 @@
                     <thead class="border-secondary text-muted">
                         <tr>
                             <th class="text-start ps-4">Dată Meci</th>
-                            <th>Tip Meci</th>
-                            <th>Scor Final (Acasă - Deplasare)</th>
+                            <th>Status</th>
+                            <th>Locație</th>
+                            <th>Scor (Acasă - Deplasare)</th>
                             <th class="text-end pe-4">Acțiune</th>
                         </tr>
                     </thead>
@@ -26,12 +38,23 @@
                         {
                             @foreach (var meci in Model)
                             {
+                                bool isPlayed = meci.HomeScore > 0 || meci.AwayScore > 0;
                                 <tr>
                                     <td class="text-start ps-4 fw-bold">
                                         <i class="far fa-calendar-alt text-muted me-2"></i>
-                                        <span class="text-white">@meci.GameDate.ToString("dd MMM yyyy, HH:mm")</span>
+                                        <span class="text-white">@meci.GameDate.ToString("dd MMM yyyy")</span>
                                     </td>
-                                    <td class="text-info">@(string.IsNullOrEmpty(meci.GameType) ? "Meci Oficial" : meci.GameType)</td>
+                                    <td>
+                                        @if (isPlayed)
+                                        {
+                                            <span class="badge bg-success bg-opacity-25 border border-success text-success"><i class="fas fa-check me-1"></i>Salvat</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning bg-opacity-25 border border-warning text-warning"><i class="fas fa-pen me-1"></i>De Completat</span>
+                                        }
+                                    </td>
+                                    <td class="text-info">@meci.Location</td>
                                     <td>
                                         <span class="fs-5 fw-bold @(meci.HomeScore > meci.AwayScore ? "text-success" : "text-white")">@meci.HomeScore</span>
                                         <span class="mx-2 text-muted">-</span>
@@ -39,7 +62,7 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <a asp-action="EditMatchStats" asp-route-id="@meci.GameId" class="btn btn-sm btn-cyber">
-                                            <i class="fas fa-edit me-1"></i> Adaugă / Editează Statistici
+                                            <i class="fas fa-edit me-1"></i> Modifică Date
                                         </a>
                                     </td>
                                 </tr>
@@ -48,9 +71,9 @@
                         else
                         {
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-5">
+                                <td colspan="5" class="text-center text-muted py-5">
                                     <i class="fas fa-basketball-ball fs-1 mb-3 opacity-25"></i>
-                                    <h5 class="mb-0">Nu a fost jucat niciun meci încă.</h5>
+                                    <h5 class="mb-0">Nu există meciuri în această categorie.</h5>
                                 </td>
                             </tr>
                         }

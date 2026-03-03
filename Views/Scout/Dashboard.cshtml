@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Scout Dashboard";
+    var recentPending = ViewBag.RecentPending as List<Licenta.Models.Sports.Game>;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom border-success pb-3">
+        <div>
+            <h2 class="text-white fw-bold mb-1 text-uppercase letter-spacing">
+                <i class="fas fa-binoculars text-success me-2"></i>Departament Scouting
+            </h2>
+            <div class="d-flex align-items-center gap-3">
+                <p class="text-muted mb-0">Sistem de Analiză și Raportare Statistică</p>
+
+                <span class="badge badge-cyber fs-6 px-3 py-1 text-white border-warning shadow-sm">
+                    <i class="fas fa-trophy text-warning me-1"></i> Record: @ViewBag.Wins W - @ViewBag.Losses L
+                </span>
+            </div>
+        </div>
+        <div class="text-end d-none d-md-block">
+            <span class="badge bg-dark border border-secondary text-info fs-6 p-2">
+                <i class="fas fa-clock me-2"></i>@DateTime.Now.ToString("dd MMMM yyyy")
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-6">
+            <div class="card glass-card border-warning h-100" style="background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(245,158,11,0.1));">
+                <div class="card-body text-center p-4">
+                    <div class="display-4 text-warning fw-bold mb-3 pulse-danger">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h5 class="text-white text-uppercase fw-bold">Gestiune Rapoarte Meciuri</h5>
+                    <p class="text-muted small mb-4">Adaugă statistici pentru meciurile noi sau accesează arhiva istorică a sezonului.</p>
+
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a asp-action="MatchReports" asp-route-status="pending" class="btn btn-warning text-dark fw-bold px-4">
+                            <i class="fas fa-pen me-1"></i> De Completat (@ViewBag.PendingCount)
+                        </a>
+                        <a asp-action="MatchReports" asp-route-status="completed" class="btn btn-outline-success px-4">
+                            <i class="fas fa-archive me-1"></i> Arhivă Finalizate
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card glass-card border-info h-100" style="background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(6,182,212,0.1));">
+                <div class="card-body text-center p-4">
+                    <div class="display-4 text-info fw-bold mb-3"><i class="fas fa-users"></i></div>
+                    <h5 class="text-white text-uppercase fw-bold">Lotul Echipei</h5>
+                    <p class="text-muted small mb-4">Evaluează rapoartele de scouting individuale și gestionează mediile lunare ale sportivilor.</p>
+                    <a asp-controller="Players" asp-action="Index" class="btn btn-info text-dark fw-bold px-5">
+                        <i class="fas fa-search me-1"></i> Caută Jucător
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    @if (recentPending != null && recentPending.Any())
+    {
+        <h5 class="text-warning mb-3 border-bottom border-secondary pb-2"><i class="fas fa-exclamation-circle me-2"></i>Atenție: Meciuri neprocesate</h5>
+        <div class="row g-3">
+            @foreach (var meci in recentPending)
+            {
+                <div class="col-md-4">
+                    <div class="card glass-card border-start border-4 border-warning h-100">
+                        <div class="card-body p-3">
+                            <span class="badge bg-secondary mb-2">@meci.GameType</span>
+                            <h6 class="text-white fw-bold mb-1">@meci.Location</h6>
+                            <p class="text-muted small mb-3"><i class="far fa-calendar-alt me-1"></i> @meci.GameDate.ToString("dd MMM yyyy, HH:mm")</p>
+
+                            <a asp-action="EditMatchStats" asp-route-id="@meci.GameId" class="btn btn-sm btn-cyber w-100">
+                                <i class="fas fa-plus-circle me-1"></i> Completează Fișa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .pulse-danger {
+        animation: pulse-warn 2s infinite;
+    }
+
+    @@keyframes pulse-warn {
+        0% {
+            transform: scale(1);
+            text-shadow: 0 0 0 rgba(245, 158, 11, 0.7);
+        }
+
+        50% {
+            transform: scale(1.05);
+            text-shadow: 0 0 15px rgba(245, 158, 11, 1);
+        }
+
+        100% {
+            transform: scale(1);
+            text-shadow: 0 0 0 rgba(245, 158, 11, 0.7);
+        }
+    }
+</style>

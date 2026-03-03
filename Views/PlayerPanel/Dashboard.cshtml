@@ -27,6 +27,9 @@
                         <span class="badge badge-cyber fs-6 px-3 py-2 text-white">
                             <i class="fas fa-arrows-alt-v me-1"></i> @Model.PlayerInfo.Height cm
                         </span>
+                        <span class="badge badge-cyber fs-6 px-3 py-2 text-white border-warning ms-1">
+                            <i class="fas fa-trophy text-warning me-1"></i> Record: @ViewBag.Wins W - @ViewBag.Losses L
+                        </span>
                     </div>
                 </div>
             </div>
@@ -91,10 +94,11 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0">
+                        <table class="table align-middle mb-0 text-center">
                             <thead>
                                 <tr>
-                                    <th class="ps-4">Data Meciului</th>
+                                    <th class="ps-4 text-start">Data Meciului</th>
+                                    <th>Scor Final</th>
                                     <th>Puncte</th>
                                     <th>Rec</th>
                                     <th>Pase</th>
@@ -107,10 +111,17 @@
                                     @foreach (var stat in Model.RecentPerformances)
                                     {
                                         <tr>
-                                            <td class="ps-4 text-white">
+                                            <td class="ps-4 text-start text-white">
                                                 <i class="far fa-calendar-alt text-muted me-2"></i>
                                                 @stat.Game.GameDate.ToString("dd MMM yyyy")
                                             </td>
+
+                                            <td class="text-white text-nowrap">
+                                                <span class="fw-bold @(stat.Game.HomeScore > stat.Game.AwayScore ? "text-success" : "text-white")">@stat.Game.HomeScore</span>
+                                                <span class="mx-1 text-muted">-</span>
+                                                <span class="fw-bold @(stat.Game.AwayScore > stat.Game.HomeScore ? "text-success" : "text-white")">@stat.Game.AwayScore</span>
+                                            </td>
+
                                             <td class="fw-bold text-info fs-5">@stat.Points</td>
                                             <td class="text-white">@stat.Rebounds</td>
                                             <td class="text-white">@stat.Assists</td>
@@ -123,7 +134,7 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">Nu există date recente.</td>
+                                        <td colspan="6" class="text-center text-muted py-4">Nu există date recente.</td>
                                     </tr>
                                 }
                             </tbody>
@@ -236,29 +247,24 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var cdElement = document.getElementById('event-countdown');
-            if(!cdElement) return; // Dacă nu există eveniment, oprim scriptul
+            if(!cdElement) return;
 
-            // Luăm data din atributul data-time pe care l-am setat in HTML
             var targetDate = new Date(cdElement.getAttribute('data-time')).getTime();
-
             var timer = setInterval(function() {
                 var now = new Date().getTime();
                 var distance = targetDate - now;
 
-                // Dacă timpul a expirat
                 if (distance < 0) {
                     clearInterval(timer);
                     cdElement.innerHTML = "<h5 class='text-success mt-3 fw-bold pulse-danger'><i class='fas fa-play-circle me-2'></i>Evenimentul a început!</h5>";
                     return;
                 }
 
-                // Calculăm timpul
                 var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                // Afișăm cu un '0' în față dacă numărul e mai mic de 10
                 document.getElementById('cd-days').innerText = days < 10 ? '0' + days : days;
                 document.getElementById('cd-hours').innerText = hours < 10 ? '0' + hours : hours;
                 document.getElementById('cd-mins').innerText = minutes < 10 ? '0' + minutes : minutes;

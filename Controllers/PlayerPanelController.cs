@@ -47,7 +47,7 @@ namespace Licenta.Controllers
                 .ToListAsync();
 
             var recentPerformances = allStats
-                .Where(s => s.Game != null) 
+                .Where(s => s.Game != null)
                 .OrderByDescending(s => s.Game.GameDate)
                 .Take(5)
                 .ToList();
@@ -91,6 +91,23 @@ namespace Licenta.Controllers
                 ActiveInjuries = injuries,
                 NextEvent = nextEvent
             };
+
+            // --- CALCUL PALMARES ECHIPĂ PENTRU DASHBOARD ---
+            var pastGamesForRecord = await _context.Games
+                .Where(g => g.GameDate < DateTime.Now && (g.HomeScore > 0 || g.AwayScore > 0))
+                .ToListAsync();
+
+            int wins = 0; int losses = 0;
+            foreach (var g in pastGamesForRecord)
+            {
+                bool isHome = g.Location.ToLower().Contains("acas");
+                if (isHome && g.HomeScore > g.AwayScore) wins++;
+                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
+                else losses++;
+            }
+            ViewBag.Wins = wins;
+            ViewBag.Losses = losses;
+            // -----------------------------------------------
 
             return View(model);
         }

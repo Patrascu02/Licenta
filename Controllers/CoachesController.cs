@@ -128,6 +128,23 @@ namespace Licenta.Controllers
                 NextEvent = nextEvent
             };
 
+            // --- CALCUL PALMARES ECHIPĂ PENTRU DASHBOARD ---
+            var pastGamesForRecord = await _context.Games
+                .Where(g => g.GameDate < DateTime.Now && (g.HomeScore > 0 || g.AwayScore > 0))
+                .ToListAsync();
+
+            int wins = 0; int losses = 0;
+            foreach (var g in pastGamesForRecord)
+            {
+                bool isHome = g.Location.ToLower().Contains("acas");
+                if (isHome && g.HomeScore > g.AwayScore) wins++;
+                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
+                else losses++;
+            }
+            ViewBag.Wins = wins;
+            ViewBag.Losses = losses;
+            // -----------------------------------------------
+
             return View(model);
         }
 
@@ -218,7 +235,19 @@ namespace Licenta.Controllers
                 .OrderByDescending(g => g.GameDate)
                 .ToListAsync();
 
-            return View(pastGames); // Folosește view-ul TacticalReports.cshtml
+            // CALCUL PALMARES AUTOMAT (W - L) PENTRU ANTRENOR
+            int wins = 0; int losses = 0;
+            foreach (var g in pastGames.Where(g => g.HomeScore > 0 || g.AwayScore > 0))
+            {
+                bool isHome = g.Location.ToLower().Contains("acas");
+                if (isHome && g.HomeScore > g.AwayScore) wins++;
+                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
+                else losses++;
+            }
+            ViewBag.Wins = wins;
+            ViewBag.Losses = losses;
+
+            return View(pastGames);
         }
 
         [HttpGet]

@@ -9,13 +9,28 @@
             <h2 class="text-success fw-bold mb-1"><i class="fas fa-clipboard-check me-2"></i>Fișă Meci</h2>
             <h6 class="text-info ms-1">@Model.GameInfo</h6>
         </div>
-        <a asp-action="TacticalReports" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
+        <a asp-action="MatchReports" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
     </div>
 
     <div class="card glass-card border-success">
         <div class="card-body p-0">
-            <form asp-action="EditGameStats" method="post">
+            <form asp-action="EditMatchStats" method="post">
                 <input type="hidden" asp-for="GameId" />
+
+                <div asp-validation-summary="All" class="alert alert-danger bg-danger bg-opacity-25 text-white border-danger m-3 fw-bold shadow-sm" style="display: @(ViewData.ModelState.IsValid ? "none" : "block");">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Datele nu au putut fi salvate:
+                </div>
+
+                <div class="row g-3 mx-2 mt-2 mb-4 p-3 bg-dark bg-opacity-50 border border-secondary rounded">
+                    <div class="col-md-6 text-center">
+                        <label class="text-white fw-bold d-block mb-2">Puncte Acasă</label>
+                        <input asp-for="HomeScore" type="number" min="0" class="form-control form-control-lg bg-dark text-success border-success text-center mx-auto fw-bold" style="max-width: 150px; font-size: 1.5rem;" required />
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <label class="text-white fw-bold d-block mb-2">Puncte Deplasare</label>
+                        <input asp-for="AwayScore" type="number" min="0" class="form-control form-control-lg bg-dark text-danger border-danger text-center mx-auto fw-bold" style="max-width: 150px; font-size: 1.5rem;" required />
+                    </div>
+                </div>
 
                 <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
                     <table class="table table-hover table-dark align-middle mb-0 bg-transparent text-center sticky-header-table">
