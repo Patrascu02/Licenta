@@ -7,7 +7,7 @@ namespace Licenta.Models.Scouting
         public int ScoutPlayerId { get; set; }
         public int ScoutId { get; set; }
         public string? PlayerName { get; set; }
-        public string? Observations { get; set; } // "arunca prost", "slab psihic" etc.
+        public string? Observations { get; set; } 
 
         public Scout? Scout { get; set; }
     }

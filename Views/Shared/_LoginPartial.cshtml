@@ -13,18 +13,14 @@
     
     if (user != null)
     {
-        // 1. Căutăm manual profilul STAFF asociat
         var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
 
-        // --- NOU: CALCULĂM MESAJELE NECITITE ---
         int unreadMessagesCount = 0;
         if (staff != null)
         {
-            // 1. Mesaje 1-la-1 necitite
             int unread1on1 = await _context.Messages
                 .CountAsync(m => m.ToStaffId == staff.StaffId && m.GroupId == null && !m.IsRead);
 
-            // 2. Mesaje Grup necitite
             var groupMemberships = await _context.MessageGroupMembers
                 .Where(mgm => mgm.StaffId == staff.StaffId)
                 .ToListAsync();
@@ -40,9 +36,7 @@
 
             unreadMessagesCount = unread1on1 + unreadGroup;
         }
-        // ---------------------------------------
 
-        // 2. Nume și Inițiale
         string displayName = (staff != null && !string.IsNullOrEmpty(staff.FirstName)) 
                              ? $"{staff.FirstName} {staff.LastName}" 
                              : user.Email;
@@ -57,7 +51,6 @@
              initials = user.Email.Substring(0, 1).ToUpper();
         }
 
-        // 3. Rol
         var roles = await UserManager.GetRolesAsync(user);
         var roleName = roles.FirstOrDefault() ?? "Utilizator";
 

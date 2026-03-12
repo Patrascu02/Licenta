@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Configurare Permisiuni";
 
-    // Funcție locală pentru stilizarea numelui rolului
     string GetRoleBadgeClass(string roleName)
     {
         return roleName switch
@@ -104,7 +103,6 @@
 </div>
 
 <style>
-    /* Stiluri specifice doar pentru culorile rolurilor (GM, Coach etc.) */
     .role-gm {
         background: linear-gradient(135deg, #4c1d95 0%, #312e81 100%);
         color: #e0e7ff;

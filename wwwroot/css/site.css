@@ -2,24 +2,19 @@
    CYBER-SPORT THEME VARIABLES
    ========================================= */
 :root {
-    /* --- Core Colors (Fundal Dark Navy) --- */
     --cyber-bg-main: #0f172a;
     --cyber-bg-secondary: #1e293b;
-    /* --- Text Colors --- */
-    --cyber-text-primary: #cbd5e1; /* Gri deschis (Slate-300) */
-    --cyber-text-secondary: #94a3b8; /* Gri mediu (Slate-400) */
-    --cyber-text-highlight: #e2e8f0; /* Gri foarte deschis (Hover) */
-    /* --- Neon Accents --- */
-    --neon-primary: #06b6d4; /* Cyan electric */
-    --neon-secondary: #3b82f6; /* Albastru regal */
+    --cyber-text-primary: #cbd5e1; 
+    --cyber-text-secondary: #94a3b8; 
+    --cyber-text-highlight: #e2e8f0; 
+    --neon-primary: #06b6d4;
+    --neon-secondary: #3b82f6;
 
-    --neon-success: #10b981; /* Verde */
-    --neon-danger: #ef4444; /* Roșu */
-    --neon-warning: #f59e0b; /* Portocaliu */
-    /* --- Effects --- */
+    --neon-success: #10b981; 
+    --neon-danger: #ef4444; 
+    --neon-warning: #f59e0b; 
     --cyber-box-shadow: 0 4px 20px rgba(6, 182, 212, 0.1);
     --panel-border: 1px solid rgba(148, 163, 184, 0.2);
-    /* --- Typography --- */
     --font-cyber: 'Orbitron', sans-serif;
     --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
@@ -36,7 +31,6 @@ html, body {
     overflow-x: hidden;
 }
 
-    /* Cyber Background Pattern */
     body::before {
         content: "";
         position: fixed;
@@ -50,7 +44,6 @@ html, body {
         z-index: -1;
     }
 
-/* Titluri - Neon */
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3 {
     font-family: var(--font-cyber), var(--font-ui);
     text-transform: uppercase;
@@ -70,7 +63,6 @@ a {
         color: var(--neon-secondary);
     }
 
-/* Fix pentru textele standard Bootstrap */
 .text-dark, .text-body {
     color: var(--cyber-text-primary) !important;
 }
@@ -202,7 +194,6 @@ a {
     transition: all 0.3s ease;
 }
 
-/* Buton Principal (Plin) */
 .btn-primary, .btn-cyber {
     background: transparent !important;
     color: var(--neon-primary) !important;
@@ -217,7 +208,6 @@ a {
         border-color: var(--neon-primary) !important;
     }
 
-/* Buton Secundar (Gri) */
 .btn-secondary, .btn-light, .btn-outline-secondary {
     background: transparent !important;
     border: 1px solid var(--cyber-text-secondary) !important;
@@ -230,7 +220,6 @@ a {
         border-color: var(--cyber-text-highlight) !important;
     }
 
-/* === NEW FIX: Buton Outline Primary (Back Button) === */
 .btn-outline-primary {
     color: var(--neon-primary) !important;
     border: 1px solid var(--neon-primary) !important;
@@ -240,12 +229,11 @@ a {
 
     .btn-outline-primary:hover {
         background-color: var(--neon-primary) !important;
-        color: #000 !important; /* Scris negru pe fundal cyan */
+        color: #000 !important;
         box-shadow: 0 0 20px var(--neon-primary) !important;
         transform: translateY(-2px);
     }
 
-/* Input-uri */
 .form-control, .form-select {
     background-color: rgba(30, 41, 59, 0.6) !important;
     border: 1px solid rgba(148, 163, 184, 0.3) !important;
@@ -306,11 +294,10 @@ a {
                 color: var(--cyber-text-highlight) !important;
             }
 
-/* === NEW FIX: Cyber Badge (ID-urile din tabel) === */
 .badge-cyber {
-    background-color: rgba(0, 0, 0, 0.6) !important; /* Fundal Negru semi-transparent */
-    color: var(--neon-primary) !important; /* Scris Neon */
-    border: 1px solid rgba(6, 182, 212, 0.5) !important; /* Bordură Neon fină */
+    background-color: rgba(0, 0, 0, 0.6) !important; 
+    color: var(--neon-primary) !important;
+    border: 1px solid rgba(6, 182, 212, 0.5) !important; 
     box-shadow: 0 0 5px rgba(6, 182, 212, 0.2);
 }
 
@@ -425,7 +412,6 @@ a {
             bottom: -5px !important;
         }
 
-    /* Culori Specifice Carduri */
     .stat-card.border-primary:hover {
         box-shadow: 0 0 30px rgba(59, 130, 246, 0.4) !important;
         border-color: #3b82f6 !important;
@@ -455,13 +441,11 @@ a {
    FIX NAVBAR & USER PROFILE (CYBER DROPDOWN)
    ======================================================= */
 
-/* 1. Asigurăm că Navbar-ul e DEASUPRA tuturor (Z-Index) */
 .navbar {
     position: relative;
-    z-index: 1030; /* Mai mare decât orice card din pagină */
+    z-index: 1030; 
 }
 
-/* 2. Avatar Cyber (Cercul cu inițiala) */
 .cyber-avatar {
     width: 35px;
     height: 35px;
@@ -497,21 +481,18 @@ a {
     text-shadow: 0 0 5px var(--neon-primary);
 }
 
-/* 3. Dropdown Menu (Cardul care se deschide) */
 .cyber-dropdown {
-    background: #0f172a !important; /* Fundal solid închis (nu transparent) */
+    background: #0f172a !important;
     border: 1px solid var(--neon-primary) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8) !important;
     border-radius: 8px !important;
     padding: 0.5rem 0;
-    margin-top: 15px !important; /* Îl coborâm puțin */
+    margin-top: 15px !important; 
     min-width: 220px;
-    z-index: 9999 !important; /* Critic: Să fie peste tot */
-    /* Mic triunghi indicator (opțional) */
+    z-index: 9999 !important; 
     position: absolute;
 }
 
-/* Elementele din meniu */
 .cyber-item {
     color: var(--cyber-text-primary) !important;
     padding: 10px 20px;
@@ -520,9 +501,9 @@ a {
 }
 
     .cyber-item:hover {
-        background: rgba(6, 182, 212, 0.1) !important; /* Cyan deschis la hover */
+        background: rgba(6, 182, 212, 0.1) !important; 
         color: #fff !important;
-        transform: translateX(5px); /* Mică animație de mișcare */
+        transform: translateX(5px);
         border-left: 3px solid var(--neon-primary);
     }
 
@@ -533,10 +514,9 @@ a {
     }
 
     .cyber-item:hover i {
-        transform: scale(1.2); /* Iconița crește la hover */
+        transform: scale(1.2); 
     }
 
-/* Separator */
 .dropdown-divider {
     border-top: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
@@ -545,13 +525,11 @@ a {
    FIX NAVBAR & USER PROFILE (CYBER DROPDOWN)
    ======================================================= */
 
-/* 1. Navbar deasupra tuturor */
 .navbar {
     position: relative;
     z-index: 1030;
 }
 
-/* 2. Avatar Cyber */
 .cyber-avatar {
     width: 35px;
     height: 35px;
@@ -587,9 +565,8 @@ a {
     text-shadow: 0 0 5px var(--neon-primary);
 }
 
-/* 3. Dropdown Menu Cyber */
 .cyber-dropdown {
-    background: #0f172a !important; /* Fundal solid */
+    background: #0f172a !important; 
     border: 1px solid var(--neon-primary) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8) !important;
     border-radius: 8px !important;

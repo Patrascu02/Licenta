@@ -27,7 +27,6 @@ namespace Licenta.Models.ViewModels
         [Display(Name = "Data Angajării")]
         public DateTime HireDate { get; set; }
 
-        // --- Date Specifice Jucător ---
         [Display(Name = "Poziție")]
         public string? Position { get; set; }
 
@@ -40,15 +39,12 @@ namespace Licenta.Models.ViewModels
         [Display(Name = "Greutate (kg)")]
         public int? Weight { get; set; }
 
-        // --- Date Specifice Antrenor ---
         [Display(Name = "Licență")]
         public string? LicenseNumber { get; set; }
 
-        // --- Date Specifice Medic ---
         [Display(Name = "Specializare")]
         public string? Specialization { get; set; }
 
-        // --- Date Specifice General Manager (ADAUGAT ACUM) ---
         [Display(Name = "Birou")]
         public string? Office { get; set; }
     }

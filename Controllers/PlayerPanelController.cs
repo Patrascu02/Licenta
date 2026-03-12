@@ -10,12 +10,10 @@ using System.Threading.Tasks;
 
 namespace Licenta.Controllers
 {
-    // Doar cei cu rolul de 'Player' au acces aici
     [Authorize(Roles = "Player")]
     public class PlayerPanelController : Controller
     {
         private readonly ApplicationDbContext _context;
-        // REPARAT: Folosim IdentityUser în loc de ApplicationUser
         private readonly UserManager<IdentityUser> _userManager;
 
         public PlayerPanelController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
@@ -92,7 +90,6 @@ namespace Licenta.Controllers
                 NextEvent = nextEvent
             };
 
-            // --- CALCUL PALMARES ECHIPĂ PENTRU DASHBOARD ---
             var pastGamesForRecord = await _context.Games
                 .Where(g => g.GameDate < DateTime.Now && (g.HomeScore > 0 || g.AwayScore > 0))
                 .ToListAsync();
@@ -107,7 +104,6 @@ namespace Licenta.Controllers
             }
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
-            // -----------------------------------------------
 
             return View(model);
         }

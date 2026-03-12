@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Editează Utilizator";
 
-    // Funcții ajutătoare pentru afișare
     string GetRoleCardClass(string roleName)
     {
         return roleName switch
@@ -33,7 +32,6 @@
     var roleCardClass = GetRoleCardClass(Model.RoleName);
     var roleIcon = GetRoleIcon(Model.RoleName);
 
-    // Traducere rol pentru afișare
     string roleDisplay = Model.RoleName;
     if (roleDisplay == "GeneralManager") roleDisplay = "General Manager";
     if (roleDisplay == "Coach") roleDisplay = "Antrenor";

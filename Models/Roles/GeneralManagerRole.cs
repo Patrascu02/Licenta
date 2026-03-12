@@ -13,7 +13,6 @@ namespace Licenta.Models.Roles
 
         public Staff? Staff { get; set; }
 
-        // GM specific capabilities
         public ICollection<Expense>? ManagedBudgets { get; set; }
         public ICollection<TerminationNotice>? Approvals { get; set; }
     }

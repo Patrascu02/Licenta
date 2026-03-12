@@ -24,14 +24,13 @@ namespace Licenta.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // Verificăm dacă userul are dreptul să vadă lista (Admin sau permisiune specifică)
             if (!User.IsInRole("Admin") && !User.HasClaim("Permission", "Coaches.View"))
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
 
             var coaches = await _context.Coaches
-                .Include(c => c.Staff) // Încărcăm datele personale (Nume, Prenume)
+                .Include(c => c.Staff) 
                 .ToListAsync();
 
             return View(coaches);
@@ -43,7 +42,6 @@ namespace Licenta.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            // Căutăm antrenorul asociat userului curent
             var staffMember = await _context.Staff
                 .Include(s => s.Coach)
                 .FirstOrDefaultAsync(s => s.UserId == userId);
@@ -53,7 +51,6 @@ namespace Licenta.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Redirecționăm către pagina de detalii cu ID-ul corect
             return RedirectToAction("Details", new { id = staffMember.Coach.CoachId });
         }
 
@@ -67,9 +64,6 @@ namespace Licenta.Controllers
 
             if (coach == null) return NotFound();
 
-            // SECURITATE: Cine are voie să vadă acest profil?
-            // 1. Adminul
-            // 2. Antrenorul însuși (Profilul propriu)
 
             var currentUserId = _userManager.GetUserId(User);
             bool isOwnProfile = (coach.Staff.UserId == currentUserId);
@@ -128,7 +122,7 @@ namespace Licenta.Controllers
                 NextEvent = nextEvent
             };
 
-            // --- CALCUL PALMARES ECHIPĂ PENTRU DASHBOARD ---
+            // --- CALCUL PALMARES ECHIPA PENTRU DASHBOARD ---
             var pastGamesForRecord = await _context.Games
                 .Where(g => g.GameDate < DateTime.Now && (g.HomeScore > 0 || g.AwayScore > 0))
                 .ToListAsync();
@@ -143,7 +137,7 @@ namespace Licenta.Controllers
             }
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
-            // -----------------------------------------------
+          
 
             return View(model);
         }
@@ -161,7 +155,6 @@ namespace Licenta.Controllers
 
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
 
-            // Extragem evenimentele create de acest antrenor (viitoare și din trecutul recent)
             var events = await _context.Events
                 .Where(e => e.StaffId == staff.StaffId)
                 .OrderBy(e => e.StartTime)
@@ -287,7 +280,7 @@ namespace Licenta.Controllers
             }
 
             model.PlayerStats = model.PlayerStats.OrderBy(p => p.JerseyNumber).ToList();
-            return View(model); // Folosește view-ul ViewGameStats.cshtml
+            return View(model); 
         }
 
     }

@@ -8,11 +8,9 @@ namespace Licenta.Models.Security
         [Key]
         public int UserPermissionId { get; set; }
 
-        // Aici folosim UserId ca simplu string pentru a evita ciclul (Multiple Cascade Paths)
         [Required]
         public string UserId { get; set; }
 
-        // Legătura cu permisiunea (Foreign Key)
         public int PermissionId { get; set; }
 
         [ForeignKey("PermissionId")]

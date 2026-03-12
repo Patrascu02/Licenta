@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Gestiune Utilizatori";
 
-    // Funcție pentru culoarea avatarului
     string GetAvatarColor(int id)
     {
         var colors = new[] {
@@ -310,7 +309,6 @@
 </div>
 
 <style>
-    /* === FIX FILTRE (TEXT VIZIBIL) === */
     .nav-pills .nav-link {
         color: #334155 !important;
         font-weight: 600;
@@ -326,7 +324,6 @@
             border-color: transparent;
         }
 
-    /* === CULORI ROLURI === */
     .role-badge {
         padding: 0.5em 1em;
         font-weight: 600;
@@ -366,7 +363,6 @@
         display: inline-block;
     }
 
-    /* === STILURI GENERALE === */
     .avatar-circle {
         width: 45px;
         height: 45px;
@@ -420,7 +416,6 @@
         animation: fadeInUp 0.8s ease-out;
     }
 
-    /* === MODAL STILIZAT === */
     .glass-modal {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(20px);
@@ -431,7 +426,7 @@
     .icon-circle-danger {
         width: 80px;
         height: 80px;
-        background: #fef2f2; /* Roșu foarte pal */
+        background: #fef2f2; 
         border-radius: 50%;
         display: flex;
         align-items: center;

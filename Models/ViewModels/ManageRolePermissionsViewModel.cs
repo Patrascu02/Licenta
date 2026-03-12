@@ -10,10 +10,10 @@
     public class PermissionCheckbox
     {
         public int PermissionId { get; set; }
-        public string Name { get; set; }       // Ex: "Contracts.Edit"
-        public string Description { get; set; } // Ex: "Poate modifica contracte"
+        public string Name { get; set; }       
+        public string Description { get; set; }
         public bool IsSelected { get; set; }
 
-        public bool IsInherited { get; set; } // Vine automat din Rol (RolePermission)
+        public bool IsInherited { get; set; } 
     }
 }

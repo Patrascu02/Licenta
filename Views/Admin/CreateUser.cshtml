@@ -212,14 +212,12 @@
 </div>
 
 <style>
-    /* === DESIGN FIXES === */
     .glass-card {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
         border-radius: 16px;
     }
 
-    /* Input-uri albe cu bordură vizibilă */
     .form-control {
         background-color: white !important;
         border: 1px solid #ced4da !important;
@@ -231,7 +229,6 @@
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
         }
 
-    /* Placeholders pentru cardurile colorate din dreapta */
     .role-card-player input, .role-card-coach input, .role-card-medic input, .role-card-gm input {
         background-color: rgba(255,255,255,0.2) !important;
         border: 1px solid rgba(255,255,255,0.3) !important;
@@ -245,7 +242,6 @@
             color: rgba(255,255,255,0.7) !important;
         }
 
-    /* Carduri Roluri */
     .role-card-player {
         background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
         border: none;
@@ -279,20 +275,19 @@
 
     <script>
         $(document).ready(function() {
-            // 1. SELECTIE ROL (Simplu, fără animații de mișcare)
+            // 1. SELECTIE ROL
             function toggleRoleFields() {
                 var selectedRole = $('#roleSelector').val();
-                $('.role-section').addClass('d-none'); // Ascunde tot instant
+                $('.role-section').addClass('d-none'); 
                 if(selectedRole) {
-                    $('#role-' + selectedRole).removeClass('d-none').hide().fadeIn(300); // Doar fade-in
+                    $('#role-' + selectedRole).removeClass('d-none').hide().fadeIn(300); 
                 }
             }
             $('#roleSelector').change(toggleRoleFields);
             toggleRoleFields();
 
-            // 2. OCHI PAROLĂ (Funcționează pentru ambele câmpuri)
+            // 2. OCHI PAROL
             $('.toggle-password').click(function () {
-                // Găsește input-ul asociat (fratele anterior)
                 var input = $(this).siblings('input');
                 var icon = $(this).find('i');
 

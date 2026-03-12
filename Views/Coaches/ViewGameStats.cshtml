@@ -39,7 +39,6 @@
                     <tbody>
                         @foreach (var ps in Model.PlayerStats)
                         {
-                            // Dacă jucătorul a avut 0 minute (nu a intrat pe teren), îl afișăm cu text estompat
                             string rowClass = ps.MinutesPlayed == 0 ? "opacity-50" : "";
 
                             <tr class="@rowClass">

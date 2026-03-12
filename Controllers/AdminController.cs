@@ -44,7 +44,7 @@ namespace Licenta.Controllers
         // --- DASHBOARD ---
         public async Task<IActionResult> AdminDashboard()
         {
-            // 1. Statistici de Bază
+            // 1. Statistici de Baza
             var totalUsers = await _context.Users.CountAsync();
             var totalPlayers = await _context.Players.CountAsync();
             var totalCoaches = await _context.Coaches.CountAsync();
@@ -256,7 +256,6 @@ namespace Licenta.Controllers
             return View(viewModel);
         }
 
-        // --- EDITARE UTILIZATOR (GET) ---
         [HttpGet]
         public async Task<IActionResult> EditUser(int id)
         {
@@ -264,7 +263,7 @@ namespace Licenta.Controllers
                 .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
-                .Include(s => s.GeneralManager) // AM INCLUS GM AICI
+                .Include(s => s.GeneralManager) 
                 .FirstOrDefaultAsync(s => s.StaffId == id);
 
             if (staff == null) return NotFound();
@@ -283,22 +282,19 @@ namespace Licenta.Controllers
                 HireDate = staff.HireDate,
                 RoleName = roleName,
 
-                // Jucător
                 Position = staff.Player?.Position,
                 JerseyNumber = staff.Player?.JerseyNumber,
                 Height = staff.Player?.Height,
                 Weight = staff.Player?.Weight,
 
-                // Restul
                 LicenseNumber = staff.Coach?.LicenseNumber,
                 Specialization = staff.Medic?.Specialty,
-                Office = staff.GeneralManager?.Office // AM ADĂUGAT ASTA
+                Office = staff.GeneralManager?.Office 
             };
 
             return View(model);
         }
 
-        // --- EDITARE UTILIZATOR (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(EditUserViewModel model)
@@ -309,18 +305,16 @@ namespace Licenta.Controllers
                 .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
-                .Include(s => s.GeneralManager) // AM INCLUS GM AICI
+                .Include(s => s.GeneralManager) 
                 .FirstOrDefaultAsync(s => s.StaffId == model.StaffId);
 
             if (staff == null) return NotFound();
 
-            // Update Date Generale
             staff.FirstName = model.FirstName;
             staff.LastName = model.LastName;
             staff.DateOfBirth = model.DateOfBirth;
             staff.HireDate = model.HireDate;
 
-            // Update Date Specifice
             if (model.RoleName == "Player" && staff.Player != null)
             {
                 staff.Player.Position = model.Position;
@@ -339,7 +333,7 @@ namespace Licenta.Controllers
                 staff.Medic.Specialty = model.Specialization;
                 _context.Update(staff.Medic);
             }
-            else if (model.RoleName == "GeneralManager" && staff.GeneralManager != null) // AM ADĂUGAT LOGICA GM
+            else if (model.RoleName == "GeneralManager" && staff.GeneralManager != null)
             {
                 staff.GeneralManager.Office = model.Office;
                 _context.Update(staff.GeneralManager);
@@ -468,18 +462,15 @@ namespace Licenta.Controllers
             var userId = staff.UserId;
             var user = await _userManager.FindByIdAsync(userId);
 
-            // 1. Toate permisiunile
             var allPermissions = await _context.Permissions.ToListAsync();
 
-            // 2. Permisiuni EXPLICITE (UserPermission - Extra)
             var userDirectPermissions = await _context.UserPermissions
                 .Where(up => up.UserId == userId)
                 .Select(up => up.PermissionId)
                 .ToListAsync();
 
-            // 3. Permisiuni MOȘTENITE (RolePermission)
             var userRoles = await _userManager.GetRolesAsync(user);
-            var roleName = userRoles.FirstOrDefault() ?? "Nespecificat"; // Luăm numele rolului
+            var roleName = userRoles.FirstOrDefault() ?? "Nespecificat";
 
             var roleIds = await _roleManager.Roles
                 .Where(r => userRoles.Contains(r.Name))
@@ -496,7 +487,7 @@ namespace Licenta.Controllers
                 StaffId = staff.StaffId,
                 UserName = $"{staff.FirstName} {staff.LastName}",
                 UserId = userId,
-                RoleName = roleName, // <--- Setăm proprietatea
+                RoleName = roleName, 
                 PermissionList = allPermissions.Select(p => new PermissionCheckbox
                 {
                     PermissionId = p.PermissionId,
@@ -544,7 +535,7 @@ namespace Licenta.Controllers
 
 
         // ==========================================
-        //         MODUL COMUNICAȚII (GRUPURI)
+        //         MODUL COMUNICATII (GRUPURI)
         // ==========================================
 
         [HttpGet]
@@ -568,7 +559,6 @@ namespace Licenta.Controllers
                 });
             }
 
-            // Sortăm după rol ca să fie mai ușor de găsit
             model.AvailableStaff = model.AvailableStaff.OrderBy(s => s.RoleName).ThenBy(s => s.FullName).ToList();
 
             return View(model);
@@ -586,12 +576,10 @@ namespace Licenta.Controllers
                 return View(model);
             }
 
-            // 1. Creăm grupul
             var group = new MessageGroup { Name = model.Name, CreatedAt = DateTime.Now };
             _context.MessageGroups.Add(group);
-            await _context.SaveChangesAsync(); // Salvăm ca să primim GroupId
+            await _context.SaveChangesAsync(); 
 
-            // 2. Adăugăm membrii
             foreach (var staffId in selectedIds)
             {
                 _context.MessageGroupMembers.Add(new MessageGroupMember
@@ -607,7 +595,7 @@ namespace Licenta.Controllers
             return RedirectToAction("AdminDashboard");
         }
 
-        // --- AFIȘEAZĂ TOATE GRUPURILE ---
+        // --- AFISEAZA TOATE GRUPURILE ---
         [HttpGet]
         public async Task<IActionResult> ManageMessageGroups()
         {
@@ -647,7 +635,6 @@ namespace Licenta.Controllers
                     StaffId = staff.StaffId,
                     FullName = $"{staff.FirstName} {staff.LastName}",
                     RoleName = roles.FirstOrDefault() ?? "Staff",
-                    // Marcăm bifați pe cei care sunt deja în grup
                     IsSelected = group.Members.Any(m => m.StaffId == staff.StaffId)
                 });
             }
@@ -675,14 +662,11 @@ namespace Licenta.Controllers
                 return View(model);
             }
 
-            // Update nume
             group.Name = model.Name;
 
-            // Ștergem membrii care au fost debifați
             var membersToRemove = group.Members.Where(m => !selectedIds.Contains(m.StaffId)).ToList();
             _context.MessageGroupMembers.RemoveRange(membersToRemove);
 
-            // Adăugăm membrii noi bifați
             var existingIds = group.Members.Select(m => m.StaffId).ToList();
             foreach (var id in selectedIds)
             {
@@ -692,7 +676,7 @@ namespace Licenta.Controllers
                     {
                         GroupId = group.GroupId,
                         StaffId = id,
-                        LastReadAt = DateTime.Now // Inițializăm ceasul pentru noul membru
+                        LastReadAt = DateTime.Now 
                     });
                 }
             }
@@ -703,7 +687,6 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageMessageGroups));
         }
 
-        // --- ȘTERGERE GRUP (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMessageGroup(int id)
@@ -753,7 +736,6 @@ namespace Licenta.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Scorul începe default de la 0-0
                 model.HomeScore = 0;
                 model.AwayScore = 0;
 

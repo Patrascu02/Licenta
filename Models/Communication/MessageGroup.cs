@@ -15,7 +15,6 @@ namespace Licenta.Models.Communication
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Relații
         public ICollection<MessageGroupMember> Members { get; set; }
         public ICollection<Message> Messages { get; set; }
     }

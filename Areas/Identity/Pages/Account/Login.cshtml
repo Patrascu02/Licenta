@@ -90,7 +90,7 @@
 </div>
 
 <style>
-    /* === FUNDAL PAGINĂ === */
+    /* === FUNDAL PAGINA === */
     .login-background {
         background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
         position: relative;
@@ -119,7 +119,7 @@
             border-radius: 50%;
         }
 
-    /* === CARD DE STICLĂ === */
+    /* === CARD DE STICLA === */
     .glass-card {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(20px);
@@ -148,14 +148,13 @@
             background-color: white !important;
             border-color: var(--primary-color) !important;
             box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1) !important;
-            z-index: 1; /* Ca să vină peste border-ul vecin */
+            z-index: 1; 
         }
 
     .form-floating > label {
         padding-left: 1rem;
     }
 
-    /* Input group pentru parolă */
     .input-group .form-control {
         border-top-right-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
@@ -202,7 +201,6 @@
 
     }
 
-    /* Listele de erori implicite Identity */
     .alert ul {
         list-style: none;
         padding-left: 0;
@@ -214,7 +212,6 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // Funcție simplă pentru a arăta/ascunde parola
         function togglePassword() {
             var input = document.getElementById("passwordInput");
             var icon = document.getElementById("toggleIcon");

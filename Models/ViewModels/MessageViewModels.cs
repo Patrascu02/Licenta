@@ -14,9 +14,9 @@ namespace Licenta.Models.ViewModels
 
     public class ConversationItem
     {
-        public bool IsGroup { get; set; } // NOU: Să știm dacă e grup sau 1-la-1
+        public bool IsGroup { get; set; } 
         public Staff OtherStaff { get; set; }
-        public MessageGroup Group { get; set; } // NOU
+        public MessageGroup Group { get; set; } 
         public Message LastMessage { get; set; }
         public int UnreadCount { get; set; }
     }

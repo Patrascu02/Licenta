@@ -11,7 +11,6 @@ namespace Licenta
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configurare Bază de Date
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -20,16 +19,14 @@ namespace Licenta
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            // Configurare Identity
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>() // Activăm Rolurile
+                .AddRoles<IdentityRole>() 
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // --- SEEDING MINIMAL (Doar Structură, Fără Date de Business) ---
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -39,10 +36,8 @@ namespace Licenta
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                     var context = services.GetRequiredService<ApplicationDbContext>();
 
-                    // 1. Aplicăm Migrările (Update Database automat)
                     await context.Database.MigrateAsync();
 
-                    // 2. Asigurăm că Rolurile există (dar sunt GOLE, fără permisiuni)
                     string[] roleNames = { "Admin", "GeneralManager", "Coach", "Player", "Medic", "Scout" };
                     foreach (var roleName in roleNames)
                     {
@@ -52,7 +47,6 @@ namespace Licenta
                         }
                     }
 
-                    // 3. Asigurăm că există un cont de Admin pentru a putea intra în sistem
                     string adminEmail = "admin@clubbaschet.ro";
                     var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
@@ -65,7 +59,6 @@ namespace Licenta
                         {
                             await userManager.AddToRoleAsync(user, "Admin");
 
-                            // Profil Staff minimal pentru Admin
                             context.Staff.Add(new Staff
                             {
                                 UserId = user.Id,
@@ -79,9 +72,6 @@ namespace Licenta
                         }
                     }
 
-                    // =======================================================
-                    // 4. Apelăm Seeder-ul nostru pentru Sezon și Echipă !!!
-                    // =======================================================
                     Licenta.Data.DbInitializer.Seed(context);
                 }
                 catch (Exception ex)
@@ -91,7 +81,6 @@ namespace Licenta
                 }
             }
 
-            // Configurare Pipeline HTTP
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();

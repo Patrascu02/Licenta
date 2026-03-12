@@ -40,7 +40,6 @@ namespace Licenta.Controllers
 
             var conversations = new List<ConversationItem>();
 
-            // 1. Aducem conversațiile 1-la-1
             var allOtherStaff = await _context.Staff.Where(s => s.StaffId != currentStaff.StaffId).ToListAsync();
             foreach (var staff in allOtherStaff)
             {
@@ -55,7 +54,6 @@ namespace Licenta.Controllers
                 conversations.Add(new ConversationItem { IsGroup = false, OtherStaff = staff, LastMessage = lastMessage, UnreadCount = unreadCount });
             }
 
-            // 2. Aducem Grupurile
             var myMemberships = await _context.MessageGroupMembers
                 .Include(mgm => mgm.Group)
                 .Where(mgm => mgm.StaffId == currentStaff.StaffId)
@@ -69,7 +67,6 @@ namespace Licenta.Controllers
                     .Where(m => m.GroupId == group.GroupId)
                     .OrderByDescending(m => m.SentAt).FirstOrDefaultAsync();
 
-                // NOU: Calculăm mesajele necitite de acest membru în grup (trimise DUPĂ ultima lui vizită, și nu trimise de el)
                 int unreadGroupCount = await _context.Messages
                     .CountAsync(m => m.GroupId == group.GroupId &&
                                      m.SentAt > membership.LastReadAt &&
@@ -78,7 +75,6 @@ namespace Licenta.Controllers
                 conversations.Add(new ConversationItem { IsGroup = true, Group = group, LastMessage = lastGroupMsg, UnreadCount = unreadGroupCount });
             }
 
-            // 3. Sortăm totul
             var sortedConversations = conversations
                 .OrderByDescending(c => c.UnreadCount > 0)
                 .ThenByDescending(c => c.LastMessage?.SentAt ?? DateTime.MinValue)
@@ -109,7 +105,6 @@ namespace Licenta.Controllers
             return RedirectToAction("Chat", new { id = toStaffId });
         }
 
-        // --- FEREASTRA DE CHAT DE GRUP ---
         public async Task<IActionResult> GroupChat(int id)
         {
             var currentStaff = await GetCurrentStaffAsync();
@@ -118,9 +113,8 @@ namespace Licenta.Controllers
             if (group == null) return RedirectToAction("Index");
 
             var membership = group.Members.FirstOrDefault(m => m.StaffId == currentStaff.StaffId);
-            if (membership == null) return RedirectToAction("Index"); // Nu are acces
+            if (membership == null) return RedirectToAction("Index"); 
 
-            // NOU: Actualizăm "LastReadAt" ca fiind ACUM, deci toate mesajele devin "citite"
             membership.LastReadAt = DateTime.Now;
             await _context.SaveChangesAsync();
 
@@ -146,12 +140,11 @@ namespace Licenta.Controllers
                 GroupId = groupId,
                 Text = text,
                 SentAt = DateTime.Now,
-                IsRead = true // Dummy
+                IsRead = true 
             });
 
-            // Actualizăm timpul autorului ca să nu își vadă propriul mesaj ca "necitit"
             var membership = await _context.MessageGroupMembers.FirstOrDefaultAsync(m => m.GroupId == groupId && m.StaffId == currentStaff.StaffId);
-            if (membership != null) membership.LastReadAt = DateTime.Now.AddSeconds(2); // +2 sec ca să fim siguri că depășește SentAt
+            if (membership != null) membership.LastReadAt = DateTime.Now.AddSeconds(2); 
 
             await _context.SaveChangesAsync();
             return RedirectToAction("GroupChat", new { id = groupId });

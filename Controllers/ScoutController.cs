@@ -32,14 +32,12 @@ namespace Licenta.Controllers
                 .OrderByDescending(g => g.GameDate)
                 .ToListAsync();
 
-            // Meciurile jucate care încă au scorul 0-0 sunt considerate "Necompletate"
             var pendingGames = pastGames.Where(g => g.HomeScore == 0 && g.AwayScore == 0).ToList();
             var completedGames = pastGames.Where(g => g.HomeScore > 0 || g.AwayScore > 0).ToList();
 
             ViewBag.PendingCount = pendingGames.Count;
             ViewBag.CompletedCount = completedGames.Count;
 
-            // Trimitem primele 3 meciuri necompletate către interfață pentru acces rapid
             ViewBag.RecentPending = pendingGames.Take(3).ToList();
 
             // --- CALCUL PALMARES ECHIPĂ PENTRU DASHBOARD ---
@@ -54,7 +52,6 @@ namespace Licenta.Controllers
 
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
-            // -----------------------------------------------
 
             return View();
         }
@@ -63,7 +60,6 @@ namespace Licenta.Controllers
         [HttpGet]
         public async Task<IActionResult> AddMonthlyStats(int playerId)
         {
-            // Verificăm permisiunea de Scouting prin sistemul ACL implementat anterior
             if (!User.HasClaim("Permission", "Scouting.Manage"))
             {
                 return Forbid();
@@ -75,13 +71,12 @@ namespace Licenta.Controllers
 
             if (player == null) return NotFound();
 
-            // Pregătim modelul cu valori implicite pentru luna și anul curent
             var model = new PlayerGameStats
             {
                 PlayerId = playerId,
                 Month = DateTime.Now.Month,
                 Year = DateTime.Now.Year,
-                IsScoutingReport = true // Marcăm automat ca raport de scouting
+                IsScoutingReport = true
             };
 
             ViewBag.PlayerName = $"{player.Staff.FirstName} {player.Staff.LastName}";
@@ -95,13 +90,11 @@ namespace Licenta.Controllers
         {
             if (!User.HasClaim("Permission", "Scouting.Manage")) return Forbid();
 
-            // Forțăm marcarea ca raport de scouting pentru a evita erorile de GameId nullable
             stats.IsScoutingReport = true;
             stats.GameId = null;
 
             if (ModelState.IsValid)
             {
-                // Verificăm dacă scouterul a introdus deja date pentru această lună/an la acest jucător
                 var existingReport = await _context.PlayerGameStats
                     .AnyAsync(s => s.PlayerId == stats.PlayerId &&
                                    s.Month == stats.Month &&
@@ -117,7 +110,6 @@ namespace Licenta.Controllers
                 _context.PlayerGameStats.Add(stats);
                 await _context.SaveChangesAsync();
 
-                // Redirect înapoi la profilul jucătorului
                 return RedirectToAction("Details", "Players", new { id = stats.PlayerId });
             }
 
@@ -210,7 +202,6 @@ namespace Licenta.Controllers
             var game = await _context.Games.FindAsync(model.GameId);
             if (game == null) return NotFound();
 
-            // 1. CURĂȚĂM ERORILE FALSE (generate de server pentru textele care nu sunt în <input>)
             ModelState.Remove("GameInfo");
             for (int i = 0; i < model.PlayerStats.Count; i++)
             {
@@ -218,30 +209,23 @@ namespace Licenta.Controllers
                 ModelState.Remove($"PlayerStats[{i}].Position");
             }
 
-            // 2. VALIDĂRI DE BASCHET
-            // A. Nu există egal
             if (model.HomeScore == model.AwayScore && model.HomeScore != 0)
             {
                 ModelState.AddModelError("", "Eroare: În baschet nu există rezultat de egalitate (meciul intră în prelungiri).");
             }
 
-            // Identificăm care este scorul ECHIPEI NOASTRE
             bool isHome = game.Location.ToLower().Contains("acas");
             int ourTeamScore = isHome ? model.HomeScore : model.AwayScore;
 
-            // Calculăm suma punctelor trecute la jucători
             int sumPoints = (int)model.PlayerStats.Sum(p => p.Points);
 
-            // B. Suma punctelor trebuie să fie EXACTĂ! (!= înseamnă "diferit")
             if (sumPoints != ourTeamScore)
             {
                 ModelState.AddModelError("", $"Atenție: Scorul echipei noastre este setat la {ourTeamScore} puncte, dar punctele jucătorilor adunate dau {sumPoints}! Aceste două numere trebuie să fie EXACT egale pentru a salva raportul.");
             }
 
-            // DACĂ FORMULARUL ARE ERORI LOGICE (se va opri din salvare)
             if (!ModelState.IsValid)
             {
-                // Refacem textele jucătorilor pentru a nu apărea goale când ne întoarcem pe pagină cu eroarea
                 model.GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location} | {game.GameType}";
 
                 var roster = await _context.Players.Include(p => p.Staff).ToListAsync();
@@ -255,17 +239,14 @@ namespace Licenta.Controllers
                     }
                 }
 
-                // Ne întoarcem în pagina formularului, unde i se va afișa eroarea sus cu roșu
                 return View(model);
             }
 
-            // 3. SALVAREA EFECTIVĂ A DATELOR (Se ajunge aici doar dacă totul este corect)
             game.HomeScore = model.HomeScore;
             game.AwayScore = model.AwayScore;
 
             foreach (var ps in model.PlayerStats)
             {
-                // Dacă nu a jucat (0 minute) îl ignorăm
                 if (ps.MinutesPlayed == 0 && ps.PlayerGameStatsId == 0) continue;
 
                 if (ps.PlayerGameStatsId == 0)

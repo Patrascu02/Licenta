@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Roluri și Permisiuni";
 
-    // Funcție locală pentru a obține stilul vizual al rolului (Culoare + Icon)
     (string Class, string Icon) GetRoleStyle(string roleName)
     {
         return roleName switch
@@ -13,7 +12,7 @@
             "Player" => ("role-player", "fa-basketball-ball"),
             "Medic" => ("role-medic", "fa-user-md"),
             "Scout" => ("role-scout", "fa-binoculars"),
-            _ => ("bg-secondary", "fa-user-shield") // Default Admin sau altele
+            _ => ("bg-secondary", "fa-user-shield") 
         };
     }
 }
@@ -80,18 +79,16 @@
 </div>
 
 <style>
-    /* === GLASSHOUSE EFFECT === */
     .glass-card {
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(10px);
         border-radius: 20px;
     }
 
-    /* === ICONIȚE ROLURI (Stil Avatar) === */
     .icon-avatar {
         width: 48px;
         height: 48px;
-        border-radius: 12px; /* Pătrat rotunjit modern */
+        border-radius: 12px; 
         display: flex;
         align-items: center;
         justify-content: center;
@@ -105,7 +102,6 @@
         transform: scale(1.1) rotate(-5deg);
     }
 
-    /* === PALETA DE CULORI (Aceleași ca la Useri) === */
     .role-gm {
         background: linear-gradient(135deg, #4c1d95 0%, #312e81 100%);
     }

@@ -16,7 +16,6 @@ using Licenta.Models.Identity;
 
 namespace Licenta.Data
 {
-    // FIX: Folosim IdentityDbContext simplu pentru compatibilitate cu Program.cs
     public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -24,7 +23,6 @@ namespace Licenta.Data
         {
         }
 
-        // --- DEFINIREA TABELELOR (DbSets) ---
         public DbSet<Staff> Staff { get; set; }
         public DbSet<StaffRole> StaffRoles { get; set; }
         public DbSet<Player> Players { get; set; }
@@ -56,7 +54,6 @@ namespace Licenta.Data
         {
             base.OnModelCreating(builder);
 
-            // --- DEFINIREA CHEILOR PRIMARE ---
             builder.Entity<FileStorage>().HasKey(f => f.FileId);
             builder.Entity<Contract>().HasKey(c => c.ContractId);
             builder.Entity<Staff>().HasKey(s => s.StaffId);
@@ -64,7 +61,6 @@ namespace Licenta.Data
             builder.Entity<Injury>().HasKey(i => i.InjuryId);
             builder.Entity<UserPermission>().HasKey(up => up.UserPermissionId);
 
-            // --- REZOLVARE WARNINGS PENTRU DECIMAL ---
             builder.Entity<Contract>()
                 .Property(c => c.Salary)
                 .HasColumnType("decimal(18,2)");
@@ -81,9 +77,7 @@ namespace Licenta.Data
                 .Property(t => t.BudgetLimit)
                 .HasColumnType("decimal(18,2)");
 
-            // --- CONFIGURĂRI CASCADE DELETE ---
-
-            // 1. Relații Jucător & Contracte
+            
             builder.Entity<Contract>()
                 .HasOne(c => c.Staff)
                 .WithMany(s => s.Contracts)
@@ -102,7 +96,6 @@ namespace Licenta.Data
                 .HasForeignKey(pth => pth.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 2. Performanță și Sezoane
             builder.Entity<Expense>()
                 .HasOne(e => e.Season)
                 .WithMany(s => s.Expenses)
@@ -127,7 +120,6 @@ namespace Licenta.Data
                 .HasForeignKey(pgs => pgs.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 3. Comunicare și Mesaje
             builder.Entity<Message>()
                 .HasOne(m => m.FromStaff)
                 .WithMany(s => s.MessagesSent)
@@ -140,7 +132,6 @@ namespace Licenta.Data
                 .HasForeignKey(m => m.ToStaffId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // 4. HR și Notificări
             builder.Entity<TerminationNotice>()
                 .HasOne(tn => tn.IssuedByStaff)
                 .WithMany(s => s.NoticesIssued)
@@ -159,14 +150,12 @@ namespace Licenta.Data
                 .HasForeignKey(n => n.StaffId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 5. Fișiere și Securitate
             builder.Entity<FileStorage>()
                 .HasOne(f => f.Staff)
                 .WithMany(s => s.Files)
                 .HasForeignKey(f => f.StaffId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // 6. Permisiuni
             builder.Entity<RolePermission>()
                 .HasOne(rp => rp.Permission)
                 .WithMany()
@@ -179,7 +168,6 @@ namespace Licenta.Data
                 .HasForeignKey(up => up.PermissionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Reguli pentru Mesajele de Grup
             builder.Entity<Message>()
                 .HasOne(m => m.Group)
                 .WithMany(g => g.Messages)

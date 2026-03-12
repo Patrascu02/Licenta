@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "Dashboard Financiar GM";
-    // Calculăm culoarea alertei: Roșu dacă e depășit, Galben dacă mai e < 10%, Verde altfel
     var alertClass = Model.RemainingBudget < 0 ? "alert-danger" : (Model.RemainingBudget < Model.BudgetLimit * 0.1m ? "alert-warning" : "alert-success");
 }
 

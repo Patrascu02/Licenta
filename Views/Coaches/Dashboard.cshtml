@@ -182,29 +182,25 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var cdElement = document.getElementById('event-countdown');
-            if(!cdElement) return; // Dacă nu există eveniment, oprim scriptul
+            if(!cdElement) return; 
 
-            // Luăm data din atributul data-time pe care l-am setat in HTML
             var targetDate = new Date(cdElement.getAttribute('data-time')).getTime();
 
             var timer = setInterval(function() {
                 var now = new Date().getTime();
                 var distance = targetDate - now;
 
-                // Dacă timpul a expirat
                 if (distance < 0) {
                     clearInterval(timer);
                     cdElement.innerHTML = "<h5 class='text-success mt-3 fw-bold pulse-danger'><i class='fas fa-play-circle me-2'></i>Evenimentul a început!</h5>";
                     return;
                 }
 
-                // Calculăm timpul
                 var days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                // Afișăm cu un '0' în față dacă numărul e mai mic de 10
                 document.getElementById('cd-days').innerText = days < 10 ? '0' + days : days;
                 document.getElementById('cd-hours').innerText = hours < 10 ? '0' + hours : hours;
                 document.getElementById('cd-mins').innerText = minutes < 10 ? '0' + minutes : minutes;

@@ -30,8 +30,7 @@ namespace Licenta.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // Verificare Opțională: Players.View
-            // if (!User.HasClaim("Permission", "Players.View") && !User.IsInRole("Admin")) return Forbid();
+            
 
             var players = _context.Players
                 .Include(p => p.Staff)
@@ -58,7 +57,6 @@ namespace Licenta.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            // MODIFICARE AICI: Fără "Permissions."
             if (!User.HasClaim("Permission", "Players.Create") && !User.IsInRole("Admin"))
             {
                 return Forbid();
@@ -71,7 +69,6 @@ namespace Licenta.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Player player)
         {
-            // MODIFICARE AICI
             if (!User.HasClaim("Permission", "Players.Create") && !User.IsInRole("Admin"))
             {
                 return Forbid();
@@ -94,7 +91,6 @@ namespace Licenta.Controllers
         {
             if (id == null) return NotFound();
 
-            // MODIFICARE AICI: "Players.Edit"
             if (!User.HasClaim("Permission", "Players.Edit") && !User.IsInRole("Admin"))
             {
                 return Forbid();
@@ -113,7 +109,6 @@ namespace Licenta.Controllers
         {
             if (id != player.PlayerId) return NotFound();
 
-            // MODIFICARE AICI
             if (!User.HasClaim("Permission", "Players.Edit") && !User.IsInRole("Admin"))
             {
                 return Forbid();
@@ -144,7 +139,6 @@ namespace Licenta.Controllers
         {
             if (id == null) return NotFound();
 
-            // MODIFICARE AICI: "Players.Delete"
             if (!User.HasClaim("Permission", "Players.Delete") && !User.IsInRole("Admin"))
             {
                 return Forbid();
@@ -160,7 +154,6 @@ namespace Licenta.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // MODIFICARE AICI
             if (!User.HasClaim("Permission", "Players.Delete") && !User.IsInRole("Admin"))
             {
                 return Forbid();

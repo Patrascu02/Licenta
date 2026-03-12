@@ -11,21 +11,19 @@ namespace Licenta.Models.ViewModels
         public int TotalCoaches { get; set; }
         public int TotalStaff { get; set; }
 
-        // Monitorizare Sistem (Metrici Reale)
-        public double RamUsageMb { get; set; } // RAM folosit de app
-        public double RamTotalMb { get; set; } // RAM alocat (limită fictivă sau reală)
+        public double RamUsageMb { get; set; } 
+        public double RamTotalMb { get; set; } 
         public int RamPercentage => (int)((RamUsageMb / RamTotalMb) * 100);
 
-        public double StorageUsageMb { get; set; } // Mărimea folderului wwwroot
-        public double StorageLimitMb { get; set; } // Limită hosting (ex: 500MB)
+        public double StorageUsageMb { get; set; } 
+        public double StorageLimitMb { get; set; } 
         public int StoragePercentage => (int)((StorageUsageMb / StorageLimitMb) * 100);
 
-        public int ActiveSessions { get; set; } // Useri activi în ultimele 30 min
+        public int ActiveSessions { get; set; } 
         public string LastActivityTime { get; set; }
 
-        public int CpuUsagePercent { get; set; } // Simulat sau calculat
+        public int CpuUsagePercent { get; set; } 
 
-        // Lista Log-uri
         public List<AuditLog> RecentLogs { get; set; }
     }
 }

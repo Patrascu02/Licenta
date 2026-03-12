@@ -7,18 +7,15 @@ public class PlayerGameStats
     public int PlayerGameStatsId { get; set; }
     public int PlayerId { get; set; }
 
-    [ValidateNever]//valideaza id ul dar nu te uita la tot obiectul player
+    [ValidateNever]
     public Player Player { get; set; }
 
-    // Facem GameId nullable pentru că un raport de scouting lunar 
-    // reprezintă media mai multor meciuri, nu a unuia singur
     public int? GameId { get; set; }
     public Game? Game { get; set; }
 
-    // ADAUGĂ ACESTE CÂMPURI PENTRU SCOUTING LUNAR:
-    public int Month { get; set; } // 1-12
+    public int Month { get; set; } 
     public int Year { get; set; }
-    public bool IsScoutingReport { get; set; } // Diferențiem un meci real de o notă de scouting
+    public bool IsScoutingReport { get; set; } 
 
     
     public double Points { get; set; }

@@ -5,7 +5,6 @@ namespace Licenta.Models.ViewModels
 {
     public class CreateUserViewModel
     {
-        // --- DATE CONT (Identitate) ---
         [Required(ErrorMessage = "Email-ul este obligatoriu.")]
         [EmailAddress(ErrorMessage = "Formatul email-ului este invalid.")]
         [Display(Name = "Email Oficial")]
@@ -27,7 +26,6 @@ namespace Licenta.Models.ViewModels
         public string Role { get; set; } = string.Empty;
 
 
-        // --- DATE STAFF (Comune pentru toți angajații) ---
         [Required(ErrorMessage = "Prenumele este obligatoriu.")]
         [Display(Name = "Prenume")]
         public string FirstName { get; set; } = string.Empty;
@@ -47,9 +45,6 @@ namespace Licenta.Models.ViewModels
         public DateTime HireDate { get; set; } = DateTime.Now;
 
 
-        // --- DATE SPECIFICE JUCĂTOR ---
-        // Folosim tipuri Nullable (?) pentru că aceste câmpuri nu sunt completate 
-        // dacă rolul selectat este altul decât "Player"
 
         [Display(Name = "Poziție Teren")]
         public string? Position { get; set; }
@@ -60,23 +55,20 @@ namespace Licenta.Models.ViewModels
 
         [Display(Name = "Înălțime (cm)")]
         [Range(150, 250, ErrorMessage = "Înălțimea trebuie să fie între 150 și 250 cm.")]
-        public int? Height { get; set; } // Schimbat din double? în int?
+        public int? Height { get; set; } 
 
         [Display(Name = "Greutate (kg)")]
         [Range(50, 160, ErrorMessage = "Greutatea trebuie să fie între 50 și 160 kg.")]
         public int? Weight { get; set; }
 
 
-        // --- DATE SPECIFICE ANTRENOR ---
         [Display(Name = "Număr Licență")]
         public string? LicenseNumber { get; set; }
 
 
-        // --- DATE SPECIFICE MEDIC ---
         [Display(Name = "Specializare Medicală")]
         public string? Specialization { get; set; }
 
-        //--- gm ---
 
         [Display(Name = "Birou / Departament")]
         public string? Office { get; set; }
