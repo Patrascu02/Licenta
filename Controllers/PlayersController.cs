@@ -34,7 +34,8 @@ namespace Licenta.Controllers
 
             var players = _context.Players
                 .Include(p => p.Staff)
-                .Include(p => p.CurrentTeam);
+                .Include(p => p.CurrentTeam)
+                .Include(p => p.Injuries);
             return View(await players.ToListAsync());
         }
 

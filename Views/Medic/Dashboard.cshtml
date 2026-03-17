@@ -1,0 +1,176 @@
+﻿@model Licenta.Models.ViewModels.MedicDashboardViewModel
+@{
+    ViewData["Title"] = "Departament Medical";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-danger pb-3">
+        <div>
+            <h2 class="text-white fw-bold mb-1"><i class="fas fa-heartbeat text-danger me-2"></i>Departament Medical</h2>
+            <p class="text-muted mb-0">Monitorizare Vize Medicale și Accidentări</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card glass-card border-warning">
+                <div class="card-body text-center">
+                    <h3 class="text-warning fw-bold">@Model.ExpiredClearances</h3>
+                    <p class="text-muted text-uppercase mb-0 small">Vize Expirate (sau la limită)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card glass-card border-danger">
+                <div class="card-body text-center">
+                    <h3 class="text-danger fw-bold">@Model.TotalInjured</h3>
+                    <p class="text-muted text-uppercase mb-0 small">Jucători Accidentați</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card glass-card border-secondary mb-4">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0 text-center">
+                <thead>
+                    <tr class="text-info">
+                        <th class="text-start ps-4">Jucător</th>
+                        <th>Viza Medicală (8 Luni)</th>
+                        <th>Status Sănătate</th>
+                        <th class="text-end pe-4">Acțiuni Medicale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Players)
+                    {
+                        <tr>
+                            <td class="text-start ps-4 fw-bold text-white">
+                                <span class="badge bg-secondary me-2">#@p.JerseyNumber</span> @p.FullName
+                            </td>
+                            <td>
+                                @if (p.IsClearanceValid)
+                                {
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success px-2 py-1">
+                                        <i class="fas fa-check-circle me-1"></i> Valabilă
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-2 py-1 pulse-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i> Expirată
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (p.ActiveInjury != null)
+                                {
+                                    <div class="text-danger fw-bold">
+                                        <i class="fas fa-band-aid me-1"></i> @p.ActiveInjury.Description
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-success"><i class="fas fa-running me-1"></i> Apt de joc</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+
+                                @if (!p.IsClearanceValid && p.ActiveInjury == null)
+                                {
+                                    <form asp-action="GrantClearance" method="post" class="d-inline">
+                                        <input type="hidden" name="playerId" value="@p.PlayerId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success me-1" title="Acordă Viza Medicală">
+                                            <i class="fas fa-stethoscope"></i> OK Joc
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (p.ActiveInjury != null)
+                                {
+                                    <form asp-action="MarkRecovered" method="post" class="d-inline">
+                                        <input type="hidden" name="injuryId" value="@p.ActiveInjury.InjuryId" />
+                                        <button type="submit" class="btn btn-sm btn-success fw-bold">
+                                            <i class="fas fa-plus-square me-1"></i> Recuperat
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#injuryModal-@p.PlayerId">
+                                        <i class="fas fa-user-injured"></i> Raportează Accidentare
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @foreach (var p in Model.Players)
+    {
+        @if (p.ActiveInjury == null)
+        {
+            <div class="modal fade" id="injuryModal-@p.PlayerId" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content glass-card border-danger text-white" style="background: rgba(15, 23, 42, 0.95);">
+                        <form asp-action="ReportInjury" method="post">
+                            <div class="modal-header border-danger">
+                                <h5 class="modal-title text-danger"><i class="fas fa-briefcase-medical me-2"></i>Raport Medical: @p.FullName</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" name="playerId" value="@p.PlayerId" />
+
+                                <div class="mb-3 text-start">
+                                    <label class="form-label fw-bold">Diagnostic / Descriere</label>
+                                    <input type="text" name="description" class="form-control bg-dark text-white border-secondary shadow-none" placeholder="Ex: Entorsă gleznă dreaptă" required autofocus />
+                                </div>
+
+                                <div class="mb-3 text-start">
+                                    <label class="form-label fw-bold text-info">Perioadă estimativă (Opțional)</label>
+                                    <input type="text" name="recoveryText" class="form-control bg-dark text-white border-secondary shadow-none" placeholder="Ex: 2-3 săptămâni..." />
+                                </div>
+
+                            </div>
+                            <div class="modal-footer border-secondary">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
+                                <button type="submit" class="btn btn-danger fw-bold"><i class="fas fa-save me-2"></i>Salvează Dosarul</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .pulse-danger {
+        animation: pulse-warn 2s infinite;
+    }
+
+    @@keyframes pulse-warn {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 rgba(245, 158, 11, 0.4);
+        }
+
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+        }
+
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 rgba(245, 158, 11, 0.4);
+        }
+    }
+
+    .form-control:focus {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 5px rgba(220, 53, 69, 0.5) !important;
+    }
+</style>

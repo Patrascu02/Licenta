@@ -34,6 +34,10 @@ namespace Licenta.Controllers
             {
                 return RedirectToAction("Dashboard", "Scout");
             }
+            if (User.IsInRole("Medic"))
+            {
+                return RedirectToAction("Dashboard", "Medic");
+            }
 
             return View();
         }
