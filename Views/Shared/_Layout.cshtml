@@ -93,6 +93,14 @@
                                         </a>
                                     </li>
                                 }
+                                @if (User.IsInRole("GeneralManager") || User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-area="" asp-controller="GeneralManager" asp-action="Index">
+                                            <i class="fas fa-chart-line text-success"></i> Birou GM
+                                        </a>
+                                    </li>
+                                }
 
                        
                                 @if (User.HasClaim(c => c.Type == "Permission" && c.Value == "Players.View") )

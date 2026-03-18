@@ -1,4 +1,7 @@
 ﻿using Licenta.Data;
+using Licenta.Models.Finance;
+using Licenta.Models.Sports;
+using Licenta.Models.Contracts;
 using Licenta.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,64 +22,124 @@ namespace Licenta.Controllers
             _context = context;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var team = await _context.Teams.FirstOrDefaultAsync();
-            decimal limit = team?.BudgetLimit ?? 1000000;
+            var today = DateTime.Now;
 
-            var contracts = await _context.Contracts
-                .Include(c => c.Staff).ThenInclude(s => s.Player)
-                .Include(c => c.Staff).ThenInclude(s => s.Coach)
-                .Include(c => c.Staff).ThenInclude(s => s.Medic)
-                .Include(c => c.Staff).ThenInclude(s => s.Scout)
+            var currentSeason = await _context.Seasons
+                .Include(s => s.Expenses)
+                .FirstOrDefaultAsync(s => s.StartDate <= today && s.EndDate >= today);
+
+            var model = new GMDashboardViewModel();
+
+            ViewBag.AllStaff = await _context.Staff.OrderBy(s => s.LastName).ToListAsync();
+
+            var activeContracts = await _context.Contracts
+                .Include(c => c.Staff)
                 .Where(c => c.IsActive)
                 .ToListAsync();
 
-            var expenses = await _context.Expenses
-                .Where(e => e.ExpenseDate.Year == DateTime.Now.Year)
-                .ToListAsync();
+            model.ActiveContracts = activeContracts;
 
-            var model = new BudgetDashboardViewModel
+            if (currentSeason != null)
             {
-                BudgetLimit = limit,
+                decimal monthlySalaries = activeContracts.Sum(c => c.Salary);
+                decimal seasonalSalariesCost = monthlySalaries * 10;
+                decimal otherExpenses = currentSeason.Expenses?.Sum(e => e.Amount) ?? 0;
 
-                PlayerSalaries = contracts.Where(c => c.Staff.Player != null).Sum(c => c.Salary),
-                CoachSalaries = contracts.Where(c => c.Staff.Coach != null).Sum(c => c.Salary),
-                MedicSalaries = contracts.Where(c => c.Staff.Medic != null).Sum(c => c.Salary),
-                ScoutSalaries = contracts.Where(c => c.Staff.Scout != null).Sum(c => c.Salary),
-
-                OperationalExpenses = expenses
-                    .GroupBy(e => e.Type ?? "Diverse")
-                    .ToDictionary(g => g.Key, g => g.Sum(e => e.Amount))
-            };
-
-            decimal totalSalaries = model.PlayerSalaries + model.CoachSalaries + model.MedicSalaries + model.ScoutSalaries;
-            decimal totalOps = model.OperationalExpenses.Values.Sum();
-
-            model.TotalSpent = totalSalaries + totalOps;
-            model.RemainingBudget = model.BudgetLimit - model.TotalSpent;
+                model.CurrentSeason = currentSeason;
+                model.TotalBudget = currentSeason.Budget;
+                model.MonthlySalaries = monthlySalaries;
+                model.SeasonalSalariesCost = seasonalSalariesCost;
+                model.TotalOtherExpenses = otherExpenses;
+                model.ActiveContractsCount = activeContracts.Count;
+                model.RecentExpenses = currentSeason.Expenses?.OrderByDescending(e => e.ExpenseDate).Take(5).ToList() ?? new();
+            }
 
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> StartNewSeason(decimal totalBudget)
+        {
+            var today = DateTime.Now;
+            int startYear = today.Month >= 9 ? today.Year : today.Year - 1;
 
-        
+            var newSeason = new Season
+            {
+                Name = $"Sezonul {startYear} - {startYear + 1}",
+                StartDate = new DateTime(startYear, 9, 1),
+                EndDate = new DateTime(startYear + 1, 8, 31),
+                Budget = totalBudget
+            };
+
+            _context.Seasons.Add(newSeason);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateBudget(decimal newLimit)
+        public async Task<IActionResult> AddExpense(int seasonId, string type, string description, decimal amount)
         {
-            
-            var team = await _context.Teams.FirstOrDefaultAsync();
-
-            if (team != null)
+            var expense = new Expense
             {
-                
-                team.BudgetLimit = newLimit;
+                SeasonId = seasonId,
+                Type = type,
+                Description = description ?? "",
+                Amount = amount,
+                ExpenseDate = DateTime.Now
+            };
+
+            _context.Expenses.Add(expense);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteExpense(int expenseId)
+        {
+            var expense = await _context.Expenses.FindAsync(expenseId);
+            if (expense != null)
+            {
+                _context.Expenses.Remove(expense);
                 await _context.SaveChangesAsync();
             }
+            return RedirectToAction(nameof(Index));
+        }
 
-            
+        [HttpPost]
+        public async Task<IActionResult> AssignContract(int staffId, decimal salary, DateTime startDate, DateTime? endDate)
+        {
+            var oldContracts = await _context.Contracts.Where(c => c.StaffId == staffId).ToListAsync();
+            foreach (var c in oldContracts)
+            {
+                c.IsActive = false;
+            }
+
+            var newContract = new Contract
+            {
+                StaffId = staffId,
+                Salary = salary,
+                StartDate = startDate,
+                EndDate = endDate,
+                IsActive = true
+            };
+
+            _context.Contracts.Add(newContract);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteContract(int contractId)
+        {
+            var contract = await _context.Contracts.FindAsync(contractId);
+            if (contract != null)
+            {
+                _context.Contracts.Remove(contract);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
     }

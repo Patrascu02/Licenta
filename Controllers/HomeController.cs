@@ -38,6 +38,10 @@ namespace Licenta.Controllers
             {
                 return RedirectToAction("Dashboard", "Medic");
             }
+            if (User.IsInRole("GeneralManager"))
+            {
+                return RedirectToAction("Index", "GeneralManager");
+            }
 
             return View();
         }
