@@ -223,6 +223,14 @@
                                             <td>@(contract.EndDate.HasValue ? contract.EndDate.Value.ToString("dd MMM yyyy") : "Perioadă Nedeterminată")</td>
                                             <td class="text-end text-success fw-bold">@contract.Salary.ToString("C0")</td>
                                             <td class="text-end pe-4">
+                                                
+                                                @if (!string.IsNullOrEmpty(contract.SignedFilePath))
+                                                {
+                                                    <a href="@contract.SignedFilePath" target="_blank" class="btn btn-sm btn-info text-dark fw-bold me-1" title="Vezi Document">
+                                                        <i class="fas fa-file-pdf"></i> PDF
+                                                    </a>
+                                                }
+
                                                 <form asp-action="DeleteContract" method="post" class="d-inline">
                                                     <input type="hidden" name="contractId" value="@contract.ContractId" />
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Șterge contract (În caz de eroare)" onclick="return confirm('Atenție: Ești sigur că vrei să ștergi acest contract? Angajatul va fi marcat ca Fără Contract.');">
@@ -249,7 +257,7 @@
         <div class="modal fade" id="newContractModal" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content glass-card border-warning text-white" style="background: rgba(15, 23, 42, 0.95);">
-                    <form asp-action="AssignContract" method="post">
+                    <form asp-action="AssignContract" method="post" enctype="multipart/form-data">
                         <div class="modal-header border-warning">
                             <h5 class="modal-title text-warning"><i class="fas fa-file-contract me-2"></i>Semnează Contract Nou</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -275,14 +283,19 @@
                                     <span class="input-group-text bg-secondary text-white border-secondary">RON / €</span>
                                 </div>
                             </div>
+                            
+                            <div class="mb-3 text-start">
+                                <label class="form-label fw-bold text-info">Încarcă Contract Scanat (PDF)</label>
+                                <input type="file" name="contractFile" class="form-control bg-dark text-white border-info shadow-none" accept=".pdf,.jpg,.png" />
+                            </div>
+
                             <div class="row">
-                                <div class="col-md-6 mb-3 text-start">
-                                    <label class="form-label fw-bold">Dată Început</label>
+                                <div class="col-12 mb-3 text-start">
+                                    <label class="form-label fw-bold">Dată Început Contract</label>
                                     <input type="date" name="startDate" class="form-control bg-dark text-white border-secondary shadow-none" required />
-                                </div>
-                                <div class="col-md-6 mb-3 text-start">
-                                    <label class="form-label fw-bold text-muted">Dată Expirare (Opțional)</label>
-                                    <input type="date" name="endDate" class="form-control bg-dark text-white border-secondary shadow-none" />
+                                    <div class="form-text text-info mt-2">
+                                        <i class="fas fa-info-circle me-1"></i> Contractul se va încheia automat la finalul sezonului competițional (31 August).
+                                    </div>
                                 </div>
                             </div>
                         </div>

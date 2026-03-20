@@ -109,7 +109,7 @@ namespace Licenta.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AssignContract(int staffId, decimal salary, DateTime startDate, DateTime? endDate)
+        public async Task<IActionResult> AssignContract(int staffId, decimal salary, DateTime startDate, IFormFile? contractFile)
         {
             var oldContracts = await _context.Contracts.Where(c => c.StaffId == staffId).ToListAsync();
             foreach (var c in oldContracts)
@@ -117,13 +117,45 @@ namespace Licenta.Controllers
                 c.IsActive = false;
             }
 
+            string? savedFilePath = null;
+
+            if (contractFile != null && contractFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "contracts");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(contractFile.FileName);
+                var exactPath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(exactPath, FileMode.Create))
+                {
+                    await contractFile.CopyToAsync(stream);
+                }
+
+                savedFilePath = "/uploads/contracts/" + uniqueFileName;
+            }
+
+            DateTime calculatedEndDate;
+            if (startDate.Month >= 9) 
+            {
+                calculatedEndDate = new DateTime(startDate.Year + 1, 8, 31);
+            }
+            else 
+            {
+                calculatedEndDate = new DateTime(startDate.Year, 8, 31);
+            }
+
             var newContract = new Contract
             {
                 StaffId = staffId,
                 Salary = salary,
                 StartDate = startDate,
-                EndDate = endDate,
-                IsActive = true
+                EndDate = calculatedEndDate, 
+                IsActive = true,
+                SignedFilePath = savedFilePath
             };
 
             _context.Contracts.Add(newContract);
