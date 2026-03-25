@@ -13,7 +13,7 @@
         <div class="col-lg-6 col-md-8">
             <div class="card glass-card border-success">
                 <div class="card-body p-4">
-                    <form asp-action="CreateEvent" method="post">
+                    <form asp-action="CreateEvent" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="mb-3">
@@ -51,6 +51,12 @@
                             <label asp-for="Description" class="form-label text-white fw-bold"></label>
                             <textarea asp-for="Description" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Unde se ține sau alte detalii..."></textarea>
                             <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="AttachedFile" class="form-label text-info fw-bold"><i class="fas fa-paperclip me-1"></i>Atașează Fișier Tactic (Video/PDF) - Opțional</label>
+                            <input asp-for="AttachedFile" type="file" class="form-control bg-dark text-white border-info shadow-none" accept=".pdf,.mp4,.avi,.mov" />
+                            <div class="form-text text-muted mt-1"><i class="fas fa-info-circle me-1"></i>Puteți încărca rezumatul video al meciului sau analiza tactică PDF pentru jucători.</div>
                         </div>
 
                         <div class="text-end border-top border-secondary pt-3">

@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace Licenta.Controllers
 {
@@ -18,6 +21,7 @@ namespace Licenta.Controllers
         public MedicController(ApplicationDbContext context)
         {
             _context = context;
+            QuestPDF.Settings.License = LicenseType.Community; // Trebuie adăugat pentru a folosi librăria gratuit
         }
 
         [HttpGet]
@@ -53,11 +57,10 @@ namespace Licenta.Controllers
             return View(model);
         }
 
-        // --- ACORDARE VIZĂ MEDICALĂ (OK DE JOC) ---
         [HttpPost]
         public async Task<IActionResult> GrantClearance(int playerId)
         {
-            var player = await _context.Players.FindAsync(playerId);
+            var player = await _context.Players.Include(p => p.Staff).FirstOrDefaultAsync(p => p.PlayerId == playerId);
             if (player != null)
             {
                 player.LastMedicalClearance = DateTime.Now;
@@ -66,11 +69,9 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Dashboard));
         }
 
-        // --- RAPORT ACCIDENTARE ---
         [HttpPost]
         public async Task<IActionResult> ReportInjury(int playerId, string description, string recoveryText)
         {
-            // Lipim textul de recuperare de diagnostic, dacă medicul l-a completat
             string finalDescription = string.IsNullOrWhiteSpace(recoveryText)
                 ? description
                 : $"{description} (Timp estimat recuperare: {recoveryText})";
@@ -80,7 +81,7 @@ namespace Licenta.Controllers
                 PlayerId = playerId,
                 Description = finalDescription,
                 StartDate = DateTime.Now,
-                EstimatedRecoveryDate = DateTime.Now, // Punem o dată default ca să nu dea eroare SQL-ul
+                EstimatedRecoveryDate = DateTime.Now,
                 Status = "Accidentat"
             };
 
@@ -89,7 +90,6 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Dashboard));
         }
 
-        // --- DECLARARE RECUPERAT ---
         [HttpPost]
         public async Task<IActionResult> MarkRecovered(int injuryId)
         {
@@ -97,10 +97,111 @@ namespace Licenta.Controllers
             if (injury != null)
             {
                 injury.Status = "Recuperat";
-                // Am eliminat EndDate pentru a nu mai da eroare
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Dashboard));
+        }
+
+        // ==========================================
+        //  GENERARE AUTOMATĂ DE PDF-URI (QuestPDF)
+        // ==========================================
+
+        // 1. Descarcă Certificatul "Apt de Joc"
+        [HttpGet]
+        public async Task<IActionResult> DownloadClearancePdf(int playerId)
+        {
+            var player = await _context.Players.Include(p => p.Staff).FirstOrDefaultAsync(p => p.PlayerId == playerId);
+            if (player == null) return NotFound();
+
+            var pdfData = GenerateClearancePdfDocument(player);
+            return File(pdfData, "application/pdf", $"VizaMedicala_{player.Staff.LastName}.pdf");
+        }
+
+        // 2. Descarcă Fișa de Accidentare
+        [HttpGet]
+        public async Task<IActionResult> DownloadInjuryPdf(int injuryId)
+        {
+            var injury = await _context.Injuries.Include(i => i.Player).ThenInclude(p => p.Staff).FirstOrDefaultAsync(i => i.InjuryId == injuryId);
+            if (injury == null) return NotFound();
+
+            var pdfData = GenerateInjuryPdfDocument(injury);
+            return File(pdfData, "application/pdf", $"FisaAccidentare_{injury.Player.Staff.LastName}.pdf");
+        }
+
+        // --- METODELE CARE "DESENEAZĂ" EFECTIV PDF-UL ---
+        private byte[] GenerateClearancePdfDocument(Licenta.Models.Roles.Player player)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12));
+
+                    page.Header().Text("DEPARTAMENTUL MEDICAL").SemiBold().FontSize(20).FontColor(Colors.Blue.Darken2);
+
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(x =>
+                    {
+                        x.Spacing(20);
+                        x.Item().Text("CERTIFICAT MEDICAL - APT DE JOC").FontSize(16).Bold().AlignCenter();
+                        x.Item().Text($"Subsemnatul, Medic Sportiv al clubului, atest faptul că jucătorul:");
+                        x.Item().Text($"{player.Staff.FirstName} {player.Staff.LastName}").FontSize(18).Bold().FontColor(Colors.Green.Darken2).AlignCenter();
+                        x.Item().Text($"Număr Tricou: #{player.JerseyNumber} | Poziție: {player.Position}");
+
+                        x.Item().Text($"A fost examinat medical astăzi, {DateTime.Now:dd MMMM yyyy}, și este declarat CLINIC SĂNĂTOS și APT pentru antrenamente și meciuri oficiale în sezonul competițional curent.");
+                        x.Item().Text("Viza medicală este valabilă pentru o perioadă de 8 luni de la data prezentei.");
+
+                        x.Item().PaddingTop(50).Row(row =>
+                        {
+                            row.RelativeItem().Text("Data emiterii:\n" + DateTime.Now.ToString("dd.MM.yyyy"));
+                            row.RelativeItem().AlignRight().Text("Semnătura Medicului:\n....................................");
+                        });
+                    });
+                });
+            });
+            return document.GeneratePdf();
+        }
+
+        private byte[] GenerateInjuryPdfDocument(Injury injury)
+        {
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12));
+
+                    page.Header().Text("DEPARTAMENTUL MEDICAL").SemiBold().FontSize(20).FontColor(Colors.Red.Darken2);
+
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(x =>
+                    {
+                        x.Spacing(20);
+                        x.Item().Text("FIȘĂ DE ACCIDENTARE SPORTIVĂ").FontSize(16).Bold().AlignCenter();
+                        x.Item().Text($"Nume Jucător: {injury.Player.Staff.FirstName} {injury.Player.Staff.LastName}").FontSize(14).Bold();
+
+                        x.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+
+                        x.Item().Text($"Dată constatare: {injury.StartDate:dd MMMM yyyy}");
+                        x.Item().Text("Diagnostic / Descriere accidentare:").Bold();
+                        x.Item().Text(injury.Description).FontColor(Colors.Red.Medium);
+
+                        x.Item().Text($"Status actual: {injury.Status}").Bold();
+
+                        x.Item().Text("\n\nPrin prezenta se suspendă dreptul de joc și antrenament fizic al sportivului până la recuperarea completă și eliberarea unei noi vize medicale.");
+
+                        x.Item().PaddingTop(50).Row(row =>
+                        {
+                            row.RelativeItem().Text("Data raportului:\n" + DateTime.Now.ToString("dd.MM.yyyy"));
+                            row.RelativeItem().AlignRight().Text("Semnătura Medicului:\n....................................");
+                        });
+                    });
+                });
+            });
+            return document.GeneratePdf();
         }
     }
 }

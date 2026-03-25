@@ -23,5 +23,9 @@ namespace Licenta.Models.ViewModels
         [Required(ErrorMessage = "Tipul este obligatoriu.")]
         [Display(Name = "Tip Eveniment")]
         public string RelatedEntity { get; set; }
+
+
+        [Display(Name = "Atașează Fișier (Video/PDF)")]
+        public IFormFile? AttachedFile { get; set; }
     }
 }

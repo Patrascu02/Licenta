@@ -45,6 +45,15 @@
                                             <small class="text-muted d-block"><i class="fas fa-stop me-1 text-danger opacity-75"></i> @ev.EndTime.ToString("HH:mm")</small>
                                         </div>
                                     </div>
+
+                                    @if (!string.IsNullOrEmpty(ev.AttachedFilePath))
+                                    {
+                                        <div class="mt-3">
+                                            <a href="@ev.AttachedFilePath" target="_blank" class="btn btn-sm btn-info text-dark fw-bold w-100">
+                                                <i class="fas fa-video me-2"></i>Vezi Fișier Tactic / Video
+                                            </a>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -73,6 +82,13 @@
                                 <div>
                                     <h6 class="text-muted mb-1 text-decoration-line-through">@ev.Title</h6>
                                     <small class="text-secondary d-block">@ev.StartTime.ToString("dd MMM yyyy")</small>
+
+                                    @if (!string.IsNullOrEmpty(ev.AttachedFilePath))
+                                    {
+                                        <a href="@ev.AttachedFilePath" target="_blank" class="btn btn-xs btn-outline-info mt-2">
+                                            <i class="fas fa-paperclip me-1"></i> Arhivă Video/Tactică
+                                        </a>
+                                    }
                                 </div>
                                 <span class="badge bg-secondary opacity-50">@ev.RelatedEntity</span>
                             </div>
@@ -129,7 +145,7 @@
             let formToSubmit = null;
 
             $('.delete-form').on('submit', function (e) {
-                e.preventDefault(); 
+                e.preventDefault();
                 formToSubmit = this;
 
                 var message = $(this).attr('data-bs-message');
@@ -141,7 +157,7 @@
 
             $('#confirmDeleteBtn').on('click', function () {
                 if (formToSubmit) {
-                    formToSubmit.submit(); 
+                    formToSubmit.submit();
                 }
             });
         });

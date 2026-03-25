@@ -185,6 +185,27 @@ namespace Licenta.Controllers
             var user = await _userManager.GetUserAsync(User);
             var staff = await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
 
+            string? savedFilePath = null;
+
+            if (model.AttachedFile != null && model.AttachedFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "events");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.AttachedFile.FileName);
+                var exactPath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(exactPath, FileMode.Create))
+                {
+                    await model.AttachedFile.CopyToAsync(stream);
+                }
+
+                savedFilePath = "/uploads/events/" + uniqueFileName;
+            }
+
             var newEvent = new Licenta.Models.Calendar.Event
             {
                 Title = model.Title,
@@ -192,7 +213,8 @@ namespace Licenta.Controllers
                 StartTime = model.StartTime,
                 EndTime = model.EndTime,
                 StaffId = staff.StaffId,
-                RelatedEntity = model.RelatedEntity 
+                RelatedEntity = model.RelatedEntity,
+                AttachedFilePath = savedFilePath 
             };
 
             _context.Events.Add(newEvent);

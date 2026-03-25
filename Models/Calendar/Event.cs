@@ -12,6 +12,7 @@ namespace Licenta.Models.Calendar
         public int StaffId { get; set; }
         public string? RelatedEntity { get; set; }
 
+        public string? AttachedFilePath { get; set; }
         public Staff? Staff { get; set; }
     }
 }
