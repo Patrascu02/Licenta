@@ -21,7 +21,7 @@ namespace Licenta.Controllers
         public MedicController(ApplicationDbContext context)
         {
             _context = context;
-            QuestPDF.Settings.License = LicenseType.Community; // Trebuie adăugat pentru a folosi librăria gratuit
+            QuestPDF.Settings.License = LicenseType.Community;
         }
 
         [HttpGet]
@@ -106,7 +106,6 @@ namespace Licenta.Controllers
         //  GENERARE AUTOMATĂ DE PDF-URI (QuestPDF)
         // ==========================================
 
-        // 1. Descarcă Certificatul "Apt de Joc"
         [HttpGet]
         public async Task<IActionResult> DownloadClearancePdf(int playerId)
         {
@@ -117,7 +116,6 @@ namespace Licenta.Controllers
             return File(pdfData, "application/pdf", $"VizaMedicala_{player.Staff.LastName}.pdf");
         }
 
-        // 2. Descarcă Fișa de Accidentare
         [HttpGet]
         public async Task<IActionResult> DownloadInjuryPdf(int injuryId)
         {
@@ -151,7 +149,9 @@ namespace Licenta.Controllers
                         x.Item().Text($"Număr Tricou: #{player.JerseyNumber} | Poziție: {player.Position}");
 
                         x.Item().Text($"A fost examinat medical astăzi, {DateTime.Now:dd MMMM yyyy}, și este declarat CLINIC SĂNĂTOS și APT pentru antrenamente și meciuri oficiale în sezonul competițional curent.");
-                        x.Item().Text("Viza medicală este valabilă pentru o perioadă de 8 luni de la data prezentei.");
+
+                        // --- AICI ESTE MODIFICAREA ---
+                        x.Item().Text("Viza medicală este valabilă până la finalul sezonului regulat!").Bold();
 
                         x.Item().PaddingTop(50).Row(row =>
                         {

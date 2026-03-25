@@ -36,7 +36,7 @@
                 <thead>
                     <tr class="text-info">
                         <th class="text-start ps-4">Jucător</th>
-                        <th>Viza Medicală (8 Luni)</th>
+                        <th>Viza Medicală (Sezon Regulat)</th>
                         <th>Status Sănătate</th>
                         <th class="text-end pe-4">Acțiuni Medicale</th>
                     </tr>
@@ -48,15 +48,22 @@
                             <td class="text-start ps-4 fw-bold text-white">
                                 <span class="badge bg-secondary me-2">#@p.JerseyNumber</span> @p.FullName
                             </td>
+
                             <td>
-                                @if (p.IsClearanceValid)
+                                @if (p.ActiveInjury != null)
+                                {
+                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-2 py-1 pulse-danger">
+                                        <i class="fas fa-ban me-1"></i> Suspendată (Accidentat)
+                                    </span>
+                                }
+                                else if (p.IsClearanceValid)
                                 {
                                     <span class="badge bg-success bg-opacity-25 text-success border border-success px-2 py-1">
                                         <i class="fas fa-check-circle me-1"></i> Valabilă
                                     </span>
                                     <br />
                                     <a asp-action="DownloadClearancePdf" asp-route-playerId="@p.PlayerId" class="btn btn-sm btn-outline-success mt-2" target="_blank">
-                                        <i class="fas fa-file-pdf"></i> Descarcă PDF
+                                        <i class="fas fa-file-pdf"></i> Descarcă PDF Apt
                                     </a>
                                 }
                                 else
@@ -66,6 +73,7 @@
                                     </span>
                                 }
                             </td>
+
                             <td>
                                 @if (p.ActiveInjury != null)
                                 {
@@ -73,7 +81,7 @@
                                         <i class="fas fa-band-aid me-1"></i> @p.ActiveInjury.Description
                                     </div>
                                     <a asp-action="DownloadInjuryPdf" asp-route-injuryId="@p.ActiveInjury.InjuryId" class="btn btn-sm btn-outline-danger mt-2" target="_blank">
-                                        <i class="fas fa-file-pdf"></i> Fișă PDF
+                                        <i class="fas fa-file-pdf"></i> Fișă Accidentare (PDF)
                                     </a>
                                 }
                                 else
@@ -81,8 +89,8 @@
                                     <span class="text-success"><i class="fas fa-running me-1"></i> Apt de joc</span>
                                 }
                             </td>
-                            <td class="text-end pe-4">
 
+                            <td class="text-end pe-4">
                                 @if (!p.IsClearanceValid && p.ActiveInjury == null)
                                 {
                                     <form asp-action="GrantClearance" method="post" class="d-inline">
@@ -140,7 +148,6 @@
                                     <label class="form-label fw-bold text-info">Perioadă estimativă (Opțional)</label>
                                     <input type="text" name="recoveryText" class="form-control bg-dark text-white border-secondary shadow-none" placeholder="Ex: 2-3 săptămâni..." />
                                 </div>
-
                             </div>
                             <div class="modal-footer border-secondary">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anulează</button>
