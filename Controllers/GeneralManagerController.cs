@@ -110,10 +110,7 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ============================================================
-        // VERIFICARE ACL: Doar utilizatorii cu această politica pot semna!
         [HttpPost]
-        [Authorize(Policy = "CanManageContracts")]
         public async Task<IActionResult> AssignContract(int staffId, decimal salary, DateTime startDate, IFormFile? contractFile)
         {
             var oldContracts = await _context.Contracts.Where(c => c.StaffId == staffId).ToListAsync();
@@ -168,10 +165,7 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ============================================================
-        // VERIFICARE ACL: Doar utilizatorii cu această politica pot sterge!
         [HttpPost]
-        [Authorize(Policy = "CanManageContracts")]
         public async Task<IActionResult> DeleteContract(int contractId)
         {
             var contract = await _context.Contracts.FindAsync(contractId);

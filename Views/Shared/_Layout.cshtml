@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Licenta.styles.css" asp-append-version="true" />
 
-
     <style>
         html, body {
             height: 100%;
@@ -32,10 +31,11 @@
         }
 
         footer {
-            flex-shrink: 0; 
+            flex-shrink: 0;
             background-color: #f8f9fa;
             padding: 20px 0;
         }
+
         .footer {
             position: static !important;
             line-height: normal !important;
@@ -70,8 +70,8 @@
                                             <i class="fas fa-calendar-check text-info"></i> Meciuri
                                         </a>
                                     </li>
-
                                 }
+
                                 @if (User.IsInRole("Scout"))
                                 {
                                     <li class="nav-item">
@@ -85,6 +85,7 @@
                                         </a>
                                     </li>
                                 }
+
                                 @if (User.IsInRole("Medic"))
                                 {
                                     <li class="nav-item">
@@ -93,7 +94,8 @@
                                         </a>
                                     </li>
                                 }
-                                @if (User.IsInRole("GeneralManager") || User.IsInRole("Admin"))
+
+                                @if (User.IsInRole("GeneralManager"))
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link text-white" asp-area="" asp-controller="GeneralManager" asp-action="Index">
@@ -102,15 +104,11 @@
                                     </li>
                                 }
 
-                       
-                                @if (User.HasClaim(c => c.Type == "Permission" && c.Value == "Players.View") )
-                                {
-                                    <li class="nav-item">
-                                        <a class="nav-link text-white" asp-area="" asp-controller="Players" asp-action="Index">
-                                            <i class="fas fa-users"></i> Lotul de Jucători
-                                        </a>
-                                    </li>
-                                }
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Players" asp-action="Index">
+                                        <i class="fas fa-users"></i> Lotul de Jucători
+                                    </a>
+                                </li>
                             }
                             else
                             {

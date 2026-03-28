@@ -155,7 +155,7 @@
 
         <div class="col-lg-4">
 
-            @if (Model.NextEvent != null && User.HasClaim("Permission", "ViewTraining"))
+            @if (Model.NextEvent != null)
             {
                 <div class="card glass-card border-warning mb-4 shadow-lg" style="background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(245,158,11,0.1));">
                     <div class="card-body p-4 text-center">

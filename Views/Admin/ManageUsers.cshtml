@@ -122,7 +122,7 @@
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
                                                 <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
-                                                <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-info" title="Permisiuni"><i class="fas fa-key"></i></a>
+
                                                 @if (User.IsInRole("GeneralManager"))
                                                 {
                                                     <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-success" title="Contract"><i class="fas fa-file-invoice-dollar"></i></a>
@@ -179,7 +179,7 @@
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
                                                 <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
-                                                <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-info" title="Permisiuni"><i class="fas fa-key"></i></a>
+
 
                                                 @if (User.IsInRole("GeneralManager"))
                                                 {
@@ -262,7 +262,7 @@
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
                                                 <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
-                                                <a asp-action="ManageUserPermissions" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-info" title="Permisiuni"><i class="fas fa-key"></i></a>
+
 
                                                 <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post"
                                                       class="d-inline delete-form"
@@ -426,7 +426,7 @@
     .icon-circle-danger {
         width: 80px;
         height: 80px;
-        background: #fef2f2; 
+        background: #fef2f2;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -450,25 +450,21 @@
         $(document).ready(function () {
             let formToSubmit = null;
 
-            // 1. Interceptăm submit-ul formularului de ștergere
             $('.delete-form').on('submit', function (e) {
-                e.preventDefault(); // Oprește acțiunea default
+                e.preventDefault();
 
-                formToSubmit = this; // Salvăm formularul curent
+                formToSubmit = this;
 
-                // Preluăm mesajul personalizat
                 var message = $(this).attr('data-bs-message');
                 $('#deleteModalMessage').html(message);
 
-                // Deschidem modala
                 var myModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
                 myModal.show();
             });
 
-            // 2. Acțiune buton confirmare
             $('#confirmDeleteBtn').on('click', function () {
                 if (formToSubmit) {
-                    formToSubmit.submit(); // Trimitem formularul
+                    formToSubmit.submit();
                 }
             });
         });

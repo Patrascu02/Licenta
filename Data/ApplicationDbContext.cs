@@ -45,9 +45,6 @@ namespace Licenta.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<TerminationNotice> TerminationNotices { get; set; }
         public DbSet<FileStorage> FileStorages { get; set; }
-        public DbSet<Permission> Permissions { get; set; }
-        public DbSet<RolePermission> RolePermissions { get; set; }
-        public DbSet<UserPermission> UserPermissions { get; set; }
         public DbSet<MessageGroup> MessageGroups { get; set; }
         public DbSet<MessageGroupMember> MessageGroupMembers { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
@@ -59,7 +56,6 @@ namespace Licenta.Data
             builder.Entity<Staff>().HasKey(s => s.StaffId);
             builder.Entity<Player>().HasKey(p => p.PlayerId);
             builder.Entity<Injury>().HasKey(i => i.InjuryId);
-            builder.Entity<UserPermission>().HasKey(up => up.UserPermissionId);
 
             builder.Entity<Contract>()
                 .Property(c => c.Salary)
@@ -156,17 +152,6 @@ namespace Licenta.Data
                 .HasForeignKey(f => f.StaffId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<RolePermission>()
-                .HasOne(rp => rp.Permission)
-                .WithMany()
-                .HasForeignKey(rp => rp.PermissionId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<UserPermission>()
-                .HasOne(up => up.Permission)
-                .WithMany()
-                .HasForeignKey(up => up.PermissionId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Message>()
                 .HasOne(m => m.Group)

@@ -23,22 +23,6 @@ namespace Licenta
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            // =======================================================
-            // NOU: CONFIGURARE POLITICI DE ACCES (ACL)
-            // =======================================================
-            builder.Services.AddAuthorization(options =>
-            {
-                // Politica pentru Contracte: Permis dacă e Admin SAU dacă are bifa "ManageContracts"
-                options.AddPolicy("CanManageContracts", policy =>
-                    policy.RequireAssertion(context =>
-                        context.User.IsInRole("Admin") || context.User.HasClaim("Permission", "ManageContracts")));
-
-                // Aici poți adăuga pe viitor și alte politici, ex:
-                // options.AddPolicy("CanDeletePlayers", policy =>
-                //    policy.RequireAssertion(context => context.User.IsInRole("Admin") || context.User.HasClaim("Permission", "DeletePlayers")));
-            });
-            // =======================================================
-
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
