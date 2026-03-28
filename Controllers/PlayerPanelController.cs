@@ -54,10 +54,10 @@ namespace Licenta.Controllers
             double avgReb = allStats.Any() ? allStats.Average(s => s.Rebounds) : 0;
             double avgAst = allStats.Any() ? allStats.Average(s => s.Assists) : 0;
 
+            // Am corectat logica de extragere a contractului activ (fara StartDate)
             var activeContract = staff.Contracts?
-                .FirstOrDefault(c => c.StartDate <= DateTime.Now &&
-                                    (c.EndDate == null || c.EndDate >= DateTime.Now) &&
-                                    c.IsActive);
+                .FirstOrDefault(c => c.IsActive &&
+                                    (c.EndDate == null || c.EndDate.Value.Date >= DateTime.Today));
 
             var injuries = await _context.Injuries
                 .Where(i => i.PlayerId == player.PlayerId && i.Status != "Recuperat")
@@ -69,10 +69,15 @@ namespace Licenta.Controllers
                 .Take(3)
                 .ToListAsync();
 
-            var nextEvent = await _context.Events
-                .Where(e => e.StartTime >= DateTime.Now)
-                .OrderBy(e => e.StartTime)
-                .FirstOrDefaultAsync();
+            // Verificam direct din Baza de Date permisiunea, ca sa nu incarcam inutil serverul
+            Licenta.Models.Calendar.Event nextEvent = null;
+            if (User.HasClaim("Permission", "ViewTraining"))
+            {
+                nextEvent = await _context.Events
+                    .Where(e => e.StartTime >= DateTime.Now)
+                    .OrderBy(e => e.StartTime)
+                    .FirstOrDefaultAsync();
+            }
 
             var model = new PlayerDashboardViewModel
             {

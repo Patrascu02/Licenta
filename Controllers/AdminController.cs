@@ -424,7 +424,6 @@ namespace Licenta.Controllers
 
             return View(model);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePermissions(ManageRolePermissionsViewModel model)
@@ -441,11 +440,15 @@ namespace Licenta.Controllers
                 await _roleManager.RemoveClaimAsync(role, claim);
             }
 
-            var selectedPermissions = model.PermissionList.Where(p => p.IsSelected).ToList();
-            foreach (var item in selectedPermissions)
+            // FIX: Extragem denumirile corecte direct din Baza de Date pe baza ID-urilor bifate
+            var selectedIds = model.PermissionList.Where(p => p.IsSelected).Select(p => p.PermissionId).ToList();
+            var dbPermissions = await _context.Permissions.Where(p => selectedIds.Contains(p.PermissionId)).ToListAsync();
+
+            foreach (var perm in dbPermissions)
             {
-                _context.RolePermissions.Add(new RolePermission { RoleId = model.RoleId, PermissionId = item.PermissionId });
-                await _roleManager.AddClaimAsync(role, new Claim("Permission", item.Name));
+                _context.RolePermissions.Add(new RolePermission { RoleId = model.RoleId, PermissionId = perm.PermissionId });
+                // Salvăm numele corect din baza de date, nu cel din interfață
+                await _roleManager.AddClaimAsync(role, new Claim("Permission", perm.Name));
             }
 
             await _context.SaveChangesAsync();
@@ -517,16 +520,20 @@ namespace Licenta.Controllers
                 await _userManager.RemoveClaimAsync(user, claim);
             }
 
-            var selected = model.PermissionList.Where(p => p.IsSelected).ToList();
-            foreach (var item in selected)
+            // FIX: Extragem denumirile corecte direct din Baza de Date pe baza ID-urilor bifate
+            var selectedIds = model.PermissionList.Where(p => p.IsSelected).Select(p => p.PermissionId).ToList();
+            var dbPermissions = await _context.Permissions.Where(p => selectedIds.Contains(p.PermissionId)).ToListAsync();
+
+            foreach (var perm in dbPermissions)
             {
                 _context.UserPermissions.Add(new UserPermission
                 {
                     UserId = model.UserId,
-                    PermissionId = item.PermissionId
+                    PermissionId = perm.PermissionId
                 });
 
-                await _userManager.AddClaimAsync(user, new Claim("Permission", item.Name));
+                // Salvăm numele corect din baza de date, nu cel din interfață
+                await _userManager.AddClaimAsync(user, new Claim("Permission", perm.Name));
             }
 
             await _context.SaveChangesAsync();

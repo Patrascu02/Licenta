@@ -40,9 +40,18 @@
 
                 @if (Model.ActiveContract != null)
                 {
-                    <span class="badge bg-dark text-success border border-success px-3 py-2 shadow-sm">
-                        <i class="fas fa-file-signature me-2"></i>Contract Activ până în @(Model.ActiveContract.EndDate.HasValue? Model.ActiveContract.EndDate.Value.Year.ToString() : "nedeterminat")
-                    </span>
+                    <div class="d-flex flex-column align-items-md-end gap-2">
+                        <span class="badge bg-dark text-success border border-success px-3 py-2 shadow-sm">
+                            <i class="fas fa-file-signature me-2"></i>Contract Activ până în @(Model.ActiveContract.EndDate.HasValue? Model.ActiveContract.EndDate.Value.Year.ToString() : "nedeterminat")
+                        </span>
+
+                        @if (!string.IsNullOrEmpty(Model.ActiveContract.SignedFilePath))
+                        {
+                            <a href="@Model.ActiveContract.SignedFilePath" target="_blank" class="btn btn-sm btn-info text-dark fw-bold mt-1 shadow-sm" style="width: fit-content;">
+                                <i class="fas fa-file-pdf me-1"></i> Descarcă Copia PDF
+                            </a>
+                        }
+                    </div>
                 }
                 else
                 {
@@ -146,7 +155,7 @@
 
         <div class="col-lg-4">
 
-            @if (Model.NextEvent != null)
+            @if (Model.NextEvent != null && User.HasClaim("Permission", "ViewTraining"))
             {
                 <div class="card glass-card border-warning mb-4 shadow-lg" style="background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(245,158,11,0.1));">
                     <div class="card-body p-4 text-center">

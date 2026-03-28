@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Licenta.Controllers
 {
@@ -108,7 +110,10 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ============================================================
+        // VERIFICARE ACL: Doar utilizatorii cu această politica pot semna!
         [HttpPost]
+        [Authorize(Policy = "CanManageContracts")]
         public async Task<IActionResult> AssignContract(int staffId, decimal salary, DateTime startDate, IFormFile? contractFile)
         {
             var oldContracts = await _context.Contracts.Where(c => c.StaffId == staffId).ToListAsync();
@@ -139,11 +144,11 @@ namespace Licenta.Controllers
             }
 
             DateTime calculatedEndDate;
-            if (startDate.Month >= 9) 
+            if (startDate.Month >= 9)
             {
                 calculatedEndDate = new DateTime(startDate.Year + 1, 8, 31);
             }
-            else 
+            else
             {
                 calculatedEndDate = new DateTime(startDate.Year, 8, 31);
             }
@@ -153,7 +158,7 @@ namespace Licenta.Controllers
                 StaffId = staffId,
                 Salary = salary,
                 StartDate = startDate,
-                EndDate = calculatedEndDate, 
+                EndDate = calculatedEndDate,
                 IsActive = true,
                 SignedFilePath = savedFilePath
             };
@@ -163,7 +168,10 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ============================================================
+        // VERIFICARE ACL: Doar utilizatorii cu această politica pot sterge!
         [HttpPost]
+        [Authorize(Policy = "CanManageContracts")]
         public async Task<IActionResult> DeleteContract(int contractId)
         {
             var contract = await _context.Contracts.FindAsync(contractId);
