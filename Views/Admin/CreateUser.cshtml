@@ -19,8 +19,11 @@
     </div>
 
     <form asp-action="CreateUser" method="post" id="createUserForm">
-        <div class="row g-4">
 
+        <div asp-validation-summary="All" class="alert alert-danger shadow-sm border-danger bg-dark bg-opacity-50 text-danger fw-bold" style="display: @(ViewData.ModelState.IsValid ? "none" : "block")">
+        </div>
+
+        <div class="row g-4">
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm glass-card h-100">
                     <div class="card-header bg-transparent border-0 pt-4 px-4">
@@ -138,6 +141,7 @@
                                     <div class="col-6">
                                         <label class="text-white-50 small text-uppercase">Nr. Tricou</label>
                                         <input asp-for="JerseyNumber" class="form-control bg-white bg-opacity-25 border-0 text-white" placeholder="23" />
+                                        <span asp-validation-for="JerseyNumber" class="text-warning small fw-bold mt-1 d-block"></span>
                                     </div>
                                     <div class="col-6">
                                         <label class="text-white-50 small text-uppercase">Înălțime (cm)</label>
@@ -275,18 +279,16 @@
 
     <script>
         $(document).ready(function() {
-            // 1. SELECTIE ROL
             function toggleRoleFields() {
                 var selectedRole = $('#roleSelector').val();
-                $('.role-section').addClass('d-none'); 
+                $('.role-section').addClass('d-none');
                 if(selectedRole) {
-                    $('#role-' + selectedRole).removeClass('d-none').hide().fadeIn(300); 
+                    $('#role-' + selectedRole).removeClass('d-none').hide().fadeIn(300);
                 }
             }
             $('#roleSelector').change(toggleRoleFields);
             toggleRoleFields();
 
-            // 2. OCHI PAROL
             $('.toggle-password').click(function () {
                 var input = $(this).siblings('input');
                 var icon = $(this).find('i');
@@ -300,7 +302,6 @@
                 }
             });
 
-            // 3. VALIDARE EMAIL LIVE
             $('#emailInput').blur(function () {
                 var email = $(this).val();
                 var errorSpan = $('#emailError');

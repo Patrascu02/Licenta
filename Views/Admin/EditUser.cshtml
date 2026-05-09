@@ -54,6 +54,10 @@
     </div>
 
     <form asp-action="EditUser" method="post">
+
+        <div asp-validation-summary="All" class="alert alert-danger shadow-sm border-danger bg-dark bg-opacity-50 text-danger fw-bold" style="display: @(ViewData.ModelState.IsValid ? "none" : "block")">
+        </div>
+
         <input type="hidden" asp-for="StaffId" />
         <input type="hidden" asp-for="RoleName" />
         <input type="hidden" asp-for="Email" />
@@ -175,6 +179,7 @@
                                     <div class="col-6">
                                         <label class="text-white-50 small text-uppercase">Nr. Tricou</label>
                                         <input asp-for="JerseyNumber" class="form-control bg-white bg-opacity-25 border-0 text-white" />
+                                        <span asp-validation-for="JerseyNumber" class="text-warning small fw-bold mt-1 d-block"></span>
                                     </div>
                                     <div class="col-6">
                                         <label class="text-white-50 small text-uppercase">Înălțime (cm)</label>
@@ -244,15 +249,12 @@
 </div>
 
 <style>
-    /* === GLASSMORPHISM (Static) === */
     .glass-card {
-        background: rgba(255, 255, 255, 0.95); /* Opacitate crescută pentru contrast */
+        background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(12px);
         border-radius: 16px;
-        /* overflow: hidden;  <-- SCOASĂ PENTRU A EVITA TĂIEREA CONȚINUTULUI */
     }
 
-    /* === FORM STYLE === */
     .form-control {
         background-color: white !important;
         border: 1px solid #ced4da !important;
@@ -264,7 +266,6 @@
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
         }
 
-        /* Stil specific pentru Readonly */
         .form-control[readonly] {
             background-color: #f8f9fa !important;
             border-color: #e9ecef !important;
@@ -272,12 +273,10 @@
             cursor: not-allowed;
         }
 
-    /* Input Groups */
     .input-group-text {
         border-color: #e9ecef !important;
     }
 
-    /* === ROLE CARDS COLORS === */
     .role-card-player {
         background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
     }
@@ -298,7 +297,6 @@
         background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     }
 
-    /* Input-uri in carduri colorate */
     .role-card-player input, .role-card-coach input, .role-card-medic input, .role-card-gm input {
         background-color: rgba(255,255,255,0.2) !important;
         border: 1px solid rgba(255,255,255,0.3) !important;

@@ -44,18 +44,15 @@ namespace Licenta.Controllers
         // --- DASHBOARD ---
         public async Task<IActionResult> AdminDashboard()
         {
-            // 1. Statistici de Baza
             var totalUsers = await _context.Users.CountAsync();
             var totalPlayers = await _context.Players.CountAsync();
             var totalCoaches = await _context.Coaches.CountAsync();
             var totalStaff = await _context.Staff.CountAsync();
 
-            // 2. RAM Usage
             var currentProcess = Process.GetCurrentProcess();
             double ramUsedMb = Math.Round(currentProcess.WorkingSet64 / 1024.0 / 1024.0, 2);
             double ramLimitMb = 1024;
 
-            // 3. Storage Usage
             double storageUsedMb = 0;
             try
             {
@@ -70,7 +67,6 @@ namespace Licenta.Controllers
             catch { storageUsedMb = 0; }
             double storageLimitMb = 500;
 
-            // 4. Sesiuni Active
             var activeThreshold = DateTime.Now.AddMinutes(-30);
             var activeUsersCount = await _context.AuditLogs
                 .Where(l => l.Timestamp >= activeThreshold)
@@ -80,14 +76,12 @@ namespace Licenta.Controllers
 
             if (activeUsersCount == 0) activeUsersCount = 1;
 
-            // 5. Audit Logs Recente
             var recentLogs = await _context.AuditLogs
                 .Include(a => a.Staff)
                 .OrderByDescending(l => l.Timestamp)
                 .Take(6)
                 .ToListAsync();
 
-            // Ultima Activitate
             var lastLog = recentLogs.FirstOrDefault();
             string lastActivityStr = lastLog != null ? lastLog.Timestamp.ToString("HH:mm") : "--:--";
 
@@ -124,6 +118,35 @@ namespace Licenta.Controllers
         {
             if (ModelState.IsValid)
             {
+                // ==============================================================
+                // REGULĂ: DOAR UN SINGUR USER PENTRU ANUMITE ROLURI
+                // ==============================================================
+                string[] uniqueRoles = { "Admin", "GeneralManager", "Coach", "Medic" };
+
+                if (uniqueRoles.Contains(model.Role))
+                {
+                    var existingUsersInRole = await _userManager.GetUsersInRoleAsync(model.Role);
+                    if (existingUsersInRole.Any())
+                    {
+                        ModelState.AddModelError("", $"Eroare: Sistemul permite existența unui singur utilizator cu rolul de {model.Role}!");
+                        return View(model);
+                    }
+                }
+
+                // ==============================================================
+                // NOU: REGULĂ NUMĂR TRICOU UNIC PENTRU JUCĂTORI
+                // ==============================================================
+                if (model.Role == "Player" && model.JerseyNumber.HasValue)
+                {
+                    bool jerseyExists = await _context.Players.AnyAsync(p => p.JerseyNumber == model.JerseyNumber.Value);
+                    if (jerseyExists)
+                    {
+                        ModelState.AddModelError("JerseyNumber", $"Atenție: Numărul de tricou #{model.JerseyNumber.Value} este deja alocat altui jucător!");
+                        return View(model);
+                    }
+                }
+
+                // Verificare unicitate Email
                 var existingUser = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUser != null)
                 {
@@ -156,7 +179,7 @@ namespace Licenta.Controllers
                         var player = new Player
                         {
                             StaffId = staff.StaffId,
-                            Position = model.Position,
+                            Position = model.Position ?? "Nesetat",
                             JerseyNumber = model.JerseyNumber ?? 0,
                             Height = model.Height ?? 0,
                             Weight = model.Weight ?? 0,
@@ -165,13 +188,16 @@ namespace Licenta.Controllers
                         _context.Players.Add(player);
                         await _context.SaveChangesAsync();
 
-                        var history = new PlayerTeamHistory
+                        if (mainTeam != null)
                         {
-                            PlayerId = player.PlayerId,
-                            TeamId = mainTeam.TeamId,
-                            StartDate = DateTime.Now
-                        };
-                        _context.PlayerTeamHistories.Add(history);
+                            var history = new PlayerTeamHistory
+                            {
+                                PlayerId = player.PlayerId,
+                                TeamId = mainTeam.TeamId,
+                                StartDate = DateTime.Now
+                            };
+                            _context.PlayerTeamHistories.Add(history);
+                        }
                     }
                     else if (model.Role == "Coach")
                     {
@@ -205,7 +231,7 @@ namespace Licenta.Controllers
 
                     await LogAuditAction($"Creat utilizator nou: {model.Role} - {model.FirstName} {model.LastName}");
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(AdminDashboard));
+                    return RedirectToAction(nameof(ManageUsers));
                 }
 
                 foreach (var error in result.Errors)
@@ -263,7 +289,7 @@ namespace Licenta.Controllers
                 .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
-                .Include(s => s.GeneralManager) 
+                .Include(s => s.GeneralManager)
                 .FirstOrDefaultAsync(s => s.StaffId == id);
 
             if (staff == null) return NotFound();
@@ -289,7 +315,7 @@ namespace Licenta.Controllers
 
                 LicenseNumber = staff.Coach?.LicenseNumber,
                 Specialization = staff.Medic?.Specialty,
-                Office = staff.GeneralManager?.Office 
+                Office = staff.GeneralManager?.Office
             };
 
             return View(model);
@@ -301,11 +327,27 @@ namespace Licenta.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
+            // ==============================================================
+            // NOU: REGULĂ NUMĂR TRICOU UNIC PENTRU JUCĂTORI LA EDITARE
+            // ==============================================================
+            if (model.RoleName == "Player" && model.JerseyNumber.HasValue)
+            {
+                // Căutăm dacă există UN ALT jucător (cu StaffId diferit) care are deja numărul
+                bool jerseyExists = await _context.Players
+                    .AnyAsync(p => p.JerseyNumber == model.JerseyNumber.Value && p.StaffId != model.StaffId);
+
+                if (jerseyExists)
+                {
+                    ModelState.AddModelError("JerseyNumber", $"Atenție: Numărul de tricou #{model.JerseyNumber.Value} este deja alocat altui jucător din lot!");
+                    return View(model);
+                }
+            }
+
             var staff = await _context.Staff
                 .Include(s => s.Player)
                 .Include(s => s.Coach)
                 .Include(s => s.Medic)
-                .Include(s => s.GeneralManager) 
+                .Include(s => s.GeneralManager)
                 .FirstOrDefaultAsync(s => s.StaffId == model.StaffId);
 
             if (staff == null) return NotFound();
@@ -430,7 +472,7 @@ namespace Licenta.Controllers
 
             var group = new MessageGroup { Name = model.Name, CreatedAt = DateTime.Now };
             _context.MessageGroups.Add(group);
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
             foreach (var staffId in selectedIds)
             {
@@ -528,7 +570,7 @@ namespace Licenta.Controllers
                     {
                         GroupId = group.GroupId,
                         StaffId = id,
-                        LastReadAt = DateTime.Now 
+                        LastReadAt = DateTime.Now
                     });
                 }
             }
