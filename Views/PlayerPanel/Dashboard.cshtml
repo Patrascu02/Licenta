@@ -2,6 +2,19 @@
 
 @{
     ViewData["Title"] = "Player Dashboard";
+
+    // Preluăm statusul adevărat din Controller
+    string ovStatus = ViewBag.OverallStatus as string ?? "NECUNOSCUT";
+
+    // Stabilim dinamic culorile cartonașului în funcție de status
+    string borderClass = ovStatus == "APT DE JOC" ? "border-success" :
+                         ovStatus == "INDISPONIBIL (ACCIDENTAT)" ? "border-danger" : "border-warning";
+
+    string textClass = ovStatus == "APT DE JOC" ? "text-success" :
+                       ovStatus == "INDISPONIBIL (ACCIDENTAT)" ? "text-danger" : "text-warning";
+
+    string iconClass = ovStatus == "APT DE JOC" ? "fa-check-circle" :
+                       ovStatus == "INDISPONIBIL (ACCIDENTAT)" ? "fa-briefcase-medical" : "fa-exclamation-triangle";
 }
 
 <div class="container-fluid py-4">
@@ -190,14 +203,22 @@
                 </div>
             }
 
-            <div class="card glass-card mb-4 @(Model.ActiveInjuries.Any() ? "border-danger" : "border-success")">
+            <div class="card glass-card mb-4 @borderClass">
                 <div class="card-header">
-                    <h5 class="mb-0 fw-bold @(Model.ActiveInjuries.Any() ? "text-danger" : "text-success")">
-                        <i class="fas fa-heartbeat me-2"></i>Status Medical
+                    <h5 class="mb-0 fw-bold @textClass">
+                        <i class="fas fa-heartbeat me-2"></i>Status Operațional
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if (Model.ActiveInjuries.Any())
+                    @if (ovStatus == "APT DE JOC")
+                    {
+                        <div class="text-center py-2">
+                            <i class="fas fa-check-circle fs-1 text-success mb-2 shadow-sm"></i>
+                            <h6 class="text-white">Apt pentru joc</h6>
+                            <small class="text-muted">Documentație la zi și nicio accidentare activă.</small>
+                        </div>
+                    }
+                    else if (ovStatus == "INDISPONIBIL (ACCIDENTAT)")
                     {
                         foreach (var injury in Model.ActiveInjuries)
                         {
@@ -213,9 +234,9 @@
                     else
                     {
                         <div class="text-center py-2">
-                            <i class="fas fa-check-circle fs-1 text-success mb-2 shadow-sm"></i>
-                            <h6 class="text-white">Apt pentru joc</h6>
-                            <small class="text-muted">Nu sunt înregistrate accidentări active.</small>
+                            <i class="fas @iconClass fs-1 @textClass mb-2 shadow-sm pulse-danger"></i>
+                            <h6 class="text-white text-uppercase letter-spacing">Ineligibil</h6>
+                            <small class="text-muted fw-bold">@ovStatus</small>
                         </div>
                     }
                 </div>

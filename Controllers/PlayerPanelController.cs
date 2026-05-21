@@ -54,6 +54,7 @@ namespace Licenta.Controllers
             double avgReb = allStats.Any() ? allStats.Average(s => s.Rebounds) : 0;
             double avgAst = allStats.Any() ? allStats.Average(s => s.Assists) : 0;
 
+            // Verificare corectă a contractului (inclusiv cele nedeterminate / EndDate == null)
             var activeContract = staff.Contracts?
                 .FirstOrDefault(c => c.IsActive &&
                                     (c.EndDate == null || c.EndDate.Value.Date >= DateTime.Today));
@@ -103,6 +104,22 @@ namespace Licenta.Controllers
             }
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
+
+            bool hasActiveContract = activeContract != null;
+            bool hasValidMedicalVisa = player.LastMedicalClearance.HasValue && player.LastMedicalClearance.Value.AddMonths(8) >= DateTime.Now;
+            bool isInjured = injuries.Any();
+
+            string statusCurent = "";
+            if (!hasActiveContract)
+                statusCurent = "FĂRĂ CONTRACT";
+            else if (!hasValidMedicalVisa)
+                statusCurent = "LIPSĂ VIZĂ MEDICALĂ";
+            else if (isInjured)
+                statusCurent = "INDISPONIBIL (ACCIDENTAT)";
+            else
+                statusCurent = "APT DE JOC";
+
+            ViewBag.OverallStatus = statusCurent;
 
             return View(model);
         }

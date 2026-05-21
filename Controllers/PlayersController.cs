@@ -30,13 +30,37 @@ namespace Licenta.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            
-
-            var players = _context.Players
-                .Include(p => p.Staff)
+            var players = await _context.Players
+                .Include(p => p.Staff).ThenInclude(s => s.Contracts)
                 .Include(p => p.CurrentTeam)
-                .Include(p => p.Injuries);
-            return View(await players.ToListAsync());
+                .Include(p => p.Injuries)
+                .ToListAsync();
+
+            var playerStatuses = new Dictionary<int, string>();
+            foreach (var player in players)
+            {
+                // Corecție aici: Verificăm și dacă EndDate este NULL (contract nedeterminat)
+                bool hasActiveContract = player.Staff?.Contracts != null &&
+                                         player.Staff.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now));
+
+                bool hasValidMedicalVisa = player.LastMedicalClearance.HasValue &&
+                                           player.LastMedicalClearance.Value.AddMonths(8) >= DateTime.Now;
+
+                bool isInjured = player.Injuries != null &&
+                                 player.Injuries.Any(i => i.Status != "Recuperat");
+
+                if (!hasActiveContract)
+                    playerStatuses[player.PlayerId] = "FĂRĂ CONTRACT";
+                else if (!hasValidMedicalVisa)
+                    playerStatuses[player.PlayerId] = "LIPSĂ VIZĂ MEDICALĂ";
+                else if (isInjured)
+                    playerStatuses[player.PlayerId] = "INDISPONIBIL (ACCIDENTAT)";
+                else
+                    playerStatuses[player.PlayerId] = "APT DE JOC";
+            }
+
+            ViewBag.PlayerStatuses = playerStatuses;
+            return View(players);
         }
 
         // --- DETALII ---
@@ -44,12 +68,33 @@ namespace Licenta.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
+
             var player = await _context.Players
                 .Include(p => p.Staff).ThenInclude(s => s.Contracts)
                 .Include(p => p.CurrentTeam)
                 .Include(p => p.GameStats)
+                .Include(p => p.Injuries)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
+
             if (player == null) return NotFound();
+
+            // Corecție și aici pentru EndDate == null
+            bool hasActiveContract = player.Staff?.Contracts != null &&
+                                     player.Staff.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now));
+
+            bool hasValidMedicalVisa = player.LastMedicalClearance.HasValue &&
+                                       player.LastMedicalClearance.Value.AddMonths(8) >= DateTime.Now;
+
+            bool isInjured = player.Injuries != null &&
+                             player.Injuries.Any(i => i.Status != "Recuperat");
+
+            string statusCurent = "";
+            if (!hasActiveContract) statusCurent = "FĂRĂ CONTRACT";
+            else if (!hasValidMedicalVisa) statusCurent = "LIPSĂ VIZĂ MEDICALĂ";
+            else if (isInjured) statusCurent = "INDISPONIBIL (ACCIDENTAT)";
+            else statusCurent = "APT DE JOC";
+
+            ViewBag.PlayerStatus = statusCurent;
 
             return View(player);
         }
@@ -170,7 +215,6 @@ namespace Licenta.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-
 
         private bool PlayerExists(int id) => _context.Players.Any(e => e.PlayerId == id);
 
