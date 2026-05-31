@@ -148,10 +148,9 @@ namespace Licenta.Controllers
             ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.CurrentTeamId);
             return View(player);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Player player)
+        public async Task<IActionResult> Edit(int id, [Bind("PlayerId,StaffId,CurrentTeamId,JerseyNumber,Height,Weight,Position")] Player player)
         {
             if (id != player.PlayerId) return NotFound();
 
@@ -160,12 +159,24 @@ namespace Licenta.Controllers
                 return Forbid();
             }
 
+            ModelState.Remove("CurrentTeam");
+            ModelState.Remove("Staff");
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(player);
+                    var playerToUpdate = await _context.Players.FirstOrDefaultAsync(p => p.PlayerId == id);
+
+                    if (playerToUpdate == null) return NotFound();
+
+                    playerToUpdate.JerseyNumber = player.JerseyNumber;
+                    playerToUpdate.Height = player.Height;
+                    playerToUpdate.Weight = player.Weight;
+                    playerToUpdate.Position = player.Position;
+
                     await _context.SaveChangesAsync();
+
                     await LogAuditAction($"A modificat datele jucătorului (ID: {player.PlayerId})", "Player", player.PlayerId);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -173,8 +184,9 @@ namespace Licenta.Controllers
                     if (!PlayerExists(player.PlayerId)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index)); 
             }
+
             ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.CurrentTeamId);
             return View(player);
         }

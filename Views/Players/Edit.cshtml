@@ -1,0 +1,66 @@
+﻿@model Licenta.Models.Roles.Player
+
+@{
+    ViewData["Title"] = "Editează Date Sportive";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0" style="border-radius: 12px; border-top: 5px solid #0d6efd; background-color: #f8f9fa;">
+        <div class="card-header bg-transparent border-0 pt-4 pb-2">
+            <h3 class="mb-0" style="color: #0d6efd; font-weight: 600;">
+                <i class="fas fa-user-edit me-2" style="color: #198754;"></i> Editează Profilul Sportiv
+            </h3>
+        </div>
+
+        <div class="card-body px-4 pb-4">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <input type="hidden" asp-for="PlayerId" />
+                <input type="hidden" asp-for="StaffId" />
+                <input type="hidden" asp-for="CurrentTeamId" />
+
+                <div class="row g-4 mt-2">
+                    <div class="col-md-6">
+                        <label asp-for="JerseyNumber" class="form-label" style="color: #0d6efd; font-weight: 500;">Număr Tricou</label>
+                        <input asp-for="JerseyNumber" class="form-control border-primary" style="background-color: #fff; box-shadow: none;" />
+                        <span asp-validation-for="JerseyNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Height" class="form-label" style="color: #0d6efd; font-weight: 500;">Înălțime (cm)</label>
+                        <input asp-for="Height" class="form-control border-primary" type="number" style="background-color: #fff; box-shadow: none;" />
+                        <span asp-validation-for="Height" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Weight" class="form-label" style="color: #198754; font-weight: 500;">Greutate (kg)</label>
+                        <input asp-for="Weight" class="form-control border-success" type="number" style="background-color: #fff; box-shadow: none;" />
+                        <span asp-validation-for="Weight" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Position" class="form-label" style="color: #198754; font-weight: 500;">Poziție de joc</label>
+                        <input asp-for="Position" class="form-control border-success" style="background-color: #fff; box-shadow: none;" />
+                        <span asp-validation-for="Position" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mt-5 d-flex justify-content-between align-items-center">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 8px;">
+                        <i class="fas fa-arrow-left me-2"></i> Renunță
+                    </a>
+                    <button type="submit" class="btn px-4 py-2 text-white shadow-sm" style="background-color: #198754; border-radius: 8px; font-weight: 500;">
+                        <i class="fas fa-save me-2"></i> Salvează Modificările
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
