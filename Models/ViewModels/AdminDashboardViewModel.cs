@@ -5,7 +5,6 @@ namespace Licenta.Models.ViewModels
 {
     public class AdminDashboardViewModel
     {
-        // Contoare Generale
         public int TotalUsers { get; set; }
         public int TotalPlayers { get; set; }
         public int TotalCoaches { get; set; }

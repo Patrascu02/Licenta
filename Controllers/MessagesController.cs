@@ -32,7 +32,7 @@ namespace Licenta.Controllers
             return await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
         }
 
-        // --- INBOX (1-LA-1 ȘI GRUPURI) ---
+        // --- INBOX (1-LA-1 SI GRUPURI) ---
         public async Task<IActionResult> Index()
         {
             var currentStaff = await GetCurrentStaffAsync();

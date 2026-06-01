@@ -1,0 +1,54 @@
+﻿@model Licenta.Models.Roles.Player
+
+@{
+    ViewData["Title"] = "Șterge Profil Jucător";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0" style="border-radius: 12px; border-top: 5px solid #dc3545; background-color: #f8f9fa;">
+        <div class="card-header bg-transparent border-0 pt-4 pb-2">
+            <h3 class="mb-0" style="color: #dc3545; font-weight: 600;">
+                <i class="fas fa-exclamation-triangle me-2"></i> Confirmare Ștergere Jucător
+            </h3>
+            <p class="text-muted mt-2 fs-5">
+                Ești absolut sigur că vrei să ștergi acest profil sportiv? <br />
+                <strong>Atenție:</strong> Această acțiune este ireversibilă și va șterge legăturile jucătorului.
+            </p>
+        </div>
+
+        <div class="card-body px-4 pb-4">
+
+            <div class="p-4 mb-4" style="background-color: #fff; border-radius: 8px; border-left: 4px solid #0d6efd; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <span class="text-muted d-block" style="font-size: 0.9rem;">Nume Sportiv</span>
+                        <span style="font-weight: 500; font-size: 1.1rem; color: #0d6efd;">
+                            @(Model.Staff?.FirstName) @(Model.Staff?.LastName)
+                        </span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="text-muted d-block" style="font-size: 0.9rem;">Număr Tricou & Poziție</span>
+                        <span class="badge text-white me-2" style="background-color: #198754; font-size: 1rem;">
+                            #@Model.JerseyNumber
+                        </span>
+                        <span style="font-weight: 500;">@Model.Position</span>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="PlayerId" />
+
+                <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 8px;">
+                        <i class="fas fa-arrow-left me-2"></i> Nu, du-mă înapoi
+                    </a>
+                    <button type="submit" class="btn px-4 py-2 text-white shadow-sm" style="background-color: #dc3545; border-radius: 8px; font-weight: 500;">
+                        <i class="fas fa-trash-alt me-2"></i> Da, Șterge Definitiv
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

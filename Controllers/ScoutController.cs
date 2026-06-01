@@ -40,7 +40,7 @@ namespace Licenta.Controllers
 
             ViewBag.RecentPending = pendingGames.Take(3).ToList();
 
-            // --- CALCUL PALMARES ECHIPĂ PENTRU DASHBOARD ---
+            // --- CALCUL PALMARES ECHIPA PENTRU DASHBOARD ---
             int wins = 0; int losses = 0;
             foreach (var g in completedGames)
             {

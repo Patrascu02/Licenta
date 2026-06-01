@@ -103,7 +103,7 @@ namespace Licenta.Controllers
         }
 
         // ==========================================
-        //  GENERARE AUTOMATĂ DE PDF-URI (QuestPDF)
+        //  GENERARE AUTOMATA DE PDF-URI (QuestPDF)
         // ==========================================
 
         [HttpGet]
@@ -126,7 +126,7 @@ namespace Licenta.Controllers
             return File(pdfData, "application/pdf", $"FisaAccidentare_{injury.Player.Staff.LastName}.pdf");
         }
 
-        // --- METODELE CARE "DESENEAZĂ" EFECTIV PDF-UL ---
+        
         private byte[] GenerateClearancePdfDocument(Licenta.Models.Roles.Player player)
         {
             var document = Document.Create(container =>

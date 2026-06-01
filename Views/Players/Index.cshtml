@@ -41,12 +41,7 @@
             <p class="text-muted fw-medium fs-5">Vizualizează și gestionează performanța atleților.</p>
         </div>
 
-        @if (User.HasClaim("Permission", "Players.Create") || User.IsInRole("Admin"))
-        {
-            <a asp-action="Create" class="btn btn-primary shadow-lg rounded-pill px-4 hover-lift">
-                <i class="fas fa-plus me-2"></i> Adaugă Jucător
-            </a>
-        }
+       
     </div>
 
     <div class="card border-0 shadow-sm glass-card fade-in-up" style="animation-delay: 0.1s;">
@@ -117,7 +112,6 @@
 
                                 <td>
                                     @{
-                                        // LOGICA REVIZUITĂ (Contract -> Viză -> Accidentare)
                                         bool hasActiveContract = item.Staff?.Contracts != null && item.Staff.Contracts.Any(c => c.IsActive && c.EndDate >= DateTime.Now);
                                         bool isClearanceValid = item.LastMedicalClearance.HasValue && item.LastMedicalClearance.Value.AddMonths(8) >= DateTime.Now;
                                         bool isInjured = item.Injuries != null && item.Injuries.Any(i => i.Status != "Recuperat");

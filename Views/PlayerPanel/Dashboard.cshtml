@@ -3,10 +3,8 @@
 @{
     ViewData["Title"] = "Player Dashboard";
 
-    // Preluăm statusul adevărat din Controller
     string ovStatus = ViewBag.OverallStatus as string ?? "NECUNOSCUT";
 
-    // Stabilim dinamic culorile cartonașului în funcție de status
     string borderClass = ovStatus == "APT DE JOC" ? "border-success" :
                          ovStatus == "INDISPONIBIL (ACCIDENTAT)" ? "border-danger" : "border-warning";
 

@@ -54,7 +54,6 @@ namespace Licenta.Controllers
             double avgReb = allStats.Any() ? allStats.Average(s => s.Rebounds) : 0;
             double avgAst = allStats.Any() ? allStats.Average(s => s.Assists) : 0;
 
-            // Verificare corectă a contractului (inclusiv cele nedeterminate / EndDate == null)
             var activeContract = staff.Contracts?
                 .FirstOrDefault(c => c.IsActive &&
                                     (c.EndDate == null || c.EndDate.Value.Date >= DateTime.Today));

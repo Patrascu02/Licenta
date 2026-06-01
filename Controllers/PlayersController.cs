@@ -26,7 +26,7 @@ namespace Licenta.Controllers
             _userManager = userManager;
         }
 
-        // --- LISTA JUCĂTORI ---
+        // --- LISTA JUCATORI ---
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -39,7 +39,6 @@ namespace Licenta.Controllers
             var playerStatuses = new Dictionary<int, string>();
             foreach (var player in players)
             {
-                // Corecție aici: Verificăm și dacă EndDate este NULL (contract nedeterminat)
                 bool hasActiveContract = player.Staff?.Contracts != null &&
                                          player.Staff.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now));
 
@@ -78,7 +77,6 @@ namespace Licenta.Controllers
 
             if (player == null) return NotFound();
 
-            // Corecție și aici pentru EndDate == null
             bool hasActiveContract = player.Staff?.Contracts != null &&
                                      player.Staff.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now));
 
@@ -217,14 +215,38 @@ namespace Licenta.Controllers
                 return Forbid();
             }
 
-            var player = await _context.Players.Include(p => p.Staff).FirstOrDefaultAsync(p => p.PlayerId == id);
+            var player = await _context.Players
+                .Include(p => p.Staff)
+                .FirstOrDefaultAsync(p => p.PlayerId == id);
+
             if (player != null)
             {
-                var name = $"{player.Staff.FirstName} {player.Staff.LastName}";
+                var name = player.Staff != null ? $"{player.Staff.FirstName} {player.Staff.LastName}" : "Jucător Necunoscut";
+
+                var staff = player.Staff;
+                string userId = staff?.UserId;
+
                 _context.Players.Remove(player);
-                await LogAuditAction($"A șters profilul de jucător pentru: {name}", "Player", id);
+
+                if (staff != null)
+                {
+                    _context.Staff.Remove(staff);
+                }
+
                 await _context.SaveChangesAsync();
+
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var user = await _userManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        await _userManager.DeleteAsync(user); 
+                    }
+                }
+
+                await LogAuditAction($"A șters definitiv profilul și contul de utilizator pentru: {name}", "User Account", id);
             }
+
             return RedirectToAction(nameof(Index));
         }
 

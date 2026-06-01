@@ -41,7 +41,6 @@ namespace Licenta.Controllers
             _env = env;
         }
 
-        // --- DASHBOARD ---
         public async Task<IActionResult> AdminDashboard()
         {
             var totalUsers = await _context.Users.CountAsync();
@@ -119,7 +118,7 @@ namespace Licenta.Controllers
             if (ModelState.IsValid)
             {
                 // ==============================================================
-                // REGULĂ: DOAR UN SINGUR USER PENTRU ANUMITE ROLURI
+                // REGULA: DOAR UN SINGUR USER PENTRU ANUMITE ROLURI
                 // ==============================================================
                 string[] uniqueRoles = { "Admin", "GeneralManager", "Coach", "Medic" };
 
@@ -134,7 +133,7 @@ namespace Licenta.Controllers
                 }
 
                 // ==============================================================
-                // NOU: REGULĂ NUMĂR TRICOU UNIC PENTRU JUCĂTORI
+                // NOU: REGULA NUMAR TRICOU UNIC PENTRU JUCATORI
                 // ==============================================================
                 if (model.Role == "Player" && model.JerseyNumber.HasValue)
                 {
@@ -328,11 +327,10 @@ namespace Licenta.Controllers
             if (!ModelState.IsValid) return View(model);
 
             // ==============================================================
-            // NOU: REGULĂ NUMĂR TRICOU UNIC PENTRU JUCĂTORI LA EDITARE
+            // NOU: REGULA NUMAR TRICOU UNIC PENTRU JUCATORI LA EDITARE
             // ==============================================================
             if (model.RoleName == "Player" && model.JerseyNumber.HasValue)
             {
-                // Căutăm dacă există UN ALT jucător (cu StaffId diferit) care are deja numărul
                 bool jerseyExists = await _context.Players
                     .AnyAsync(p => p.JerseyNumber == model.JerseyNumber.Value && p.StaffId != model.StaffId);
 
