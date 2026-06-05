@@ -32,7 +32,7 @@ namespace Licenta.Controllers
         {
             var players = await _context.Players
                 .Include(p => p.Staff).ThenInclude(s => s.Contracts)
-                .Include(p => p.CurrentTeam)
+                // ELIMINAT: Include(p => p.CurrentTeam)
                 .Include(p => p.Injuries)
                 .ToListAsync();
 
@@ -70,7 +70,7 @@ namespace Licenta.Controllers
 
             var player = await _context.Players
                 .Include(p => p.Staff).ThenInclude(s => s.Contracts)
-                .Include(p => p.CurrentTeam)
+                // ELIMINAT: Include(p => p.CurrentTeam)
                 .Include(p => p.GameStats)
                 .Include(p => p.Injuries)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
@@ -105,7 +105,8 @@ namespace Licenta.Controllers
             {
                 return Forbid();
             }
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name");
+
+            // ELIMINAT: ViewBag.Teams
             return View();
         }
 
@@ -125,7 +126,8 @@ namespace Licenta.Controllers
                 await LogAuditAction($"A creat un jucător nou (ID: {player.PlayerId})", "Player", player.PlayerId);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.CurrentTeamId);
+
+            // ELIMINAT: ViewBag.Teams
             return View(player);
         }
 
@@ -143,12 +145,14 @@ namespace Licenta.Controllers
             var player = await _context.Players.Include(p => p.Staff).FirstOrDefaultAsync(p => p.PlayerId == id);
             if (player == null) return NotFound();
 
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.CurrentTeamId);
+            // ELIMINAT: ViewBag.Teams
             return View(player);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PlayerId,StaffId,CurrentTeamId,JerseyNumber,Height,Weight,Position")] Player player)
+        // ELIMINAT CurrentTeamId DIN BIND
+        public async Task<IActionResult> Edit(int id, [Bind("PlayerId,StaffId,JerseyNumber,Height,Weight,Position")] Player player)
         {
             if (id != player.PlayerId) return NotFound();
 
@@ -157,7 +161,6 @@ namespace Licenta.Controllers
                 return Forbid();
             }
 
-            ModelState.Remove("CurrentTeam");
             ModelState.Remove("Staff");
 
             if (ModelState.IsValid)
@@ -182,10 +185,10 @@ namespace Licenta.Controllers
                     if (!PlayerExists(player.PlayerId)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction(nameof(Index)); 
+                return RedirectToAction(nameof(Index));
             }
 
-            ViewData["TeamId"] = new SelectList(_context.Teams, "TeamId", "Name", player.CurrentTeamId);
+            // ELIMINAT: ViewBag.Teams
             return View(player);
         }
 
@@ -240,7 +243,7 @@ namespace Licenta.Controllers
                     var user = await _userManager.FindByIdAsync(userId);
                     if (user != null)
                     {
-                        await _userManager.DeleteAsync(user); 
+                        await _userManager.DeleteAsync(user);
                     }
                 }
 

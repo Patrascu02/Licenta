@@ -9,15 +9,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Licenta.Controllers
 {
@@ -103,23 +102,18 @@ namespace Licenta.Controllers
             return View(model);
         }
 
-        // --- CREARE UTILIZATOR (GET) ---
         [HttpGet]
         public IActionResult CreateUser()
         {
             return View();
         }
 
-        // --- CREARE UTILIZATOR (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(CreateUserViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // ==============================================================
-                // REGULA: DOAR UN SINGUR USER PENTRU ANUMITE ROLURI
-                // ==============================================================
                 string[] uniqueRoles = { "Admin", "GeneralManager", "Coach", "Medic" };
 
                 if (uniqueRoles.Contains(model.Role))
@@ -132,9 +126,6 @@ namespace Licenta.Controllers
                     }
                 }
 
-                // ==============================================================
-                // NOU: REGULA NUMAR TRICOU UNIC PENTRU JUCATORI
-                // ==============================================================
                 if (model.Role == "Player" && model.JerseyNumber.HasValue)
                 {
                     bool jerseyExists = await _context.Players.AnyAsync(p => p.JerseyNumber == model.JerseyNumber.Value);
@@ -145,7 +136,6 @@ namespace Licenta.Controllers
                     }
                 }
 
-                // Verificare unicitate Email
                 var existingUser = await _userManager.FindByEmailAsync(model.Email);
                 if (existingUser != null)
                 {
@@ -174,29 +164,16 @@ namespace Licenta.Controllers
 
                     if (model.Role == "Player")
                     {
-                        var mainTeam = await _context.Teams.FirstOrDefaultAsync();
                         var player = new Player
                         {
                             StaffId = staff.StaffId,
                             Position = model.Position ?? "Nesetat",
                             JerseyNumber = model.JerseyNumber ?? 0,
                             Height = model.Height ?? 0,
-                            Weight = model.Weight ?? 0,
-                            CurrentTeamId = mainTeam?.TeamId
+                            Weight = model.Weight ?? 0
                         };
                         _context.Players.Add(player);
                         await _context.SaveChangesAsync();
-
-                        if (mainTeam != null)
-                        {
-                            var history = new PlayerTeamHistory
-                            {
-                                PlayerId = player.PlayerId,
-                                TeamId = mainTeam.TeamId,
-                                StartDate = DateTime.Now
-                            };
-                            _context.PlayerTeamHistories.Add(history);
-                        }
                     }
                     else if (model.Role == "Coach")
                     {
@@ -239,7 +216,6 @@ namespace Licenta.Controllers
             return View(model);
         }
 
-        // --- VERIFICARE EMAIL (AJAX) ---
         [HttpGet]
         public async Task<JsonResult> CheckEmailExists(string email)
         {
@@ -247,7 +223,6 @@ namespace Licenta.Controllers
             return Json(new { exists = (user != null) });
         }
 
-        // --- GESTIUNE UTILIZATORI ---
         public async Task<IActionResult> ManageUsers()
         {
             var staffList = await _context.Staff
@@ -326,9 +301,6 @@ namespace Licenta.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // ==============================================================
-            // NOU: REGULA NUMAR TRICOU UNIC PENTRU JUCATORI LA EDITARE
-            // ==============================================================
             if (model.RoleName == "Player" && model.JerseyNumber.HasValue)
             {
                 bool jerseyExists = await _context.Players
@@ -386,7 +358,6 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageUsers));
         }
 
-        // --- DELETE USER ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(int id)
@@ -408,7 +379,6 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(ManageUsers));
         }
 
-        // --- HELPER LOG ---
         private async Task LogAuditAction(string message)
         {
             var currentUserId = _userManager.GetUserId(User);
@@ -426,10 +396,6 @@ namespace Licenta.Controllers
             }
         }
 
-        // ==========================================
-        //         MODUL COMUNICATII (GRUPURI)
-        // ==========================================
-
         [HttpGet]
         public async Task<IActionResult> CreateMessageGroup()
         {
@@ -440,7 +406,6 @@ namespace Licenta.Controllers
             {
                 var user = await _userManager.FindByIdAsync(staff.UserId);
                 if (user == null) continue;
-
                 var roles = await _userManager.GetRolesAsync(user);
 
                 model.AvailableStaff.Add(new StaffCheckboxItem
@@ -452,7 +417,6 @@ namespace Licenta.Controllers
             }
 
             model.AvailableStaff = model.AvailableStaff.OrderBy(s => s.RoleName).ThenBy(s => s.FullName).ToList();
-
             return View(model);
         }
 
@@ -487,7 +451,6 @@ namespace Licenta.Controllers
             return RedirectToAction("AdminDashboard");
         }
 
-        // --- AFISEAZA TOATE GRUPURILE ---
         [HttpGet]
         public async Task<IActionResult> ManageMessageGroups()
         {
@@ -499,7 +462,6 @@ namespace Licenta.Controllers
             return View(groups);
         }
 
-        // --- EDITARE GRUP (GET) ---
         [HttpGet]
         public async Task<IActionResult> EditMessageGroup(int id)
         {
@@ -535,7 +497,6 @@ namespace Licenta.Controllers
             return View(model);
         }
 
-        // --- EDITARE GRUP (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditMessageGroup(EditMessageGroupViewModel model)
@@ -609,6 +570,8 @@ namespace Licenta.Controllers
         {
             var games = await _context.Games
                 .Include(g => g.Season)
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
                 .OrderByDescending(g => g.GameDate)
                 .ToListAsync();
 
@@ -619,21 +582,61 @@ namespace Licenta.Controllers
         public async Task<IActionResult> CreateGame()
         {
             ViewBag.Seasons = new SelectList(await _context.Seasons.ToListAsync(), "SeasonId", "Name");
-            return View();
+            return View(new CreateGameViewModel { GameDate = DateTime.Now });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateGame(Game model)
+        public async Task<IActionResult> CreateGame(CreateGameViewModel model)
         {
             if (ModelState.IsValid)
             {
-                model.HomeScore = 0;
-                model.AwayScore = 0;
+                var myTeam = await _context.Teams.FirstOrDefaultAsync(t => t.TeamId == 2 || t.Name.Contains("STEAUA"));
+                if (myTeam == null)
+                {
+                    ModelState.AddModelError("", "Eroare internă: Echipa principală (CSA Steaua / ID 2) nu a fost găsită în baza de date.");
+                    ViewBag.Seasons = new SelectList(await _context.Seasons.ToListAsync(), "SeasonId", "Name", model.SeasonId);
+                    return View(model);
+                }
 
-                _context.Games.Add(model);
+                var opponentNameStr = model.OpponentName.Trim();
+
+                if (opponentNameStr.ToLower().Contains("steaua"))
+                {
+                    ModelState.AddModelError("OpponentName", "CSA Steaua nu poate juca împotriva ei înseși.");
+                    ViewBag.Seasons = new SelectList(await _context.Seasons.ToListAsync(), "SeasonId", "Name", model.SeasonId);
+                    return View(model);
+                }
+
+                var opponentTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.ToLower() == opponentNameStr.ToLower());
+
+                if (opponentTeam == null)
+                {
+                    opponentTeam = new Team
+                    {
+                        Name = opponentNameStr,
+                        City = "Necunoscut",
+                        Category = "Seniori"
+                    };
+                    _context.Teams.Add(opponentTeam);
+                    await _context.SaveChangesAsync();
+                }
+
+                var game = new Game
+                {
+                    SeasonId = model.SeasonId,
+                    GameDate = model.GameDate,
+                    Location = model.Location,
+                    HomeScore = 0,
+                    AwayScore = 0,
+                    HomeTeamId = model.IsHomeGame ? myTeam.TeamId : opponentTeam.TeamId,
+                    AwayTeamId = model.IsHomeGame ? opponentTeam.TeamId : myTeam.TeamId
+                };
+
+                _context.Games.Add(game);
                 await _context.SaveChangesAsync();
-                await LogAuditAction($"A programat un meci nou pentru data {model.GameDate:dd MMM yyyy}.");
+
+                await LogAuditAction($"A programat un meci nou: {myTeam.Name} vs {opponentTeam.Name} ({model.GameDate:dd MMM yyyy}).");
 
                 return RedirectToAction(nameof(ManageGames));
             }

@@ -32,7 +32,9 @@ namespace Licenta.Data
         public DbSet<GeneralManager> GeneralManagers { get; set; }
         public DbSet<ScoutPlayer> ScoutPlayers { get; set; }
         public DbSet<Team> Teams { get; set; }
-        public DbSet<PlayerTeamHistory> PlayerTeamHistories { get; set; }
+
+        // AM ELIMINAT PlayerTeamHistories
+
         public DbSet<Contract> Contracts { get; set; }
         public DbSet<Season> Seasons { get; set; }
         public DbSet<Game> Games { get; set; }
@@ -47,6 +49,7 @@ namespace Licenta.Data
         public DbSet<FileStorage> FileStorages { get; set; }
         public DbSet<MessageGroup> MessageGroups { get; set; }
         public DbSet<MessageGroupMember> MessageGroupMembers { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -73,7 +76,6 @@ namespace Licenta.Data
                 .Property(t => t.BudgetLimit)
                 .HasColumnType("decimal(18,2)");
 
-            
             builder.Entity<Contract>()
                 .HasOne(c => c.Staff)
                 .WithMany(s => s.Contracts)
@@ -86,11 +88,7 @@ namespace Licenta.Data
                 .HasForeignKey(i => i.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<PlayerTeamHistory>()
-                .HasOne(pth => pth.Player)
-                .WithMany(p => p.TeamHistories)
-                .HasForeignKey(pth => pth.PlayerId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // AM ELIMINAT REGULA PENTRU PlayerTeamHistory
 
             builder.Entity<Expense>()
                 .HasOne(e => e.Season)
@@ -103,6 +101,19 @@ namespace Licenta.Data
                 .WithMany(s => s.Games)
                 .HasForeignKey(g => g.SeasonId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // RELAȚII SIGURE PENTRU GAME -> TEAMS (previne erorile de tip Cascade Delete)
+            builder.Entity<Game>()
+                .HasOne(g => g.HomeTeam)
+                .WithMany()
+                .HasForeignKey(g => g.HomeTeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Game>()
+                .HasOne(g => g.AwayTeam)
+                .WithMany()
+                .HasForeignKey(g => g.AwayTeamId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<PlayerGameStats>()
                 .HasOne(pgs => pgs.Game)
@@ -151,7 +162,6 @@ namespace Licenta.Data
                 .WithMany(s => s.Files)
                 .HasForeignKey(f => f.StaffId)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             builder.Entity<Message>()
                 .HasOne(m => m.Group)

@@ -19,15 +19,13 @@ namespace Licenta.Controllers
             _context = context;
         }
 
-        // ==========================================
-        //         PANOU PRINCIPAL (DASHBOARD)
-        // ==========================================
-
         [HttpGet]
         [Authorize(Roles = "Scout")]
         public async Task<IActionResult> Dashboard()
         {
             var pastGames = await _context.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
                 .Where(g => g.GameDate < DateTime.Now)
                 .OrderByDescending(g => g.GameDate)
                 .ToListAsync();
@@ -37,17 +35,24 @@ namespace Licenta.Controllers
 
             ViewBag.PendingCount = pendingGames.Count;
             ViewBag.CompletedCount = completedGames.Count;
-
             ViewBag.RecentPending = pendingGames.Take(3).ToList();
 
-            // --- CALCUL PALMARES ECHIPA PENTRU DASHBOARD ---
+            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
+            int mainTeamId = mainTeam?.TeamId ?? 2;
+
             int wins = 0; int losses = 0;
             foreach (var g in completedGames)
             {
-                bool isHome = g.Location.ToLower().Contains("acas");
-                if (isHome && g.HomeScore > g.AwayScore) wins++;
-                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
-                else losses++;
+                if (g.HomeTeamId == mainTeamId)
+                {
+                    if (g.HomeScore > g.AwayScore) wins++;
+                    else if (g.HomeScore < g.AwayScore) losses++;
+                }
+                else if (g.AwayTeamId == mainTeamId)
+                {
+                    if (g.AwayScore > g.HomeScore) wins++;
+                    else if (g.AwayScore < g.HomeScore) losses++;
+                }
             }
 
             ViewBag.Wins = wins;
@@ -56,7 +61,6 @@ namespace Licenta.Controllers
             return View();
         }
 
-        // --- GET: AFISARE FORMULAR INTRODUCERE MEDII LUNARE ---
         [HttpGet]
         public async Task<IActionResult> AddMonthlyStats(int playerId)
         {
@@ -83,7 +87,6 @@ namespace Licenta.Controllers
             return View(model);
         }
 
-        // --- POST: SALVARE MEDII LUNARE ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddMonthlyStats(PlayerGameStats stats)
@@ -116,30 +119,37 @@ namespace Licenta.Controllers
             return View(stats);
         }
 
-        // ==========================================
-        //         MODUL RAPOARTE MECIURI (SCOUT)
-        // ==========================================
-
         [HttpGet]
         [Authorize(Roles = "Scout")]
         public async Task<IActionResult> MatchReports(string status = "all")
         {
             var allPastGames = await _context.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
                 .Where(g => g.GameDate < DateTime.Now)
                 .OrderByDescending(g => g.GameDate)
                 .ToListAsync();
 
+            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
+            int mainTeamId = mainTeam?.TeamId ?? 2;
+
             int wins = 0; int losses = 0;
             foreach (var g in allPastGames.Where(g => g.HomeScore > 0 || g.AwayScore > 0))
             {
-                bool isHome = g.Location.ToLower().Contains("acas");
-                if (isHome && g.HomeScore > g.AwayScore) wins++;
-                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
-                else losses++;
+                if (g.HomeTeamId == mainTeamId)
+                {
+                    if (g.HomeScore > g.AwayScore) wins++;
+                    else if (g.HomeScore < g.AwayScore) losses++;
+                }
+                else if (g.AwayTeamId == mainTeamId)
+                {
+                    if (g.AwayScore > g.HomeScore) wins++;
+                    else if (g.AwayScore < g.HomeScore) losses++;
+                }
             }
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
-            ViewBag.CurrentStatus = status; 
+            ViewBag.CurrentStatus = status;
 
             var filteredGames = allPastGames.AsEnumerable();
             if (status == "pending")
@@ -161,12 +171,15 @@ namespace Licenta.Controllers
             var game = await _context.Games.FindAsync(id);
             if (game == null || game.GameDate >= DateTime.Now) return NotFound();
 
+            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
+            int mainTeamId = mainTeam?.TeamId ?? 2;
+
             var model = new Licenta.Models.ViewModels.EditGameStatsViewModel
             {
                 GameId = game.GameId,
-                GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location} | {game.GameType}",
-                HomeScore = game.HomeScore,
-                AwayScore = game.AwayScore
+                GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location}",
+                HomeScore = game.HomeTeamId == mainTeamId ? game.HomeScore : game.AwayScore,
+                AwayScore = game.HomeTeamId == mainTeamId ? game.AwayScore : game.HomeScore
             };
 
             var roster = await _context.Players.Include(p => p.Staff).ToListAsync();
@@ -202,6 +215,9 @@ namespace Licenta.Controllers
             var game = await _context.Games.FindAsync(model.GameId);
             if (game == null) return NotFound();
 
+            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
+            int mainTeamId = mainTeam?.TeamId ?? 2;
+
             ModelState.Remove("GameInfo");
             for (int i = 0; i < model.PlayerStats.Count; i++)
             {
@@ -214,19 +230,16 @@ namespace Licenta.Controllers
                 ModelState.AddModelError("", "Eroare: În baschet nu există rezultat de egalitate (meciul intră în prelungiri).");
             }
 
-            bool isHome = game.Location.ToLower().Contains("acas");
-            int ourTeamScore = isHome ? model.HomeScore : model.AwayScore;
-
             int sumPoints = (int)model.PlayerStats.Sum(p => p.Points);
 
-            if (sumPoints != ourTeamScore)
+            if (sumPoints != model.HomeScore)
             {
-                ModelState.AddModelError("", $"Atenție: Scorul echipei noastre este setat la {ourTeamScore} puncte, dar punctele jucătorilor adunate dau {sumPoints}! Aceste două numere trebuie să fie EXACT egale pentru a salva raportul.");
+                ModelState.AddModelError("", $"Atenție: Scorul echipei noastre este setat la {model.HomeScore} puncte, dar punctele jucătorilor adunate dau {sumPoints}! Aceste două numere trebuie să fie EXACT egale pentru a salva raportul.");
             }
 
             if (!ModelState.IsValid)
             {
-                model.GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location} | {game.GameType}";
+                model.GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location}";
 
                 var roster = await _context.Players.Include(p => p.Staff).ToListAsync();
                 foreach (var p in model.PlayerStats)
@@ -242,8 +255,16 @@ namespace Licenta.Controllers
                 return View(model);
             }
 
-            game.HomeScore = model.HomeScore;
-            game.AwayScore = model.AwayScore;
+            if (game.HomeTeamId == mainTeamId)
+            {
+                game.HomeScore = model.HomeScore;
+                game.AwayScore = model.AwayScore;
+            }
+            else
+            {
+                game.AwayScore = model.HomeScore;
+                game.HomeScore = model.AwayScore;
+            }
 
             foreach (var ps in model.PlayerStats)
             {

@@ -1,8 +1,8 @@
-﻿using Licenta.Models.Contracts;
-using Licenta.Models.Core;
+﻿using Licenta.Models.Core;
 using Licenta.Models.Medical;
 using Licenta.Models.Sports;
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
 
 namespace Licenta.Models.Roles
 {
@@ -15,14 +15,8 @@ namespace Licenta.Models.Roles
         public int Height { get; set; }
         public int Weight { get; set; }
 
-        public int? CurrentTeamId { get; set; }
-
         public Staff? Staff { get; set; }
 
-
-        [ForeignKey("CurrentTeamId")]
-        public Team CurrentTeam { get; set; }
-        public ICollection<PlayerTeamHistory>? TeamHistories { get; set; }
         public ICollection<PlayerGameStats>? GameStats { get; set; }
         public ICollection<Injury>? Injuries { get; set; }
 

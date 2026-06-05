@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Licenta.Controllers
@@ -20,7 +23,6 @@ namespace Licenta.Controllers
             _userManager = userManager;
         }
 
-        // --- 1. LISTA ANTRENORI (Admin / GeneralManager) ---
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -30,13 +32,12 @@ namespace Licenta.Controllers
             }
 
             var coaches = await _context.Coaches
-                .Include(c => c.Staff) 
+                .Include(c => c.Staff)
                 .ToListAsync();
 
             return View(coaches);
         }
 
-        // --- 2. PROFILUL MEU (Pentru Antrenorul Logat) ---
         [HttpGet]
         public async Task<IActionResult> MyProfile()
         {
@@ -54,7 +55,6 @@ namespace Licenta.Controllers
             return RedirectToAction("Details", new { id = staffMember.Coach.CoachId });
         }
 
-        // --- 3. DETALII ANTRENOR (Vizualizare Profil) ---
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -63,7 +63,6 @@ namespace Licenta.Controllers
                 .FirstOrDefaultAsync(c => c.CoachId == id);
 
             if (coach == null) return NotFound();
-
 
             var currentUserId = _userManager.GetUserId(User);
             bool isOwnProfile = (coach.Staff.UserId == currentUserId);
@@ -76,7 +75,6 @@ namespace Licenta.Controllers
 
             return View(coach);
         }
-
 
         [Authorize(Roles = "Coach")]
         public async Task<IActionResult> Dashboard()
@@ -95,12 +93,16 @@ namespace Licenta.Controllers
             int injuredCount = await _context.Injuries.CountAsync(i => i.Status != "Recuperat");
 
             var upcomingGames = await _context.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
                 .Where(g => g.GameDate >= DateTime.Now)
                 .OrderBy(g => g.GameDate)
                 .Take(4)
                 .ToListAsync();
 
             var recentGames = await _context.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
                 .Where(g => g.GameDate < DateTime.Now)
                 .OrderByDescending(g => g.GameDate)
                 .Take(5)
@@ -122,7 +124,9 @@ namespace Licenta.Controllers
                 NextEvent = nextEvent
             };
 
-            // --- CALCUL PALMARES ECHIPA PENTRU DASHBOARD ---
+            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
+            int mainTeamId = mainTeam?.TeamId ?? 2;
+
             var pastGamesForRecord = await _context.Games
                 .Where(g => g.GameDate < DateTime.Now && (g.HomeScore > 0 || g.AwayScore > 0))
                 .ToListAsync();
@@ -130,21 +134,22 @@ namespace Licenta.Controllers
             int wins = 0; int losses = 0;
             foreach (var g in pastGamesForRecord)
             {
-                bool isHome = g.Location.ToLower().Contains("acas");
-                if (isHome && g.HomeScore > g.AwayScore) wins++;
-                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
-                else losses++;
+                if (g.HomeTeamId == mainTeamId)
+                {
+                    if (g.HomeScore > g.AwayScore) wins++;
+                    else if (g.HomeScore < g.AwayScore) losses++;
+                }
+                else if (g.AwayTeamId == mainTeamId)
+                {
+                    if (g.AwayScore > g.HomeScore) wins++;
+                    else if (g.AwayScore < g.HomeScore) losses++;
+                }
             }
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
-          
 
             return View(model);
         }
-
-        // ==========================================
-        //         MODUL PLANIFICARE (CALENDAR)
-        // ==========================================
 
         [HttpGet]
         [Authorize(Roles = "Coach")]
@@ -214,7 +219,7 @@ namespace Licenta.Controllers
                 EndTime = model.EndTime,
                 StaffId = staff.StaffId,
                 RelatedEntity = model.RelatedEntity,
-                AttachedFilePath = savedFilePath 
+                AttachedFilePath = savedFilePath
             };
 
             _context.Events.Add(newEvent);
@@ -237,27 +242,33 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Calendar));
         }
 
-        // ==========================================
-        //  MODUL TACTIC ANTRENOR (DOAR VIZUALIZARE)
-        // ==========================================
-
         [HttpGet]
         [Authorize(Roles = "Coach")]
         public async Task<IActionResult> TacticalReports()
         {
             var pastGames = await _context.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
                 .Where(g => g.GameDate < DateTime.Now)
                 .OrderByDescending(g => g.GameDate)
                 .ToListAsync();
 
-            // CALCUL PALMARES AUTOMAT (W - L) PENTRU ANTRENOR
+            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
+            int mainTeamId = mainTeam?.TeamId ?? 2;
+
             int wins = 0; int losses = 0;
             foreach (var g in pastGames.Where(g => g.HomeScore > 0 || g.AwayScore > 0))
             {
-                bool isHome = g.Location.ToLower().Contains("acas");
-                if (isHome && g.HomeScore > g.AwayScore) wins++;
-                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
-                else losses++;
+                if (g.HomeTeamId == mainTeamId)
+                {
+                    if (g.HomeScore > g.AwayScore) wins++;
+                    else if (g.HomeScore < g.AwayScore) losses++;
+                }
+                else if (g.AwayTeamId == mainTeamId)
+                {
+                    if (g.AwayScore > g.HomeScore) wins++;
+                    else if (g.AwayScore < g.HomeScore) losses++;
+                }
             }
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
@@ -275,7 +286,7 @@ namespace Licenta.Controllers
             var model = new Licenta.Models.ViewModels.EditGameStatsViewModel
             {
                 GameId = game.GameId,
-                GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location} | {game.GameType}",
+                GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location}",
                 HomeScore = game.HomeScore,
                 AwayScore = game.AwayScore
             };
@@ -302,8 +313,7 @@ namespace Licenta.Controllers
             }
 
             model.PlayerStats = model.PlayerStats.OrderBy(p => p.JerseyNumber).ToList();
-            return View(model); 
+            return View(model);
         }
-
     }
 }

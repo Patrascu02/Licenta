@@ -37,8 +37,6 @@ namespace Licenta.Controllers
 
             var player = staff.Player;
 
-            var team = await _context.Teams.FirstOrDefaultAsync(t => t.TeamId == player.CurrentTeamId);
-
             var allStats = await _context.PlayerGameStats
                 .Include(s => s.Game)
                 .Where(s => s.PlayerId == player.PlayerId)
@@ -63,6 +61,8 @@ namespace Licenta.Controllers
                 .ToListAsync();
 
             var upcomingGames = await _context.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
                 .Where(g => g.GameDate >= DateTime.Now)
                 .OrderBy(g => g.GameDate)
                 .Take(3)
@@ -77,7 +77,6 @@ namespace Licenta.Controllers
             {
                 StaffInfo = staff,
                 PlayerInfo = player,
-                CurrentTeam = team,
                 ActiveContract = activeContract,
                 AvgPoints = Math.Round(avgPts, 1),
                 AvgRebounds = Math.Round(avgReb, 1),
@@ -89,6 +88,9 @@ namespace Licenta.Controllers
                 NextEvent = nextEvent
             };
 
+            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
+            int mainTeamId = mainTeam?.TeamId ?? 2;
+
             var pastGamesForRecord = await _context.Games
                 .Where(g => g.GameDate < DateTime.Now && (g.HomeScore > 0 || g.AwayScore > 0))
                 .ToListAsync();
@@ -96,11 +98,18 @@ namespace Licenta.Controllers
             int wins = 0; int losses = 0;
             foreach (var g in pastGamesForRecord)
             {
-                bool isHome = g.Location.ToLower().Contains("acas");
-                if (isHome && g.HomeScore > g.AwayScore) wins++;
-                else if (!isHome && g.AwayScore > g.HomeScore) wins++;
-                else losses++;
+                if (g.HomeTeamId == mainTeamId)
+                {
+                    if (g.HomeScore > g.AwayScore) wins++;
+                    else if (g.HomeScore < g.AwayScore) losses++;
+                }
+                else if (g.AwayTeamId == mainTeamId)
+                {
+                    if (g.AwayScore > g.HomeScore) wins++;
+                    else if (g.AwayScore < g.HomeScore) losses++;
+                }
             }
+
             ViewBag.Wins = wins;
             ViewBag.Losses = losses;
 
