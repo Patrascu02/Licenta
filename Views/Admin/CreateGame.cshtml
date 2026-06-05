@@ -21,18 +21,25 @@
                 </div>
 
                 <div class="mb-4">
+                    <label class="form-label text-white fw-bold">Nume Adversar</label>
+                    <input asp-for="OpponentName" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: U-BT Cluj-Napoca" required />
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check form-switch pt-2">
+                        <input asp-for="IsHomeGame" class="form-check-input shadow-none" type="checkbox" role="switch" id="isHomeGameSwitch" checked>
+                        <label class="form-check-label text-white fw-bold ps-2" for="isHomeGameSwitch">Meci pe Teren Propriu (Acasă)</label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
                     <label class="form-label text-white fw-bold">Data și Ora</label>
                     <input asp-for="GameDate" type="datetime-local" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" required />
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label text-white fw-bold">Tip Competiție</label>
-                    <input asp-for="GameType" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Liga Națională, Cupa României" required />
-                </div>
-
-                <div class="mb-5">
-                    <label class="form-label text-white fw-bold">Locație</label>
-                    <input asp-for="Location" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Acasă, Deplasare - Oradea" required />
+                    <label class="form-label text-white fw-bold">Locație Sală</label>
+                    <input asp-for="Location" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Sala Sporturilor" required />
                 </div>
 
                 <button type="submit" class="btn btn-cyber w-100 fw-bold fs-5 py-2">

@@ -11,7 +11,6 @@ namespace Licenta.Models.ViewModels
     {
         public Staff StaffInfo { get; set; }
         public Player PlayerInfo { get; set; }
-        public Team CurrentTeam { get; set; }
         public Contract ActiveContract { get; set; }
 
         

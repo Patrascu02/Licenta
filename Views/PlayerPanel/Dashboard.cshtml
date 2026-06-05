@@ -4,7 +4,6 @@
     ViewData["Title"] = "Player Dashboard";
 
     string ovStatus = ViewBag.OverallStatus as string ?? "NECUNOSCUT";
-
     string borderClass = ovStatus == "APT DE JOC" ? "border-success" :
                          ovStatus == "INDISPONIBIL (ACCIDENTAT)" ? "border-danger" : "border-warning";
 
@@ -45,10 +44,7 @@
                 </div>
             </div>
 
-            <div class="text-md-end">
-                <p class="text-muted text-uppercase fw-bold small mb-1">Echipa Curentă</p>
-                <h4 class="text-white fw-bold mb-3">@(Model.CurrentTeam?.Name ?? "Fără echipă")</h4>
-
+            <div class="text-md-end pt-3 pt-md-0">
                 @if (Model.ActiveContract != null)
                 {
                     <div class="d-flex flex-column align-items-md-end gap-2">
@@ -118,7 +114,7 @@
                             <thead>
                                 <tr>
                                     <th class="ps-4 text-start">Data Meciului</th>
-                                    <th>Scor Final</th>
+                                    <th>Scor (Club - Adversar)</th>
                                     <th>Puncte</th>
                                     <th>Rec</th>
                                     <th>Pase</th>
@@ -137,9 +133,9 @@
                                             </td>
 
                                             <td class="text-white text-nowrap">
-                                                <span class="fw-bold @(stat.Game.HomeScore > stat.Game.AwayScore ? "text-success" : "text-white")">@stat.Game.HomeScore</span>
+                                                <span class="fw-bold @(stat.Game.ClubScore > stat.Game.OpponentScore ? "text-success" : "text-white")">@stat.Game.ClubScore</span>
                                                 <span class="mx-1 text-muted">-</span>
-                                                <span class="fw-bold @(stat.Game.AwayScore > stat.Game.HomeScore ? "text-success" : "text-white")">@stat.Game.AwayScore</span>
+                                                <span class="fw-bold @(stat.Game.OpponentScore > stat.Game.ClubScore ? "text-danger" : "text-white")">@stat.Game.OpponentScore</span>
                                             </td>
 
                                             <td class="fw-bold text-info fs-5">@stat.Points</td>
@@ -165,7 +161,6 @@
         </div>
 
         <div class="col-lg-4">
-
             @if (Model.NextEvent != null)
             {
                 <div class="card glass-card border-warning mb-4 shadow-lg" style="background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(245,158,11,0.1));">
@@ -252,7 +247,7 @@
                             {
                                 <li class="list-group-item bg-transparent border-bottom border-secondary d-flex justify-content-between align-items-center p-3">
                                     <div>
-                                        <h6 class="text-white mb-1">@(string.IsNullOrEmpty(game.GameType) ? "Meci Echipă" : game.GameType)</h6>
+                                        <h6 class="text-white mb-1">@(string.IsNullOrEmpty(game.OpponentName) ? "Meci" : "vs " + game.OpponentName)</h6>
                                         <small class="text-primary d-block"><i class="fas fa-map-marker-alt me-1"></i> @(game.Location ?? "Locație nesetată")</small>
                                         <small class="text-muted"><i class="far fa-clock me-1"></i> @game.GameDate.ToString("dd MMM HH:mm")</small>
                                     </div>
@@ -266,7 +261,6 @@
                     </ul>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -276,7 +270,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             var cdElement = document.getElementById('event-countdown');
             if(!cdElement) return;
-
             var targetDate = new Date(cdElement.getAttribute('data-time')).getTime();
             var timer = setInterval(function() {
                 var now = new Date().getTime();
