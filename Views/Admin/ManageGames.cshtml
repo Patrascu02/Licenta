@@ -19,9 +19,9 @@
                     <tr>
                         <th class="text-start ps-4">Dată</th>
                         <th>Sezon</th>
-                        <th>Adversar</th>
-                        <th>Locație / Teren</th>
-                        <th>Scor (Club - Adversar)</th>
+                        <th>Competiție</th>
+                        <th>Locație</th>
+                        <th>Scor</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -30,27 +30,16 @@
                         <tr>
                             <td class="text-start ps-4 fw-bold text-white">@g.GameDate.ToString("dd MMM yyyy, HH:mm")</td>
                             <td class="text-muted">@g.Season?.Name</td>
-                            <td class="fw-bold text-warning">@g.OpponentName</td>
-                            <td>
-                                @if (g.IsHomeGame)
-                                {
-                                    <span class="badge bg-primary me-2">Acasă</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger me-2">Deplasare</span>
-                                }
-                                <small class="text-muted">@g.Location</small>
-                            </td>
+                            <td>@g.GameType</td>
+                            <td>@g.Location</td>
                             <td>
                                 @if (g.GameDate < DateTime.Now)
                                 {
-                                    <span class="fw-bold fs-6 @(g.ClubScore > g.OpponentScore ? "text-success" : (g.ClubScore < g.OpponentScore ? "text-danger" : "text-white"))">
-                                        @g.ClubScore - @g.OpponentScore
-                                    </span>
+                                    <span class="fw-bold text-success">@g.HomeScore - @g.AwayScore</span>
                                 }
                                 else
                                 {
+
                                     <span class="badge bg-secondary">Urmează</span>
                                 }
                             </td>
