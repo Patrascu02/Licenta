@@ -1,38 +1,55 @@
-﻿@model Licenta.Models.Sports.Game
+﻿@model Licenta.Models.ViewModels.CreateGameViewModel
 @{
     ViewData["Title"] = "Meci Nou";
 }
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-info fw-bold mb-0"><i class="fas fa-plus-circle me-2"></i>Programare Meci</h2>
+        <h2 class="text-info fw-bold mb-0"><i class="fas fa-plus-circle me-2"></i>Programare Meci Nou</h2>
         <a asp-action="ManageGames" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i>Înapoi</a>
     </div>
 
-    <div class="card glass-card border-info" style="max-width: 600px;">
+    <div class="card glass-card border-info shadow-lg" style="max-width: 600px;">
         <div class="card-body p-4">
             <form asp-action="CreateGame" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
 
                 <div class="mb-4">
                     <label class="form-label text-white fw-bold">Sezon Competițional</label>
                     <select asp-for="SeasonId" class="form-select border-secondary text-white shadow-none" style="background-color: #0f172a; cursor: pointer;" asp-items="ViewBag.Seasons" required>
                         <option value="">-- Alege Sezonul --</option>
                     </select>
+                    <span asp-validation-for="SeasonId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4 p-3 border border-secondary rounded" style="background-color: rgba(0,0,0,0.2);">
+                    <label class="form-label text-white fw-bold d-block text-center mb-3">CSA STEAUA JOACĂ:</label>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span class="text-white me-3 fw-bold @(!Model.IsHomeGame ? "text-danger" : "opacity-50")">DEPLASARE</span>
+                        <div class="form-check form-switch fs-4">
+                            <input asp-for="IsHomeGame" class="form-check-input shadow-none cursor-pointer" type="checkbox" role="switch">
+                        </div>
+                        <span class="text-white ms-2 fw-bold @(Model.IsHomeGame ? "text-success" : "opacity-50")">ACASĂ</span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-warning fw-bold">Echipă Adversă</label>
+                    <input asp-for="OpponentName" class="form-control text-white border-warning shadow-none" style="background-color: #0f172a;" placeholder="ex: U-BT Cluj, CSM Oradea" autocomplete="off" required />
+                    <span asp-validation-for="OpponentName" class="text-danger small"></span>
+                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Adversarul va fi înregistrat automat dacă nu există în sistem.</small>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label text-white fw-bold">Data și Ora</label>
                     <input asp-for="GameDate" type="datetime-local" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" required />
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label text-white fw-bold">Tip Competiție</label>
-                    <input asp-for="GameType" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Liga Națională, Cupa României" required />
+                    <span asp-validation-for="GameDate" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-5">
-                    <label class="form-label text-white fw-bold">Locație</label>
-                    <input asp-for="Location" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Acasă, Deplasare - Oradea" required />
+                    <label class="form-label text-white fw-bold">Locație / Sală</label>
+                    <input asp-for="Location" class="form-control text-white border-secondary shadow-none" style="background-color: #0f172a;" placeholder="ex: Sala Mihai Viteazu" required />
+                    <span asp-validation-for="Location" class="text-danger small"></span>
                 </div>
 
                 <button type="submit" class="btn btn-cyber w-100 fw-bold fs-5 py-2">
@@ -53,4 +70,14 @@
         border-color: var(--neon-primary) !important;
         box-shadow: 0 0 10px rgba(6, 182, 212, 0.5) !important;
     }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
 </style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

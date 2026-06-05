@@ -163,29 +163,51 @@ namespace Licenta.Controllers
 
             return View(filteredGames.ToList());
         }
-
         [HttpGet]
         [Authorize(Roles = "Scout")]
         public async Task<IActionResult> EditMatchStats(int id)
         {
-            var game = await _context.Games.FindAsync(id);
+            var game = await _context.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
+                .FirstOrDefaultAsync(g => g.GameId == id);
+
             if (game == null || game.GameDate >= DateTime.Now) return NotFound();
 
             var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
             int mainTeamId = mainTeam?.TeamId ?? 2;
 
+            bool isOurTeamHome = game.HomeTeamId == mainTeamId;
+
+            ViewBag.OurTeamName = isOurTeamHome ? game.HomeTeam?.Name : game.AwayTeam?.Name;
+            ViewBag.OpponentName = isOurTeamHome ? game.AwayTeam?.Name : game.HomeTeam?.Name;
+
             var model = new Licenta.Models.ViewModels.EditGameStatsViewModel
             {
                 GameId = game.GameId,
                 GameInfo = $"{game.GameDate:dd MMM yyyy} | {game.Location}",
-                HomeScore = game.HomeTeamId == mainTeamId ? game.HomeScore : game.AwayScore,
-                AwayScore = game.HomeTeamId == mainTeamId ? game.AwayScore : game.HomeScore
+                HomeScore = isOurTeamHome ? game.HomeScore : game.AwayScore,
+                AwayScore = isOurTeamHome ? game.AwayScore : game.HomeScore
             };
 
-            var roster = await _context.Players.Include(p => p.Staff).ToListAsync();
+            var roster = await _context.Players
+                .Include(p => p.Staff).ThenInclude(s => s.Contracts)
+                .Include(p => p.Injuries)
+                .ToListAsync();
+
             var existingStats = await _context.PlayerGameStats.Where(s => s.GameId == id && !s.IsScoutingReport).ToListAsync();
 
-            foreach (var player in roster)
+           
+            var eligiblePlayers = roster.Where(p =>
+                existingStats.Any(es => es.PlayerId == p.PlayerId) ||
+                (
+                    p.Staff?.Contracts != null &&
+                    p.Staff.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now)) &&
+                    (p.Injuries == null || !p.Injuries.Any(i => i.Status != "Recuperat"))
+                )
+            ).ToList();
+
+            foreach (var player in eligiblePlayers)
             {
                 var stat = existingStats.FirstOrDefault(s => s.PlayerId == player.PlayerId);
                 model.PlayerStats.Add(new Licenta.Models.ViewModels.PlayerStatItemViewModel
@@ -203,6 +225,7 @@ namespace Licenta.Controllers
                     MinutesPlayed = stat?.MinutesPlayed ?? 0
                 });
             }
+
             model.PlayerStats = model.PlayerStats.OrderBy(p => p.JerseyNumber).ToList();
             return View(model);
         }
@@ -251,6 +274,15 @@ namespace Licenta.Controllers
                         p.Position = playerDb.Position ?? "-";
                     }
                 }
+
+                var gameDetails = await _context.Games
+                    .Include(g => g.HomeTeam)
+                    .Include(g => g.AwayTeam)
+                    .FirstOrDefaultAsync(g => g.GameId == model.GameId);
+
+                bool isOurTeamHome = gameDetails?.HomeTeamId == mainTeamId;
+                ViewBag.OurTeamName = isOurTeamHome ? gameDetails?.HomeTeam?.Name : gameDetails?.AwayTeam?.Name;
+                ViewBag.OpponentName = isOurTeamHome ? gameDetails?.AwayTeam?.Name : gameDetails?.HomeTeam?.Name;
 
                 return View(model);
             }
