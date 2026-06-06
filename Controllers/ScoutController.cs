@@ -163,6 +163,7 @@ namespace Licenta.Controllers
 
             return View(filteredGames.ToList());
         }
+
         [HttpGet]
         [Authorize(Roles = "Scout")]
         public async Task<IActionResult> EditMatchStats(int id)
@@ -197,13 +198,14 @@ namespace Licenta.Controllers
 
             var existingStats = await _context.PlayerGameStats.Where(s => s.GameId == id && !s.IsScoutingReport).ToListAsync();
 
-           
             var eligiblePlayers = roster.Where(p =>
                 existingStats.Any(es => es.PlayerId == p.PlayerId) ||
                 (
-                    p.Staff?.Contracts != null &&
-                    p.Staff.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now)) &&
+                    (p.Staff?.Contracts != null && p.Staff.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now)))
+                    &&
                     (p.Injuries == null || !p.Injuries.Any(i => i.Status != "Recuperat"))
+                    &&
+                    (p.LastMedicalClearance.HasValue && p.LastMedicalClearance.Value.AddMonths(8) >= DateTime.Now)
                 )
             ).ToList();
 
