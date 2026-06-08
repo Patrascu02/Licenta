@@ -35,7 +35,11 @@ namespace Licenta.Controllers
 
             var model = new GMDashboardViewModel();
 
-            ViewBag.AllStaff = await _context.Staff.OrderBy(s => s.LastName).ToListAsync();
+            ViewBag.AllStaff = await _context.Staff
+                .Include(s => s.Contracts)
+                .Where(s => !s.Contracts.Any(c => c.IsActive && (c.EndDate == null || c.EndDate >= DateTime.Now)))
+                .OrderBy(s => s.LastName)
+                .ToListAsync();
 
             var activeContracts = await _context.Contracts
                 .Include(c => c.Staff)
@@ -47,7 +51,25 @@ namespace Licenta.Controllers
             if (currentSeason != null)
             {
                 decimal monthlySalaries = activeContracts.Sum(c => c.Salary);
-                decimal seasonalSalariesCost = monthlySalaries * 10;
+
+                decimal seasonalSalariesCost = 0;
+                foreach (var c in activeContracts)
+                {
+                    int contractMonths = 0;
+                    if (c.EndDate.HasValue)
+                    {
+                        contractMonths = ((c.EndDate.Value.Year - c.StartDate.Year) * 12) + c.EndDate.Value.Month - c.StartDate.Month + 1;
+
+                        if (contractMonths < 0) contractMonths = 0;
+                    }
+                    else
+                    {
+                        contractMonths = 10;
+                    }
+
+                    seasonalSalariesCost += c.Salary * contractMonths;
+                }
+
                 decimal otherExpenses = currentSeason.Expenses?.Sum(e => e.Amount) ?? 0;
 
                 model.CurrentSeason = currentSeason;
