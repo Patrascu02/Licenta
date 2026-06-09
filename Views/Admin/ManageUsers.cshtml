@@ -27,6 +27,23 @@
 
 <div class="container-fluid py-5">
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4 border-0" role="alert" style="background: linear-gradient(to right, #dcfce7, #bbf7d0); color: #166534;">
+            <i class="fas fa-check-circle me-2 fs-5 align-middle"></i>
+            <span class="fw-medium align-middle">@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4 border-0" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center mb-5 fade-in-up">
         <div>
             <h2 class="mb-1 text-gradient" style="font-size: 2rem;">
@@ -121,6 +138,12 @@
                                         <td class="text-muted">@item.Email</td>
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
+                                                <form asp-action="ResetUserPassword" asp-controller="Admin" method="post" class="d-inline reset-form"
+                                                      data-bs-message="Generăm o parolă nouă aleatorie pentru <strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong>?">
+                                                    <input type="hidden" name="staffId" value="@item.StaffMember.StaffId" />
+                                                    <button type="submit" class="btn btn-icon btn-light text-warning" title="Resetează Parola"><i class="fas fa-key"></i></button>
+                                                </form>
+
                                                 <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
 
                                                 @if (User.IsInRole("GeneralManager"))
@@ -178,8 +201,13 @@
                                         <td>@(item.StaffMember.Player?.Height ?? 0) cm</td>
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
-                                                <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
+                                                <form asp-action="ResetUserPassword" asp-controller="Admin" method="post" class="d-inline reset-form"
+                                                      data-bs-message="Generăm o parolă nouă aleatorie pentru <strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong>?">
+                                                    <input type="hidden" name="staffId" value="@item.StaffMember.StaffId" />
+                                                    <button type="submit" class="btn btn-icon btn-light text-warning" title="Resetează Parola"><i class="fas fa-key"></i></button>
+                                                </form>
 
+                                                <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
 
                                                 @if (User.IsInRole("GeneralManager"))
                                                 {
@@ -261,6 +289,12 @@
                                         </td>
                                         <td class="text-end pe-4">
                                             <div class="d-flex justify-content-end gap-2">
+                                                <form asp-action="ResetUserPassword" asp-controller="Admin" method="post" class="d-inline reset-form"
+                                                      data-bs-message="Generăm o parolă nouă aleatorie pentru <strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong>?">
+                                                    <input type="hidden" name="staffId" value="@item.StaffMember.StaffId" />
+                                                    <button type="submit" class="btn btn-icon btn-light text-warning" title="Resetează Parola"><i class="fas fa-key"></i></button>
+                                                </form>
+
                                                 <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
 
 
@@ -301,6 +335,32 @@
                     </button>
                     <button type="button" id="confirmDeleteBtn" class="btn btn-danger px-4 fw-bold rounded-pill shadow-lg hover-scale">
                         Da, Șterge!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resetConfirmationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal border-0">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-4">
+                    <div class="icon-circle-warning mx-auto shadow-sm">
+                        <i class="fas fa-key fa-2x text-warning"></i>
+                    </div>
+                </div>
+
+                <h4 class="fw-bold text-dark mb-2">Resetare Parolă</h4>
+                <p class="text-muted mb-4" id="resetModalMessage">Ești sigur?</p>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="button" class="btn btn-light border px-4 fw-bold rounded-pill" data-bs-dismiss="modal">
+                        Nu, Anulează
+                    </button>
+                    <button type="button" id="confirmResetBtn" class="btn btn-warning text-dark px-4 fw-bold rounded-pill shadow-lg hover-scale">
+                        Da, Resetează!
                     </button>
                 </div>
             </div>
@@ -434,6 +494,17 @@
         border: 4px solid #fff;
     }
 
+    .icon-circle-warning {
+        width: 80px;
+        height: 80px;
+        background: #fffbeb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid #fff;
+    }
+
     .hover-scale:hover {
         transform: scale(1.05);
         transition: transform 0.2s;
@@ -448,23 +519,36 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            let formToSubmit = null;
+            let deleteFormToSubmit = null;
+            let resetFormToSubmit = null;
 
             $('.delete-form').on('submit', function (e) {
                 e.preventDefault();
-
-                formToSubmit = this;
-
+                deleteFormToSubmit = this;
                 var message = $(this).attr('data-bs-message');
                 $('#deleteModalMessage').html(message);
-
                 var myModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
                 myModal.show();
             });
 
             $('#confirmDeleteBtn').on('click', function () {
-                if (formToSubmit) {
-                    formToSubmit.submit();
+                if (deleteFormToSubmit) {
+                    deleteFormToSubmit.submit();
+                }
+            });
+
+            $('.reset-form').on('submit', function (e) {
+                e.preventDefault();
+                resetFormToSubmit = this;
+                var message = $(this).attr('data-bs-message');
+                $('#resetModalMessage').html(message);
+                var myModal = new bootstrap.Modal(document.getElementById('resetConfirmationModal'));
+                myModal.show();
+            });
+
+            $('#confirmResetBtn').on('click', function () {
+                if (resetFormToSubmit) {
+                    resetFormToSubmit.submit();
                 }
             });
         });

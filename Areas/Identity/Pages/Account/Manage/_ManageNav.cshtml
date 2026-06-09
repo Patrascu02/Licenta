@@ -28,12 +28,12 @@
         </li>
     }
 
-    <li class="nav-item">
+    @*<li class="nav-item">
         <a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext) d-flex align-items-center" id="two-factor" asp-page="./TwoFactorAuthentication">
             <div class="icon-wrapper"><i class="fas fa-shield-alt"></i></div>
             <span>Autentificare 2FA</span>
         </a>
-    </li>
+    </li>*@
 
     <li class="nav-item">
         <a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext) d-flex align-items-center" id="personal-data" asp-page="./PersonalData">
@@ -44,11 +44,9 @@
 </ul>
 
 <style>
-    /* === REZOLVARE PROBLEMĂ CULOARE (ALB PE ALB) === */
 
-    /* 1. Link-uri INACTIVE (Normale) -> Culoare GRI ÎNCHIS */
     .nav-pills .nav-link {
-        color: #4b5563 !important; /* Gri închis */
+        color: #4b5563 !important;
         background-color: transparent !important;
         font-weight: 600;
         border-radius: 12px;
@@ -57,22 +55,19 @@
         border: 1px solid transparent;
     }
 
-        /* 2. Link-uri la HOVER -> Fundal gri deschis, text Albastru */
         .nav-pills .nav-link:hover {
-            background-color: #f3f4f6 !important; /* Gri foarte deschis */
+            background-color: #f3f4f6 !important; 
             color: var(--primary-color, #0d6efd) !important;
-            transform: translateX(5px); /* Mică mișcare la dreapta */
+            transform: translateX(5px);
         }
 
-        /* 3. Link ACTIV (Pagina curentă) -> Fundal Albastru, Text ALB */
         .nav-pills .nav-link.active {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-            color: white !important; /* Text Alb obligatoriu */
+            color: white !important; 
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
             border: none;
         }
 
-    /* Stilizare Iconițe */
     .icon-wrapper {
         width: 24px;
         text-align: center;
@@ -80,7 +75,6 @@
         font-size: 1.1rem;
     }
 
-    /* Iconița devine albă când e activ */
     .nav-link.active .icon-wrapper {
         color: white !important;
     }

@@ -396,6 +396,59 @@ namespace Licenta.Controllers
             }
         }
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetUserPassword(int staffId)
+        {
+            var staffMember = await _context.Staff.FindAsync(staffId);
+            if (staffMember == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(staffMember.UserId);
+            if (user == null) return NotFound();
+
+            string tempPassword = GenerateRandomTemporaryPassword(10);
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, tempPassword);
+
+            if (result.Succeeded)
+            {
+                await LogAuditAction($"Resetat parolă forțat pentru: {staffMember.FirstName} {staffMember.LastName}");
+                TempData["SuccessMessage"] = $"Parola pentru {staffMember.FirstName} {staffMember.LastName} a fost resetată. Noua parolă generată este: {tempPassword} (Notează-o și trimite-o utilizatorului!)";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "A apărut o eroare la resetarea parolei. " + string.Join(", ", result.Errors.Select(e => e.Description));
+            }
+
+            return RedirectToAction(nameof(ManageUsers));
+        }
+
+        private string GenerateRandomTemporaryPassword(int length)
+        {
+            var random = new Random();
+            const string upper = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
+            const string lower = "abcdefghijkmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string specials = "!@#$?_-*";
+
+            var password = new char[length];
+
+            password[0] = upper[random.Next(upper.Length)];
+            password[1] = lower[random.Next(lower.Length)];
+            password[2] = digits[random.Next(digits.Length)];
+            password[3] = specials[random.Next(specials.Length)];
+
+            string allChars = upper + lower + digits + specials;
+            for (int i = 4; i < length; i++)
+            {
+                password[i] = allChars[random.Next(allChars.Length)];
+            }
+
+            return new string(password.OrderBy(x => random.Next()).ToArray());
+        }
+
         [HttpGet]
         public async Task<IActionResult> CreateMessageGroup()
         {
