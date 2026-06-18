@@ -97,7 +97,7 @@
                     </a>
                 </li>
                 
-                @if (User.IsInRole("Admin") || User.IsInRole("GeneralManager"))
+                @if (User.IsInRole("Admin"))
                 {
                     <li>
                         <a class="dropdown-item cyber-item" asp-controller="Admin" asp-action="AdminDashboard">
