@@ -26,13 +26,11 @@ namespace Licenta.Controllers
             _userManager = userManager;
         }
 
-        // --- LISTA JUCATORI ---
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             var players = await _context.Players
                 .Include(p => p.Staff).ThenInclude(s => s.Contracts)
-                // ELIMINAT: Include(p => p.CurrentTeam)
                 .Include(p => p.Injuries)
                 .ToListAsync();
 
@@ -62,7 +60,6 @@ namespace Licenta.Controllers
             return View(players);
         }
 
-        // --- DETALII ---
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
@@ -70,7 +67,6 @@ namespace Licenta.Controllers
 
             var player = await _context.Players
                 .Include(p => p.Staff).ThenInclude(s => s.Contracts)
-                // ELIMINAT: Include(p => p.CurrentTeam)
                 .Include(p => p.GameStats)
                 .Include(p => p.Injuries)
                 .FirstOrDefaultAsync(m => m.PlayerId == id);
@@ -97,7 +93,6 @@ namespace Licenta.Controllers
             return View(player);
         }
 
-        // --- CREATE ---
         [HttpGet]
         public IActionResult Create()
         {
@@ -106,7 +101,6 @@ namespace Licenta.Controllers
                 return Forbid();
             }
 
-            // ELIMINAT: ViewBag.Teams
             return View();
         }
 
@@ -127,11 +121,9 @@ namespace Licenta.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // ELIMINAT: ViewBag.Teams
             return View(player);
         }
 
-        // --- EDIT ---
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -145,13 +137,11 @@ namespace Licenta.Controllers
             var player = await _context.Players.Include(p => p.Staff).FirstOrDefaultAsync(p => p.PlayerId == id);
             if (player == null) return NotFound();
 
-            // ELIMINAT: ViewBag.Teams
             return View(player);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // ELIMINAT CurrentTeamId DIN BIND
         public async Task<IActionResult> Edit(int id, [Bind("PlayerId,StaffId,JerseyNumber,Height,Weight,Position")] Player player)
         {
             if (id != player.PlayerId) return NotFound();
@@ -188,11 +178,9 @@ namespace Licenta.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // ELIMINAT: ViewBag.Teams
             return View(player);
         }
 
-        // --- DELETE ---
         [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {

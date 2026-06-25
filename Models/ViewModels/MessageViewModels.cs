@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Licenta.Models.ViewModels
 {
-    // --- MODELE PENTRU INBOX ---
     public class InboxViewModel
     {
         public Staff CurrentStaff { get; set; }
@@ -28,7 +27,6 @@ namespace Licenta.Models.ViewModels
         public List<Message> Messages { get; set; }
     }
 
-    // NOU: Model pentru fereastra de Chat de Grup
     public class GroupChatViewModel
     {
         public Staff CurrentStaff { get; set; }
@@ -36,7 +34,6 @@ namespace Licenta.Models.ViewModels
         public List<Message> Messages { get; set; }
     }
 
-    // --- MODELE PENTRU ADMIN (CREARE GRUP) ---
     public class CreateMessageGroupViewModel
     {
         [Required(ErrorMessage = "Numele grupului este obligatoriu.")]

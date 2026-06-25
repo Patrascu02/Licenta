@@ -77,7 +77,7 @@ namespace Licenta
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "Eroare la inițializarea minimală a bazei de date.");
+                    logger.LogError(ex, "Eroare la initializarea minimala a bazei de date.");
                 }
             }
 

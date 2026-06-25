@@ -102,9 +102,6 @@ namespace Licenta.Controllers
             return RedirectToAction(nameof(Dashboard));
         }
 
-        // ==========================================
-        //  GENERARE AUTOMATA DE PDF-URI (QuestPDF)
-        // ==========================================
 
         [HttpGet]
         public async Task<IActionResult> DownloadClearancePdf(int playerId)
@@ -150,7 +147,6 @@ namespace Licenta.Controllers
 
                         x.Item().Text($"A fost examinat medical astăzi, {DateTime.Now:dd MMMM yyyy}, și este declarat CLINIC SĂNĂTOS și APT pentru antrenamente și meciuri oficiale în sezonul competițional curent.");
 
-                        // --- AICI ESTE MODIFICAREA ---
                         x.Item().Text("Viza medicală este valabilă până la finalul sezonului regulat!").Bold();
 
                         x.Item().PaddingTop(50).Row(row =>

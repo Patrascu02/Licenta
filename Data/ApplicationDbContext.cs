@@ -33,7 +33,6 @@ namespace Licenta.Data
         public DbSet<ScoutPlayer> ScoutPlayers { get; set; }
         public DbSet<Team> Teams { get; set; }
 
-        // AM ELIMINAT PlayerTeamHistories
 
         public DbSet<Contract> Contracts { get; set; }
         public DbSet<Season> Seasons { get; set; }
@@ -88,7 +87,6 @@ namespace Licenta.Data
                 .HasForeignKey(i => i.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // AM ELIMINAT REGULA PENTRU PlayerTeamHistory
 
             builder.Entity<Expense>()
                 .HasOne(e => e.Season)
@@ -102,7 +100,6 @@ namespace Licenta.Data
                 .HasForeignKey(g => g.SeasonId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // RELAȚII SIGURE PENTRU GAME -> TEAMS (previne erorile de tip Cascade Delete)
             builder.Entity<Game>()
                 .HasOne(g => g.HomeTeam)
                 .WithMany()

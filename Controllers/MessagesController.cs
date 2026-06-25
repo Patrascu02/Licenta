@@ -32,7 +32,6 @@ namespace Licenta.Controllers
             return await _context.Staff.FirstOrDefaultAsync(s => s.UserId == user.Id);
         }
 
-        // --- INBOX (1-LA-1 SI GRUPURI) ---
         public async Task<IActionResult> Index()
         {
             var currentStaff = await GetCurrentStaffAsync();
@@ -83,7 +82,6 @@ namespace Licenta.Controllers
             return View(new InboxViewModel { CurrentStaff = currentStaff, Conversations = sortedConversations });
         }
 
-        // --- CHAT 1-LA-1 ---
         public async Task<IActionResult> Chat(int id)
         {
             var currentStaff = await GetCurrentStaffAsync();
