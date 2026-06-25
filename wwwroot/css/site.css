@@ -31,6 +31,12 @@ html, body {
     overflow-x: hidden;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
     body::before {
         content: "";
         position: fixed;
@@ -521,83 +527,358 @@ a {
     border-top: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
 
-
-
-.navbar {
-    position: relative;
-    z-index: 1030;
+/* =========================================
+   ROLE BADGES
+   ========================================= */
+.role-badge {
+    padding: 0.3em 0.8em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid;
 }
 
-.cyber-avatar {
-    width: 35px;
-    height: 35px;
-    background: rgba(15, 23, 42, 0.8);
-    border: 2px solid var(--neon-primary);
+.role-player {
+    color: var(--neon-primary);
+    border-color: rgba(6, 182, 212, 0.5);
+}
+
+.role-coach {
+    color: #f97316;
+    border-color: rgba(249, 115, 22, 0.5);
+}
+
+.role-gm {
+    color: #a78bfa;
+    border-color: rgba(167, 139, 250, 0.5);
+}
+
+.role-medic {
+    color: var(--neon-danger);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.role-scout {
+    color: #6366f1;
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* =========================================
+   AVATARS
+   ========================================= */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.avatar-xl {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    background: rgba(15, 23, 42, 0.8);
+    border: 2px solid var(--neon-primary);
     color: var(--neon-primary);
-    font-weight: bold;
-    font-family: var(--font-cyber);
-    box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+}
+
+.icon-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-circle-danger {
+    width: 70px;
+    height: 70px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.icon-circle-warning {
+    width: 70px;
+    height: 70px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* =========================================
+   ACTION BUTTONS (btn-icon)
+   ========================================= */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    background: transparent !important;
+}
+
+    .btn-icon:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-icon.text-primary {
+        border: 1px solid var(--neon-secondary) !important;
+        color: var(--neon-secondary) !important;
+    }
+
+        .btn-icon.text-primary:hover {
+            background: rgba(59, 130, 246, 0.1) !important;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.3) !important;
+        }
+
+    .btn-icon.text-danger {
+        border: 1px solid var(--neon-danger) !important;
+        color: var(--neon-danger) !important;
+    }
+
+        .btn-icon.text-danger:hover {
+            background: rgba(239, 68, 68, 0.1) !important;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important;
+        }
+
+    .btn-icon.text-warning {
+        border: 1px solid var(--neon-warning) !important;
+        color: var(--neon-warning) !important;
+    }
+
+        .btn-icon.text-warning:hover {
+            background: rgba(245, 158, 11, 0.1) !important;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.3) !important;
+        }
+
+    .btn-icon.text-info {
+        border: 1px solid var(--neon-primary) !important;
+        color: var(--neon-primary) !important;
+    }
+
+        .btn-icon.text-info:hover {
+            background: rgba(6, 182, 212, 0.1) !important;
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.3) !important;
+        }
+
+    .btn-icon.text-success {
+        border: 1px solid var(--neon-success) !important;
+        color: var(--neon-success) !important;
+    }
+
+        .btn-icon.text-success:hover {
+            background: rgba(16, 185, 129, 0.1) !important;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.3) !important;
+        }
+
+/* =========================================
+   TABLE ROWS
+   ========================================= */
+.user-row,
+.player-row {
+    transition: all 0.2s ease;
+}
+
+    .user-row:hover,
+    .player-row:hover {
+        background-color: rgba(148, 163, 184, 0.05) !important;
+    }
+
+    .user-row:hover .icon-avatar {
+        transform: scale(1.1) rotate(-5deg);
+    }
+
+/* =========================================
+   ROLE CARDS (formulare creare/editare)
+   ========================================= */
+.role-card-player,
+.role-card-coach,
+.role-card-medic,
+.role-card-gm,
+.role-card-scout {
+    border-radius: 6px;
+}
+
+.role-card-player {
+    background: rgba(6, 182, 212, 0.08) !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.role-card-coach {
+    background: rgba(249, 115, 22, 0.08) !important;
+    border: 1px solid rgba(249, 115, 22, 0.3) !important;
+}
+
+.role-card-medic {
+    background: rgba(239, 68, 68, 0.08) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.role-card-gm {
+    background: rgba(167, 139, 250, 0.08) !important;
+    border: 1px solid rgba(167, 139, 250, 0.3) !important;
+}
+
+.role-card-scout {
+    background: rgba(99, 102, 241, 0.08) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+/* =========================================
+   NAV PILLS
+   ========================================= */
+.nav-pills .nav-link {
+    color: var(--cyber-text-secondary) !important;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    transition: all 0.3s;
+}
+
+    .nav-pills .nav-link.active {
+        background: rgba(6, 182, 212, 0.15) !important;
+        color: var(--neon-primary) !important;
+        border-color: rgba(6, 182, 212, 0.4) !important;
+        box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+    }
+
+/* =========================================
+   ANIMATII
+   ========================================= */
+.pulse-danger {
+    animation: pulse-danger-anim 2s infinite;
+}
+
+@keyframes pulse-danger-anim {
+    0% { box-shadow: 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.8); }
+    100% { box-shadow: 0 0 0 rgba(239, 68, 68, 0.4); }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   UTILITARE
+   ========================================= */
+.hover-lift:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s;
+}
+
+.hover-glow {
+    transition: all 0.3s;
+}
+
+    .hover-glow:hover {
+        border-color: var(--neon-primary) !important;
+        box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        background-color: rgba(15, 23, 42, 0.8) !important;
+    }
+
+.cyber-item-hover {
     transition: all 0.3s ease;
 }
 
-.cyber-profile-link:hover .cyber-avatar {
-    background: var(--neon-primary);
-    color: #000;
-    box-shadow: 0 0 20px var(--neon-primary);
-    transform: scale(1.1);
-}
-
-.text-neon-small {
-    color: var(--cyber-text-primary);
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    transition: color 0.3s;
-}
-
-.cyber-profile-link:hover .text-neon-small {
-    color: var(--neon-primary);
-    text-shadow: 0 0 5px var(--neon-primary);
-}
-
-.cyber-dropdown {
-    background: #0f172a !important; 
-    border: 1px solid var(--neon-primary) !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8) !important;
-    border-radius: 8px !important;
-    padding: 0.5rem 0;
-    margin-top: 15px !important;
-    min-width: 220px;
-    z-index: 9999 !important;
-}
-
-.cyber-item {
-    color: var(--cyber-text-primary) !important;
-    padding: 10px 20px;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-    .cyber-item:hover {
+    .cyber-item-hover:hover {
         background: rgba(6, 182, 212, 0.1) !important;
-        color: #fff !important;
         transform: translateX(5px);
-        border-left: 3px solid var(--neon-primary);
     }
 
-    .cyber-item i {
-        width: 20px;
-        text-align: center;
-        transition: transform 0.2s;
+.cyber-link-hover {
+    transition: color 0.3s ease;
+}
+
+    .cyber-link-hover:hover {
+        color: var(--neon-primary) !important;
+        text-shadow: 0 0 8px var(--neon-primary);
     }
 
-    .cyber-item:hover i {
-        transform: scale(1.2);
+.cyber-icon-hover {
+    transition: text-shadow 0.3s ease, color 0.3s ease;
+}
+
+    .cyber-icon-hover:hover {
+        color: var(--neon-primary) !important;
+        text-shadow: 0 0 15px var(--neon-primary);
     }
 
-.dropdown-divider {
-    border-top: 1px solid rgba(148, 163, 184, 0.2) !important;
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.scale-sm {
+    transform: scale(0.9);
+    display: inline-block;
+}
+
+.glass-modal {
+    background: rgba(15, 23, 42, 0.97) !important;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    border-radius: 8px;
+}
+
+/* select options dark bg */
+select option {
+    background-color: #0f172a !important;
+    color: #cbd5e1 !important;
+}
+
+/* number input spin buttons */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+/* pulse keyframes for _LoginPartial */
+@keyframes pulse-danger {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
