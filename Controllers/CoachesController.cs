@@ -201,26 +201,6 @@ namespace Licenta.Controllers
                 .OrderByDescending(g => g.GameDate)
                 .ToListAsync();
 
-            var mainTeam = await _context.Teams.FirstOrDefaultAsync(t => t.Name.Contains("STEAUA") || t.TeamId == 2);
-            int mainTeamId = mainTeam?.TeamId ?? 2;
-
-            int wins = 0; int losses = 0;
-            foreach (var g in pastGames.Where(g => g.HomeScore > 0 || g.AwayScore > 0))
-            {
-                if (g.HomeTeamId == mainTeamId)
-                {
-                    if (g.HomeScore > g.AwayScore) wins++;
-                    else if (g.HomeScore < g.AwayScore) losses++;
-                }
-                else if (g.AwayTeamId == mainTeamId)
-                {
-                    if (g.AwayScore > g.HomeScore) wins++;
-                    else if (g.AwayScore < g.HomeScore) losses++;
-                }
-            }
-            ViewBag.Wins = wins;
-            ViewBag.Losses = losses;
-
             return View(pastGames);
         }
 
