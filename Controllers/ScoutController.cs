@@ -62,64 +62,6 @@ namespace Licenta.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> AddMonthlyStats(int playerId)
-        {
-            if (!User.IsInRole("Scout"))
-            {
-                return Forbid();
-            }
-
-            var player = await _context.Players
-                .Include(p => p.Staff)
-                .FirstOrDefaultAsync(p => p.PlayerId == playerId);
-
-            if (player == null) return NotFound();
-
-            var model = new PlayerGameStats
-            {
-                PlayerId = playerId,
-                Month = DateTime.Now.Month,
-                Year = DateTime.Now.Year,
-                IsScoutingReport = true
-            };
-
-            ViewBag.PlayerName = $"{player.Staff.FirstName} {player.Staff.LastName}";
-            return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddMonthlyStats(PlayerGameStats stats)
-        {
-            if (!User.IsInRole("Scout")) return Forbid();
-
-            stats.IsScoutingReport = true;
-            stats.GameId = null;
-
-            if (ModelState.IsValid)
-            {
-                var existingReport = await _context.PlayerGameStats
-                    .AnyAsync(s => s.PlayerId == stats.PlayerId &&
-                                   s.Month == stats.Month &&
-                                   s.Year == stats.Year &&
-                                   s.IsScoutingReport);
-
-                if (existingReport)
-                {
-                    ModelState.AddModelError("", "Există deja un raport de scouting pentru această lună.");
-                    return View(stats);
-                }
-
-                _context.PlayerGameStats.Add(stats);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Details", "Players", new { id = stats.PlayerId });
-            }
-
-            return View(stats);
-        }
-
-        [HttpGet]
         [Authorize(Roles = "Scout")]
         public async Task<IActionResult> MatchReports(string status = "all")
         {
