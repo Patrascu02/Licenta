@@ -28,7 +28,7 @@ namespace Licenta.Controllers
         {
             if (!User.IsInRole("Admin") && !User.HasClaim("Permission", "Coaches.View"))
             {
-                return RedirectToAction("AccessDenied", "Account");
+                return Redirect("/Identity/Account/AccessDenied");
             }
 
             var coaches = await _context.Coaches
@@ -38,43 +38,6 @@ namespace Licenta.Controllers
             return View(coaches);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> MyProfile()
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var staffMember = await _context.Staff
-                .Include(s => s.Coach)
-                .FirstOrDefaultAsync(s => s.UserId == userId);
-
-            if (staffMember == null || staffMember.Coach == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            return RedirectToAction("Details", new { id = staffMember.Coach.CoachId });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            var coach = await _context.Coaches
-                .Include(c => c.Staff)
-                .FirstOrDefaultAsync(c => c.CoachId == id);
-
-            if (coach == null) return NotFound();
-
-            var currentUserId = _userManager.GetUserId(User);
-            bool isOwnProfile = (coach.Staff.UserId == currentUserId);
-            bool isAdmin = User.IsInRole("Admin") || User.HasClaim("Permission", "Coaches.View");
-
-            if (!isAdmin && !isOwnProfile)
-            {
-                return Forbid();
-            }
-
-            return View(coach);
-        }
 
         [Authorize(Roles = "Coach")]
         public async Task<IActionResult> Dashboard()

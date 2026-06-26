@@ -146,11 +146,6 @@
 
                                                 <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
 
-                                                @if (User.IsInRole("GeneralManager"))
-                                                {
-                                                    <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-success" title="Contract"><i class="fas fa-file-invoice-dollar"></i></a>
-                                                }
-
                                                 <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post"
                                                       class="d-inline delete-form"
                                                       data-bs-message="Ești sigur că vrei să ștergi utilizatorul <strong>@item.StaffMember.LastName @item.StaffMember.FirstName</strong>?">
@@ -208,11 +203,6 @@
                                                 </form>
 
                                                 <a asp-action="EditUser" asp-route-id="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-primary" title="Editează"><i class="fas fa-edit"></i></a>
-
-                                                @if (User.IsInRole("GeneralManager"))
-                                                {
-                                                    <a asp-controller="Contracts" asp-action="Create" asp-route-staffId="@item.StaffMember.StaffId" class="btn btn-icon btn-light text-success" title="Contract"><i class="fas fa-file-invoice-dollar"></i></a>
-                                                }
 
                                                 <form asp-action="DeleteUser" asp-route-id="@item.StaffMember.StaffId" method="post"
                                                       class="d-inline delete-form"

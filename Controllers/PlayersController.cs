@@ -93,36 +93,6 @@ namespace Licenta.Controllers
             return View(player);
         }
 
-        [HttpGet]
-        public IActionResult Create()
-        {
-            if (!User.HasClaim("Permission", "Players.Create") && !User.IsInRole("Admin"))
-            {
-                return Forbid();
-            }
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Player player)
-        {
-            if (!User.HasClaim("Permission", "Players.Create") && !User.IsInRole("Admin"))
-            {
-                return Forbid();
-            }
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(player);
-                await _context.SaveChangesAsync();
-                await LogAuditAction($"A creat un jucător nou (ID: {player.PlayerId})", "Player", player.PlayerId);
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(player);
-        }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
