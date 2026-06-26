@@ -99,7 +99,7 @@ namespace Licenta.Controllers
         {
             if (id == null) return NotFound();
 
-            if (!User.HasClaim("Permission", "Players.Edit") && !User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin"))
             {
                 return Forbid();
             }
@@ -116,7 +116,7 @@ namespace Licenta.Controllers
         {
             if (id != player.PlayerId) return NotFound();
 
-            if (!User.HasClaim("Permission", "Players.Edit") && !User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin"))
             {
                 return Forbid();
             }
@@ -156,7 +156,7 @@ namespace Licenta.Controllers
         {
             if (id == null) return NotFound();
 
-            if (!User.HasClaim("Permission", "Players.Delete") && !User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin"))
             {
                 return Forbid();
             }
@@ -171,7 +171,7 @@ namespace Licenta.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (!User.HasClaim("Permission", "Players.Delete") && !User.IsInRole("Admin"))
+            if (!User.IsInRole("Admin"))
             {
                 return Forbid();
             }

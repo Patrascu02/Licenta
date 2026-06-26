@@ -64,7 +64,7 @@ namespace Licenta.Controllers
         [HttpGet]
         public async Task<IActionResult> AddMonthlyStats(int playerId)
         {
-            if (!User.HasClaim("Permission", "Scouting.Manage"))
+            if (!User.IsInRole("Scout"))
             {
                 return Forbid();
             }
@@ -91,7 +91,7 @@ namespace Licenta.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddMonthlyStats(PlayerGameStats stats)
         {
-            if (!User.HasClaim("Permission", "Scouting.Manage")) return Forbid();
+            if (!User.IsInRole("Scout")) return Forbid();
 
             stats.IsScoutingReport = true;
             stats.GameId = null;

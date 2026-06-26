@@ -135,14 +135,14 @@
                                             <i class="fas fa-id-card"></i>
                                         </a>
 
-                                        @if (User.HasClaim("Permission", "Players.Edit") || User.IsInRole("Admin"))
+                                        @if (User.IsInRole("Admin"))
                                         {
                                             <a asp-action="Edit" asp-route-id="@item.PlayerId" class="btn btn-icon btn-light text-primary" title="Editează">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         }
 
-                                        @if (User.HasClaim("Permission", "Players.Delete") || User.IsInRole("Admin"))
+                                        @if (User.IsInRole("Admin"))
                                         {
                                             <a asp-action="Delete" asp-route-id="@item.PlayerId" class="btn btn-icon btn-light text-danger" title="Șterge">
                                                 <i class="fas fa-trash-alt"></i>

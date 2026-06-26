@@ -23,21 +23,6 @@ namespace Licenta.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            if (!User.IsInRole("Admin") && !User.HasClaim("Permission", "Coaches.View"))
-            {
-                return Redirect("/Identity/Account/AccessDenied");
-            }
-
-            var coaches = await _context.Coaches
-                .Include(c => c.Staff)
-                .ToListAsync();
-
-            return View(coaches);
-        }
-
 
         [Authorize(Roles = "Coach")]
         public async Task<IActionResult> Dashboard()
