@@ -42,7 +42,7 @@ namespace Licenta.Controllers
                 .ToListAsync();
 
             var activeContracts = await _context.Contracts
-                .Include(c => c.Staff)
+                .Include(c => c.Staff) 
                 .Where(c => c.IsActive)
                 .ToListAsync();
 
